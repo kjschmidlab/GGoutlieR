@@ -30,7 +30,7 @@
 # status: finished (2022-05-03)
 #------------------------------------------------------------------
 
-plot_GGNet_map <- function(geo_coord,
+plot_GGoutlieR <- function(geo_coord,
                            GGNet_adjm,
                            anc_coef = NULL,
                            pie_color = NULL,
@@ -63,7 +63,7 @@ plot_GGNet_map <- function(geo_coord,
   if(!is.null(anc_coef)|!is.null(p_thres)){
     if(map_type == "both" | map_type == "geographic_knn"){
       if(is.null(GeoSP_knn_res)){
-        stop("As `plot_GGNet_map` is designed to map only outliers on a geographical map when `p_thres`` is given, please provide `GeoSP_knn_res` (an output of `detect_outlier_in_GeoSpace`)")
+        stop("As `plot_GGoutlieR` is designed to map only outliers on a geographical map when `p_thres`` is given, please provide `GeoSP_knn_res` (an output of `detect_outlier_in_GeoSpace`)")
       }else{
         if(nrow(GeoSP_knn_res$statistics) != nrow(geo_coord)){
           stop("the sample size in `GeoSP_knn_res` and `geo_coord` does not match!")
@@ -72,7 +72,7 @@ plot_GGNet_map <- function(geo_coord,
     }
     if(map_type == "both" | map_type == "genetic_knn"){
       if(is.null(GenSP_knn_res)){
-        stop("As `plot_GGNet_map` is designed to map only outliers on a geographical map when `p_thres`` is given, please provide `GenSP_knn_res` (an output of `detect_outlier_in_GeneticSpace`) if you set `map_type = 'both'` or `map_type = 'GenSP'`")
+        stop("As `plot_GGoutlieR` is designed to map only outliers on a geographical map when `p_thres`` is given, please provide `GenSP_knn_res` (an output of `detect_outlier_in_GeneticSpace`) if you set `map_type = 'both'` or `map_type = 'GenSP'`")
       }
       if(nrow(GenSP_knn_res$statistics) != nrow(geo_coord)){
         stop("the sample size in `GenSP_knn_res` and `geo_coord` does not match!")
@@ -369,12 +369,12 @@ plot_GGNet_map <- function(geo_coord,
     )
     par(xpd = FALSE)
   }
-} # plot_GGNet_map end
+} # plot_GGoutlieR end
 
 
 #-------------------------------------------------------------
 # assign colors to edges
-# `get_GGNet_edge_col` is a function used in the `plot_GGNet_map`
+# `get_GGNet_edge_col` is a function used in the `plot_GGoutlieR`
 #-------------------------------------------------------------
 # Argument:
 # GGNet_adjm: an output of `get_GGNet_adjacency_matrix

@@ -12,7 +12,7 @@
 #' @param multi_stages logic. a multi-stage test will be performed if is `TRUE` (the default is `TRUE`).
 #' @param maxIter maximal iteration number of multi-stage KNN test.
 #' @param keep_all_stg_res logic. results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)
-#' @param warning_minR2 the prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. if any R^2 is less than `warning_minR2`, a warning message will be reported at the end of your analysis.
+#' @param warning_minR2 the prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. if any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.
 #' @return a list including five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
 #' @export
 #'
@@ -267,12 +267,12 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   axis(side = 1 ,at = round(gamma.thres, digits = 3), line = 0.3, tck = 0.02, font = 2)
   dev.off()
 
-  sig.indx <- Dgeo > gamma.thres
-  message("calculating p values...\n")
-  p.value <- 1 - pgamma(Dgeo, shape = current.a, rate = current.b)
 
   #----------------------------
   # return results
+  sig.indx <- Dgeo > gamma.thres
+  message("calculating p values...\n")
+  p.value <- 1 - pgamma(Dgeo, shape = current.a, rate = current.b)
   out <- data.frame(Dgeo, p.value, significant = sig.indx)
   rownames(out) <- rownames(geo_coord)
   thres <- data.frame(pvalue = c(0.05,0.01,0.005,0.001),statistic = qgamma(1 - c(0.05,0.01,0.005,0.001), shape = current.a, rate = current.b))
@@ -315,7 +315,6 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       tmp.pred.geo_coord <- pred_geo_coord_knn(tmp.geo_coord, tmp.pgdM, tmp.knn.indx)
       # calculate Dg statistic
       tmp.Dgeo <- cal_Dgeo(pred.geo_coord = tmp.pred.geo_coord, geo_coord = tmp.geo_coord, scalar = s)
-      # NOTE: `tmp.Dgeo` has to be divided by `DgeoSD` because the null distribution is based on the re-scaled Dgeo
       tmp.p.value <- 1 - pgamma(tmp.Dgeo, shape = current.a, rate = current.b)
       to_keep <- tmp.p.value > min(tmp.p.value)
 
