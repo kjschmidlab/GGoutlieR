@@ -43,7 +43,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                                            n = 10^6,
                                            s = 100,
                                            multi_stages = T,
-                                           maxIter=100,
+                                           maxIter=NULL,
                                            keep_all_stg_res = F,
                                            warning_minR2 = 0.9,
                                            cpu = 1
@@ -300,6 +300,8 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     tmp.geo_coord <- geo_coord[to_keep,]
 
     res.Iters <- list(res.out)
+    # if `maxIter` is NULL -> let it equal to 50% of sample size
+    if(is.null(maxIter)){maxIter <- round(nrow(gen_coord) * 0.5)}
     while (i <= maxIter) {
       if(i > 1){
         tmp.pgdM <- tmp.pgdM[to_keep, to_keep]
@@ -359,6 +361,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
         }
       }
     }
+    # make a figure comparing the results of single stage and multi-stage tests
     logp.plot <- paste0(plot_dir, "/KNN_GenSP_test_multi_stage_Log10P_comparison.pdf")
     message(paste("the plot for comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
     pdf(logp.plot, width = 4, height = 4.2)
@@ -379,6 +382,6 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       attr(collapse_res, "model") <- "ggoutlier_geneticKNN"
       return(collapse_res)
     }
-  } # multi-stage testing end
+  } # multi-stage test end
 
 } # ggoutlier_geneticKNN end
