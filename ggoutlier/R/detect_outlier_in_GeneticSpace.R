@@ -218,6 +218,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     orig_s <- s
     s <- s * tmps
     message(paste0("\n\n GGoutlieR adjusts the given scalar `s` value from `s=", orig_s, "` to `s=", s, "` to prevent an error in the maximum likelihood estimation process\n"))
+    message(paste0("D geo is re-scaled to a unit of ",s," meters \n"))
   }
   Dgeo <- Dgeo/tmps
   if(any(Dgeo == 0)){
@@ -281,9 +282,9 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   knn.name <- apply(knn.indx,2, function(x){rownames(geo_coord)[x]})
   res.out <- list(out, thres, gamma.par, knn.indx, knn.name, s)
   names(res.out) <- c("statistics","threshold","gamma_parameter", "knn_index", "knn_name", "scalar")
-  attr(res.out, "model") <- "ggoutlier_geneticKNN"
 
   if(!multi_stages){
+    attr(res.out, "model") <- "ggoutlier_geneticKNN"
     return(res.out)
   }else{
     #-------------------------------------------------------------
@@ -299,7 +300,6 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     tmp.geo_coord <- geo_coord[to_keep,]
 
     res.Iters <- list(res.out)
-    new_s = s*DgeoSD
     while (i <= maxIter) {
       if(i > 1){
         tmp.pgdM <- tmp.pgdM[to_keep, to_keep]
@@ -312,11 +312,10 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       # KNN prediction
       tmp.pred.geo_coord <- pred_geo_coord_knn(tmp.geo_coord, tmp.pgdM, tmp.knn.indx)
       # calculate Dg statistic
-      tmp.Dgeo <- cal_Dgeo(pred.geo_coord = tmp.pred.geo_coord, geo_coord = tmp.geo_coord, scalar = new_s)
+      tmp.Dgeo <- cal_Dgeo(pred.geo_coord = tmp.pred.geo_coord, geo_coord = tmp.geo_coord, scalar = s)
       # NOTE: `tmp.Dgeo` has to be divided by `DgeoSD` because the null distribution is based on the re-scaled Dgeo
       tmp.p.value <- 1 - pgamma(tmp.Dgeo, shape = current.a, rate = current.b)
       to_keep <- tmp.p.value > min(tmp.p.value)
-
 
       if(all(tmp.p.value > p_thres)){
         message("\nNo new significant sample is identified. Multi-stage testing process ends...\n")
@@ -349,7 +348,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                                                rownames(tmp$statistics)),]
         tmp$knn_name <- tmp$knn_name[match(rownames(collapse_res$statistics),
                                            rownames(tmp$knn_index)),]
-        #tmp.indx <- which(tmp$statistics$Dgeo > collapse_res$statistics$Dgeo)
+
         tmp.indx <- which(!is.na(tmp$statistics$Dgeo))
         if(length(tmp.indx)>0){
           collapse_res$statistics[tmp.indx,] <- tmp$statistics[tmp.indx,]
