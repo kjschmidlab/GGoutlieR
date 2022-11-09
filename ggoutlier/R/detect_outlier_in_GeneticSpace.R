@@ -13,7 +13,7 @@
 #' @param maxIter maximal iteration number of multi-stage KNN test.
 #' @param keep_all_stg_res logic. results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)
 #' @param warning_minR2 the prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. if any R^2 is less than `warning_minR2`, a warning message will be reported at the end of your analysis.
-#' @return a list including five items. `statistics` is a `data.frame` consisting of the D_g values, p values and logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
+#' @return a list including five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
 #' @export
 #'
 #'
@@ -23,18 +23,18 @@
 #'  rownames(geo_coord) <- geo_coord[,1]
 #'  geo_coord <- geo_coord[,-1]
 #'  anc.coef <- t(as.matrix(read.csv("./data/alstructure_Q_hat_1661inds.csv", header = F, stringsAsFactors = F)))
-#'  sus2 <- ggoutlier_geneticspace(geo_coord = geo_coord, gen_coord = anc.coef,
+#'  sus2 <- ggoutlier_geneticKNN(geo_coord = geo_coord, gen_coord = anc.coef,
 #'                                     plot_dir = "./fig", p_thres = 0.05, w_power = 2,
 #'                                     k = NULL, klim = c(3,100), keep_all_stg_res = F)
 #'  example 2 -> using eigenvectors:
 #'  pc <- read.table("data/gbs_georef_1661inds_PCA.eigenvec", stringsAsFactors = F)
 #'  rownames(pc) <- gsub(pc[,2], pattern = "^0_", replacement = "")
 #'  pc <- apply(pc[,-c(1:2)], 2, function(x){scale(x)}) # removing FID and IID and normalizing data
-#'  sus2 <- ggoutlier_geneticspace(geo_coord = geo_coord, gen_coord = pc[,1:5],
+#'  sus2 <- ggoutlier_geneticKNN(geo_coord = geo_coord, gen_coord = pc[,1:5],
 #'                                        plot_dir = "./fig", p_thres = 0.05, w_power = 2,
 #'                                        k = NULL, klim = c(3,100), keep_all_stg_res = F)
 
-ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
+ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                                            k = NULL,
                                            klim = c(3,100),
                                            plot_dir = ".",
@@ -160,11 +160,11 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     ## parallel computation (if `cpu` > 1)
     if(do_par){
       kindx <- seq(from = k, to = max(klim), by = 1)
-      all.D <- foreach(k = kindx, .packages='geosphere', .combine="c") %dopar% {
+      all.D <- foreach(k = kindx, .packages=c('geosphere','FNN'), .combine="c") %dopar% {
         knn.indx <- find_gen_knn(pgdM, k=k)
-        # KNN predicttion
+        # KNN prediction
         pred.geo_coord <- pred_geo_coord_knn(geo_coord, pgdM, knn.indx)
-        # calculate Dg statistic
+        # calculate Dgeo statistic
         return(sum(cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)))
       }
     } else {
@@ -173,7 +173,7 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
         message(paste0("calculating Dgeo with k = ",k,"\r"), appendLF = F)
         # find KNN
         knn.indx <- find_gen_knn(pgdM, k=k)
-        # KNN predicttion
+        # KNN prediction
         pred.geo_coord <- pred_geo_coord_knn(geo_coord, pgdM, knn.indx)
         # calculate Dg statistic
         Dgeo <- cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)
@@ -197,9 +197,9 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   }
   if(is.null(k)){stop("k is NULL!")}
   message("searching K nearest neighbors...\n")
-  knn.indx <- find_gen_knn(pgdM, k=k)
   #---------------------------------
-  # KNN predicttion with the optimal K
+  # KNN prediction with the optimal K (or K given by users)
+  knn.indx <- find_gen_knn(pgdM, k=k)
   pred.geo_coord <- pred_geo_coord_knn(geo_coord, pgdM, knn.indx)
   # calculate Dgeo statistic
   message(paste("D geo is scaled to a unit of",s,"meters \n"))
@@ -281,7 +281,7 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   knn.name <- apply(knn.indx,2, function(x){rownames(geo_coord)[x]})
   res.out <- list(out, thres, gamma.par, knn.indx, knn.name, s)
   names(res.out) <- c("statistics","threshold","gamma_parameter", "knn_index", "knn_name", "scalar")
-  attr(res.out, "model") <- "ggoutlier_GeneticSpace"
+  attr(res.out, "model") <- "ggoutlier_geneticKNN"
 
   if(!multi_stages){
     return(res.out)
@@ -309,7 +309,7 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       message(paste0("Iteration ", i,"\r"), appendLF = F)
       # find KNN
       tmp.knn.indx <- find_gen_knn(tmp.pgdM, k=k)
-      # KNN predicttion
+      # KNN prediction
       tmp.pred.geo_coord <- pred_geo_coord_knn(tmp.geo_coord, tmp.pgdM, tmp.knn.indx)
       # calculate Dg statistic
       tmp.Dgeo <- cal_Dgeo(pred.geo_coord = tmp.pred.geo_coord, geo_coord = tmp.geo_coord, scalar = new_s)
@@ -374,12 +374,12 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       names(res.Iters) <- paste0("Iter_", 1:length(res.Iters))
       res.out <- c(res.Iters, collapse_res)
       out <- c(res.Iters, combined_result = list(collapse_res))
-      attr(out, "model") <- "ggoutlier_GeneticSpace"
+      attr(out, "model") <- "ggoutlier_geneticKNN"
       return()
     }else{
-      attr(collapse_res, "model") <- "ggoutlier_GeneticSpace"
+      attr(collapse_res, "model") <- "ggoutlier_geneticKNN"
       return(collapse_res)
     }
   } # multi-stage testing end
 
-} # ggoutlier_geneticspace end
+} # ggoutlier_geneticKNN end
