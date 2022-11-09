@@ -1,6 +1,7 @@
 #' Identify samples genetically different from K nearest geographical neighbors
 #' @param geo_coord a two column matrix or data.frame. the first column is longitude and the second one is latitude.
 #' @param gen_coord a matrix of "sample's coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.
+#' @param min_nn_dist a minimum distance between a given focal sample with its neighbor. The neighboring samples within this distance will not be selected as KNN of a focal sample. Use this argument if you want to avoid searching KNNs within communities. The default is `NULL`.
 #' @param k number of the nearest neighbor. the default is `NULL`.
 #' @param klim if `k = NULL`, an optimal k will be searched between the first and second value of `klim`
 #' @param s a scalar of geographical distance. The default `s=1000` scales the distance to a unit of 1 kilometer.
@@ -11,26 +12,26 @@
 #' @param multi_stages logic. a multi-stage test will be performed if is `TRUE` (the default is `TRUE`).
 #' @param maxIter maximal iteration number of multi-stage KNN test.
 #' @param keep_all_stg_res logic. results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)
-#' @param warning_minR2 the prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. if any R^2 is less than `warning_minR2`, a warning message will be reported at the end of your analysis.
-#' @return a list including five items. `statistics` is a `data.frame` consisting of the D_g values, p values and logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
+#' @param warning_minR2 the prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. if any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.
+#' @return a list including five items. `statistics` is a `data.frame` consisting of the D_g values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
 #' @examples
 #' # example 1 -> using ancestry coefficients:
 #'  geo_coord <- read.table("./data/georef_1661ind_geo_coord_for_locator.txt", header = T, stringsAsFactors = F)
 #'  rownames(geo_coord) <- geo_coord[,1]
 #'  geo_coord <- geo_coord[,-1]
 #'  anc.coef <- t(as.matrix(read.csv("./data/alstructure_Q_hat_1661inds.csv", header = F, stringsAsFactors = F)))
-#'  sus <- detect_outlier_in_GeoSpace(geo_coord = geo_coord, gen_coord = anc.coef,
+#'  sus <- ggoutlier_geoKNN(geo_coord = geo_coord, gen_coord = anc.coef,
 #'                                     plot_dir = "./fig", p_thres = 0.05, w_power = 1,
 #'                                     k = NULL, klim = c(3,100), keep_all_stg_res = F)
 #'  example 2 -> using eigenvectors:
 #'  pc <- read.table("data/gbs_georef_1661inds_PCA.eigenvec", stringsAsFactors = F)
 #'  rownames(pc) <- gsub(pc[,2], pattern = "^0_", replacement = "")
 #'  pc <- apply(pc[,-c(1:2)], 2, function(x){scale(x)}) # removing FID and IID and normalizing data
-#'  sus <- detect_outlier_in_GeoSpace(geo_coord = geo_coord, gen_coord = pc[,1:5],
+#'  sus <- ggoutlier_geoKNN(geo_coord = geo_coord, gen_coord = pc[,1:5],
 #'                                        plot_dir = "./fig", p_thres = 0.05, w_power = 1,
 #'                                        k = NULL, klim = c(3,100), keep_all_stg_res = F)
 #' @export
-detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
+ggoutlier_geoKNN <- function(geo_coord, gen_coord,
                                        min_nn_dist = NULL,
                                        k = NULL,
                                        klim = c(3,100),
@@ -40,15 +41,32 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
                                        p_thres = 0.05,
                                        n = 10^6,
                                        multi_stages = T,
-                                       maxIter=100,
+                                       maxIter=NULL,
                                        keep_all_stg_res = F,
-                                       warning_minR2 = 0.9
+                                       warning_minR2 = 0.9,
+                                       cpu = 1
 ){
   require(geosphere) # for calculating geographical distances
-  #require(truncnorm) # for sampling truncated normal distribution
-  #require(alphastable) # to draw samples from a truncated alpha distribution
   require(stats4) # package to perform maximum likelihood estimation
   require(FastKNN) # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
+  if(cpu > 1){
+    require(foreach)
+    require(doParallel)
+    max_cores=detectCores()
+    if(cpu >= max_cores){
+      warning(paste0("\n The maximum number of CPUs is ", max_cores, ". Set `cpu` to ", max_cores-1," \n"))
+      cpu <- max_cores -1 # reserve max-1 cpus if users request too many cpus
+    }
+    if(cpu > 1){
+      message(paste0("\n parallelize computation using ", cpu, " cores \n"))
+      cl <- makeCluster(cpu)
+      registerDoParallel(cl)
+      do_par <- TRUE
+    }
+  } else {
+    if(cpu < 1){stop("`cpu` has to be at least 1")}
+    message("\n computation using 1 core. you can parallelize computation by setting a higher value to `cpu` argument \n")
+  }
   # check inputs
   if(ncol(geo_coord) != 2){stop("Please ensure the `geo_coord` having two columns!")}
   if(nrow(geo_coord) != nrow(gen_coord)){stop("`geo_coord` and `gen_coord` has different sample size!")}
@@ -77,9 +95,11 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
     gen_coord <- gen_coord[!to.rm,]
   }
 
-  # calculate geographical distance
+  #--------------------------------
+  # Data pre-treatment
+  ## calculate geographical distance
   geo.dM <- distm(x = geo_coord)/s
-  # handle samples with identical geographical coordinates
+  ## handle samples with identical geographical coordinates
   if(any(geo.dM[lower.tri(geo.dM)] == 0)){
     message("Find samples with identical geographical coordinates.\n")
     if(any(min_nn_dist == 0 , is.null(min_nn_dist))){
@@ -90,20 +110,19 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
       message(paste0("Ignore neighbors within ",min_nn_dist, " unit(s) of distance (the default unit of distance is km)\n"))
     }
   }
+  #-------------------------------------------
   # search KNN
   ## a function to find KNN
-  find_geo_knn <- function(geo.dM, k){
+  find_geo_knn <- function(geo.dM, k, min_nn_dist){
     indx <- 1:ncol(geo.dM)
     res <- matrix(NA, nrow = nrow(geo.dM), ncol = k)
     for(i in indx){
-
-
       if(any(is.null(min_nn_dist), min_nn_dist == 0)){
         res[i,] <- FastKNN::k.nearest.neighbors(i = i, distance_matrix = geo.dM, k = k)
       }else{
         tmp.d <- cbind(indx, geo.dM[,i])
         tmp.d <- tmp.d[order(tmp.d[,2], decreasing = F),]
-        # get the k nearest neighbors but with more than min_nn_dist
+        # get the k nearest neighbors but not within a distance of `min_nn_dist`
         res[i,] <- tmp.d[tmp.d[,2] > min_nn_dist,][1:k,1]
       }
     }
@@ -117,7 +136,6 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
       tmp.indx <- knn.indx[j,]
       tmp.q <- gen_coord[tmp.indx,]
       tmp.d <- geo.dM[tmp.indx,j] ^ w_power
-      #tmp.d <- (geo.dM[tmp.indx,j] + 1) ^ w_power # new approach
       w <- (1/tmp.d)/(sum(1/tmp.d))
       res[j,] <- apply(tmp.q, 2, function(x){weighted.mean(x, w)})
     }
@@ -127,31 +145,47 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
   ## a function to calculate Dg
   cal_Dg <- function(pred.q, gen_coord){
     apply(pred.q - gen_coord, 1, function(x){
-      sum(x^2)
-      #sqrt(sum(x^2))
+      mean(x^2)
     })
   } # cal_Dg end
 
+  #---------------------------------------
+  # Search the optimal K for KNN
   if(is.null(k)){
     # automatically select k if k=NULL
     message(paste("searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take a lot of time...\n"))
     k = min(klim)
     all.D <- c()
+    ## parallel computation (if `cpu` > 1)
+    if(do_par){
+      kindx <- seq(from = k, to = max(klim), by = 1)
+      all.D <- foreach(k = kindx, .packages='FNN', .combine="c") %dopar% {
+        # find KNN
+        knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k, min_nn_dist=min_nn_dist)
+        # KNN prediction
+        pred.q <- pred_q_knn(geo_coord, gen_coord, geo.dM, knn.indx)
+        # calculate Dg statistic
+        return(sum(cal_Dg(pred.q = pred.q, gen_coord = gen_coord)))
+      }
+    } else {
+      ## computation with a single cpu
+      while(k <= max(klim)){
+        message(paste0("calculating Dg with k = ",k,"\r"), appendLF = F)
+        # find KNN
+        knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k, min_nn_dist=min_nn_dist)
+        # KNN prediction
+        pred.q <- pred_q_knn(geo_coord, gen_coord, geo.dM, knn.indx)
 
-    while(k <= max(klim)){
-      message(paste0("calculating Dg with k = ",k,"\r"), appendLF = F)
-      # find KNN
-      knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k)
-      # KNN predicttion
-      pred.q <- pred_q_knn(geo_coord, gen_coord, geo.dM, knn.indx)
-
-      # calculate Dg statistic
-      Dg <- cal_Dg(pred.q, gen_coord)
-      all.D <- c(all.D, sum(Dg))
-      k=k+1
+        # calculate Dg statistic
+        Dg <- cal_Dg(pred.q, gen_coord)
+        all.D <- c(all.D, sum(Dg))
+        k=k+1
+      }
     }
+
+    # make a figure for K searching procedure
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
-    k = opt.k
+    k = opt.k # replace k with the optimal k
     k.sel.plot <- paste(plot_dir, "/KNN_Dg_optimal_k_selection.pdf", sep = "")
     pdf(k.sel.plot, width = 5, height = 4)
     par(mar=c(4,6,1,1))
@@ -166,9 +200,11 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
   }
   if(is.null(k)){stop("k is NULL!")}
   message("searching K nearest neighbors...\n")
-  knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k)
-  # KNN predicttion
-  pred.q <- pred_q_knn(geo_coord, gen_coord, geo.dM, knn.indx)
+
+  #-----------------------------------
+  # KNN prediction with the optimal K (or K given by users)
+  knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k, min_nn_dist=min_nn_dist)
+    pred.q <- pred_q_knn(geo_coord, gen_coord, geo.dM, knn.indx)
   # calculate Dg statistic
   Dg <- cal_Dg(pred.q, gen_coord)
   if(any(Dg == 0)){
@@ -184,8 +220,8 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
                    " genetic dimensions (according to the given `gen_coord`) is ", round(min(predR2), digits = 4),
                    ". Maybe only few extreme outliers in your samples. \nYou could manually check the results with `plot_GGNet_map` and adjust its `p_thres` argument to see which threshold is more appropriate.\n\n\n\n"))
   }
-
-  # get a null distribution
+  #----------------------------------------------------------
+  # Get null distribution
   ## Maximum likelihood assuming Gamma distribution
   ### Define negative log likelihood function
   negLL <- function(a, b){
@@ -224,8 +260,8 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
   p.value <- 1 - pgamma(Dg, shape = current.a, rate = current.b)
 
 
-
-  # return results
+  #--------------------------------------------
+  # Return results
   out <- data.frame(Dg, p.value, significant = sig.indx)
   rownames(out) <- rownames(geo_coord)
   thres <- data.frame(pvalue = c(0.05,0.01,0.005,0.001),statistic = qgamma(1 - c(0.05,0.01,0.005,0.001), shape = current.a, rate = current.b))
@@ -236,24 +272,27 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
   res.out <- list(out, thres, gamma.par, knn.indx, knn.name)
   names(res.out) <- c("statistics","threshold","gamma_parameter", "knn_index", "knn_name")
 
+
   if(!multi_stages){
+    attr(res.out, "model") <- "ggoutlier_geoKNN"
     return(res.out)
   }else{
-    # multi-stage testing
+    #---------------------
+    # multi-stage test
     message(paste0("Start multi-stage KNN test process with k=",k,
                    " and using the null Gamma distribution with shape=", round(current.a, digits = 3),
                    " and rate=",round(current.b, digits = 3),
                    " (the parameters of Gamma distribution were determined by MLE)\n"))
 
     i = 1
-    #to_keep <- !res.out$statistics$significant
-    declining_rate = 0.8
-    to_keep <- res.out$statistics$p.value >= p_thres*(1-declining_rate^i)
+    to_keep <- res.out$statistics$p.value > min(res.out$statistics$p.value)
     tmp.gen_coord <- gen_coord[to_keep,]
     tmp.geo.dM <- geo.dM[to_keep, to_keep]
     tmp.geo_coord <- geo_coord[to_keep,]
 
     res.Iters <- list(res.out)
+    # if `maxIter` is NULL -> let it equal to 50% of sample size
+    if(is.null(maxIter)){maxIter <- round(nrow(gen_coord) * 0.5)}
     while (i <= maxIter) {
       if(i > 1){
         tmp.gen_coord <- tmp.gen_coord[to_keep,]
@@ -263,15 +302,14 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
 
       message(paste0("Iteration ", i,"\r"), appendLF = F)
 
-
       # find KNN
-      tmp.knn.indx <- find_geo_knn(geo.dM = tmp.geo.dM, k=k)
-      # KNN predicttion
+      tmp.knn.indx <- find_geo_knn(geo.dM = tmp.geo.dM, k=k, min_nn_dist=min_nn_dist)
+      # KNN prediction
       tmp.pred.q <- pred_q_knn(tmp.geo_coord, tmp.gen_coord, tmp.geo.dM, tmp.knn.indx)
       # calculate Dg statistic
       tmp.Dg <- cal_Dg(tmp.pred.q, tmp.gen_coord)
       tmp.p.value <- 1 - pgamma(tmp.Dg, shape = current.a, rate = current.b)
-      to_keep <- tmp.p.value >= p_thres*(1-declining_rate^i)
+      to_keep <- tmp.p.value > min(tmp.p.value)
 
 
       if(all(tmp.p.value > p_thres)){
@@ -315,6 +353,7 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
       }
     }
 
+    # make a figure comparing the results of single stage and multi-stage tests
     logp.plot <- paste0(plot_dir, "/KNN_GeoSP_test_multi_stage_Log10P_comparison.pdf")
     message(paste("the plot of comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
     pdf(logp.plot, width = 4, height = 4.2)
@@ -328,10 +367,13 @@ detect_outlier_in_GeoSpace <- function(geo_coord, gen_coord,
     if(keep_all_stg_res){
       names(res.Iters) <- paste0("Iter_", 1:length(res.Iters))
       res.out <- c(res.Iters, collapse_res)
-      return(c(res.Iters, combined_result = list(collapse_res)))
+      out <- c(res.Iters, combined_result = list(collapse_res))
+      attr(out, "model") <- "ggoutlier_geoKNN"
+      return(out)
     }else{
+      attr(collapse_res, "model") <- "ggoutlier_geoKNN"
       return(collapse_res)
     }
-  } # multi-stage testing end
-} # detect_outlier_in_GeoSpace end
+  } # multi-stage test end
+} # ggoutlier_geoKNN end
 
