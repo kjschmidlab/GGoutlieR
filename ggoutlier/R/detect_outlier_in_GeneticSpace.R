@@ -198,7 +198,8 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   if(is.null(k)){stop("k is NULL!")}
   message("searching K nearest neighbors...\n")
   knn.indx <- find_gen_knn(pgdM, k=k)
-  # KNN predicttion
+  #---------------------------------
+  # KNN predicttion with the optimal K
   pred.geo_coord <- pred_geo_coord_knn(geo_coord, pgdM, knn.indx)
   # calculate Dgeo statistic
   message(paste("D geo is scaled to a unit of",s,"meters \n"))
@@ -230,7 +231,8 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     warning(paste0("\n\n\n The lowest prediction accuracy (R^2) of KNN among two geographical dimensions (according to the given `geo_coord`) is ", round(min(predR2), digits = 4),
                    ". Maybe only few extreme outliers in your samples. \nYou could manually check the results with `plot_GGoutlieR` and adjust its `p_thres` argument to see which threshold is more appropriate. \n\n\n\n"))
   }
-  # get a null distribution
+  #---------------------------------
+  # Get null distribution
   ## Maximum likelihood assuming Gamma distribution
   ### Define negative log likelihood function
   negLL <- function(a, b){
@@ -246,8 +248,8 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   current.a <- unname(mle.res@coef["a"])
   current.b <- unname(mle.res@coef["b"])
 
-
-  # get significance threshold
+  #--------------------------------------------------
+  # make a figure for the null Gamma distribution
   null.fun <- function(x){dgamma(x , shape = current.a, rate = current.b)}
   gamma.thres <- qgamma(1-p_thres, shape = current.a, rate = current.b)
   null.distr <- rgamma(n , shape = current.a, rate = current.b)
@@ -268,7 +270,7 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   message("calculating p values...\n")
   p.value <- 1 - pgamma(Dgeo, shape = current.a, rate = current.b)
 
-
+  #----------------------------
   # return results
   out <- data.frame(Dgeo, p.value, significant = sig.indx)
   rownames(out) <- rownames(geo_coord)
@@ -284,6 +286,7 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   if(!multi_stages){
     return(res.out)
   }else{
+    #-------------------------------------------------------------
     # multi-stage test
     message(paste0("Start multi-stage KNN test process with k=",k,
                    " and using the null Gamma distribution with shape=", round(current.a, digits = 3),
@@ -336,6 +339,8 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     } # while loop end
 
     ## collect results of all iterations
+    ## NOTE: In each iteration of 'multi-stage test', the sample with the most significant p values will be exclude from the KNN searching procedure in the next iteration
+    ##       The loop here sequentially collect the outputs from each iteration and update the data.frame `collapse_res`
     collapse_res <- res.Iters[[1]]
     if(length(res.Iters) > 1){
       for(i in 2:length(res.Iters)){
@@ -356,7 +361,7 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       }
     }
     logp.plot <- paste0(plot_dir, "/KNN_GenSP_test_multi_stage_Log10P_comparison.pdf")
-    message(paste("the plot of comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
+    message(paste("the plot for comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
     pdf(logp.plot, width = 4, height = 4.2)
     plot(-log10(res.out$statistics$p.value),
          -log10(collapse_res$statistics$p.value),
