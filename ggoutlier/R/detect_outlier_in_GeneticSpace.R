@@ -297,7 +297,7 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
 
     res.Iters <- list(res.out)
     new_s = s*DgeoSD
-    system.time(while (i <= maxIter) {
+    while (i <= maxIter) {
       if(i > 1){
         tmp.pgdM <- tmp.pgdM[to_keep, to_keep]
         tmp.geo_coord <- tmp.geo_coord[to_keep,]
@@ -334,7 +334,7 @@ ggoutlier_geneticspace <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       i = i+1
 
     } # while loop end
-)
+
     ## collect results of all iterations
     collapse_res <- res.Iters[[1]]
     if(length(res.Iters) > 1){
