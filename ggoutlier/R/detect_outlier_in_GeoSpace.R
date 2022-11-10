@@ -65,6 +65,7 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
     }
   } else {
     if(cpu < 1){stop("`cpu` has to be at least 1")}
+    do_par <- FALSE
     message("\n computation using 1 core. you can parallelize computation by setting a higher value to `cpu` argument \n")
   }
   # check inputs
@@ -110,44 +111,6 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
       message(paste0("Ignore neighbors within ",min_nn_dist, " unit(s) of distance (the default unit of distance is km)\n"))
     }
   }
-  #-------------------------------------------
-  # search KNN
-  ## a function to find KNN
-  find_geo_knn <- function(geo.dM, k, min_nn_dist){
-    indx <- 1:ncol(geo.dM)
-    res <- matrix(NA, nrow = nrow(geo.dM), ncol = k)
-    for(i in indx){
-      if(any(is.null(min_nn_dist), min_nn_dist == 0)){
-        res[i,] <- FastKNN::k.nearest.neighbors(i = i, distance_matrix = geo.dM, k = k)
-      }else{
-        tmp.d <- cbind(indx, geo.dM[,i])
-        tmp.d <- tmp.d[order(tmp.d[,2], decreasing = F),]
-        # get the k nearest neighbors but not within a distance of `min_nn_dist`
-        res[i,] <- tmp.d[tmp.d[,2] > min_nn_dist,][1:k,1]
-      }
-    }
-    return(res)
-  } # find_geo_knn end
-
-  ## a function to predict with KNN
-  pred_q_knn <- function(geo_coord, gen_coord, geo.dM, knn.indx){
-    res <- matrix(NA, nrow = nrow(geo_coord), ncol = ncol(gen_coord))
-    for(j in 1:nrow(gen_coord)){
-      tmp.indx <- knn.indx[j,]
-      tmp.q <- gen_coord[tmp.indx,]
-      tmp.d <- geo.dM[tmp.indx,j] ^ w_power
-      w <- (1/tmp.d)/(sum(1/tmp.d))
-      res[j,] <- apply(tmp.q, 2, function(x){weighted.mean(x, w)})
-    }
-    return(res)
-  } # pred_q_knn end
-
-  ## a function to calculate Dg
-  cal_Dg <- function(pred.q, gen_coord){
-    apply(pred.q - gen_coord, 1, function(x){
-      mean(x^2)
-    })
-  } # cal_Dg end
 
   #---------------------------------------
   # Search the optimal K for KNN
@@ -161,9 +124,15 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
       kindx <- seq(from = k, to = max(klim), by = 1)
       all.D <- foreach(k = kindx, .packages='FNN', .combine="c") %dopar% {
         # find KNN
-        knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k, min_nn_dist=min_nn_dist)
+        knn.indx <- find_geo_knn(geo.dM = geo.dM,
+                                 k=k,
+                                 min_nn_dist=min_nn_dist)
         # KNN prediction
-        pred.q <- pred_q_knn(geo_coord, gen_coord, geo.dM, knn.indx)
+        pred.q <- pred_q_knn(geo_coord = geo_coord,
+                             gen_coord = gen_coord,
+                             geo.dM =  geo.dM,
+                             knn.indx = knn.indx,
+                             w_power = w_power)
         # calculate Dg statistic
         return(sum(cal_Dg(pred.q = pred.q, gen_coord = gen_coord)))
       }
@@ -174,7 +143,7 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
         # find KNN
         knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k, min_nn_dist=min_nn_dist)
         # KNN prediction
-        pred.q <- pred_q_knn(geo_coord, gen_coord, geo.dM, knn.indx)
+        pred.q <- pred_q_knn(geo_coord = geo_coord, gen_coord = gen_coord, geo.dM =  geo.dM, knn.indx, w_power = w_power)
 
         # calculate Dg statistic
         Dg <- cal_Dg(pred.q, gen_coord)
@@ -204,7 +173,7 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
   #-----------------------------------
   # KNN prediction with the optimal K (or K given by users)
   knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k, min_nn_dist=min_nn_dist)
-    pred.q <- pred_q_knn(geo_coord, gen_coord, geo.dM, knn.indx)
+    pred.q <- pred_q_knn(geo_coord = geo_coord, gen_coord = gen_coord, geo.dM =  geo.dM, knn.indx, w_power = w_power)
   # calculate Dg statistic
   Dg <- cal_Dg(pred.q, gen_coord)
   if(any(Dg == 0)){
@@ -305,7 +274,11 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
       # find KNN
       tmp.knn.indx <- find_geo_knn(geo.dM = tmp.geo.dM, k=k, min_nn_dist=min_nn_dist)
       # KNN prediction
-      tmp.pred.q <- pred_q_knn(tmp.geo_coord, tmp.gen_coord, tmp.geo.dM, tmp.knn.indx)
+      tmp.pred.q <- pred_q_knn(geo_coord = tmp.geo_coord,
+                              gen_coord = tmp.gen_coord,
+                              geo.dM = tmp.geo.dM,
+                              knn.indx = tmp.knn.indx,
+                              w_power = w_power)
       # calculate Dg statistic
       tmp.Dg <- cal_Dg(tmp.pred.q, tmp.gen_coord)
       tmp.p.value <- 1 - pgamma(tmp.Dg, shape = current.a, rate = current.b)

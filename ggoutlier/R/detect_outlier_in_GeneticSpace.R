@@ -67,6 +67,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     }
   } else {
     if(cpu < 1){stop("`cpu` has to be at least 1")}
+    do_par <- FALSE
     message("\n computation using 1 core. you can parallelize computation by setting a higher value to `cpu` argument \n")
   }
 
@@ -118,42 +119,12 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     pgdM <- pgdM + 10^-6
     diag(pgdM) <- 0
   }
-  #---------------------------------
-  # search KNN
-  ## a function to find KNN
-  find_gen_knn <- function(pgdM, k){
-    indx <- 1:ncol(pgdM)
-    res <- matrix(NA, nrow = nrow(pgdM), ncol = k)
-    for(i in indx){
-      res[i,] <- FastKNN::k.nearest.neighbors(i = i, distance_matrix = pgdM, k = k)
-    }
-    return(res)
-  } # find_gen_knn end
-
-  ## a function to predict with KNN
-  pred_geo_coord_knn <- function(geo_coord, pgdM, knn.indx){
-    res <- matrix(NA, nrow = nrow(geo_coord), ncol = ncol(geo_coord))
-    for(j in 1:nrow(pgdM)){
-      tmp.indx <- knn.indx[j,]
-      tmp.geo_coord <- geo_coord[tmp.indx,]
-      tmp.d <- (pgdM[tmp.indx,j]) ^ w_power
-      w <- (1/tmp.d)/(sum(1/tmp.d))
-      res[j,] <- apply(tmp.geo_coord, 2, function(x){weighted.mean(x, w)})
-    }
-    return(res)
-  } # pred_geo_coord_knn end
-
-  ## a function to calculate Dg
-  cal_Dgeo <- function(pred.geo_coord, geo_coord, scalar){
-    geodist <- (sapply(1:nrow(geo_coord),function(a){distm(x = geo_coord[a,], y = pred.geo_coord[a,])/scalar}))
-    return(geodist)
-  } # cal_Dgeo end
 
   ##---------------------------------------------------
   ## search for the optimal K
   if(is.null(k)){
     # automatically select k if k=NULL
-    message(paste("\n searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
+    message(paste("\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
     k = min(klim)
     all.D <- c()
 
@@ -163,7 +134,10 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       all.D <- foreach(k = kindx, .packages=c('geosphere','FNN'), .combine="c") %dopar% {
         knn.indx <- find_gen_knn(pgdM, k=k)
         # KNN prediction
-        pred.geo_coord <- pred_geo_coord_knn(geo_coord, pgdM, knn.indx)
+        pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,
+                                             pgdM = pgdM,
+                                             knn.indx = knn.indx,
+                                             w_power = w_power)
         # calculate Dgeo statistic
         return(sum(cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)))
       }
@@ -174,7 +148,10 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
         # find KNN
         knn.indx <- find_gen_knn(pgdM, k=k)
         # KNN prediction
-        pred.geo_coord <- pred_geo_coord_knn(geo_coord, pgdM, knn.indx)
+        pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,
+                                             pgdM = pgdM,
+                                             knn.indx = knn.indx,
+                                             w_power = w_power)
         # calculate Dg statistic
         Dgeo <- cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)
         all.D <- c(all.D, sum(Dgeo))
@@ -200,7 +177,10 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   #---------------------------------
   # KNN prediction with the optimal K (or K given by users)
   knn.indx <- find_gen_knn(pgdM, k=k)
-  pred.geo_coord <- pred_geo_coord_knn(geo_coord, pgdM, knn.indx)
+  pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,
+                                       pgdM = pgdM,
+                                       knn.indx = knn.indx,
+                                       w_power = w_power)
   # calculate Dgeo statistic
   message(paste("D geo is scaled to a unit of",s,"meters \n"))
   Dgeo <- cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)
@@ -216,7 +196,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       maxD <- maxD / tmps
     }
     orig_s <- s
-    s <- s * tmps
+    s <- s * tmps # new scalar
     message(paste0("\n\n GGoutlieR adjusts the given scalar `s` value from `s=", orig_s, "` to `s=", s, "` to prevent an error in the maximum likelihood estimation process\n"))
     message(paste0("D geo is re-scaled to a unit of ",s," meters \n"))
   }
@@ -241,8 +221,8 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   }
 
   ### Loop until paramters converging
-  initial.a <- (mean(scaledDgeo)^2)/var(scaledDgeo)
-  initial.b <- mean(scaledDgeo)/var(scaledDgeo)
+  initial.a <- (mean(Dgeo)^2)/var(Dgeo)
+  initial.b <- mean(Dgeo)/var(Dgeo)
   message("Using maximum likelihood estimation to infer the null Gamma distribution...\n")
   mle.res <- mle(minuslogl = negLL, start = list(a = initial.a, b = initial.b),
                  lower = 10^-8, upper = 10^8, method = "L-BFGS-B")
@@ -312,9 +292,14 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       # find KNN
       tmp.knn.indx <- find_gen_knn(tmp.pgdM, k=k)
       # KNN prediction
-      tmp.pred.geo_coord <- pred_geo_coord_knn(tmp.geo_coord, tmp.pgdM, tmp.knn.indx)
+      tmp.pred.geo_coord <- pred_geo_coord_knn(geo_coord = tmp.geo_coord,
+                            pgdM = tmp.pgdM,
+                            knn.indx = tmp.knn.indx,
+                            w_power = w_power)
       # calculate Dg statistic
-      tmp.Dgeo <- cal_Dgeo(pred.geo_coord = tmp.pred.geo_coord, geo_coord = tmp.geo_coord, scalar = s)
+      tmp.Dgeo <- cal_Dgeo(pred.geo_coord = tmp.pred.geo_coord,
+                           geo_coord = tmp.geo_coord,
+                           scalar = s)
       tmp.p.value <- 1 - pgamma(tmp.Dgeo, shape = current.a, rate = current.b)
       to_keep <- tmp.p.value > min(tmp.p.value)
 
