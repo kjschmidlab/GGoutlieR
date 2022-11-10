@@ -60,15 +60,14 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
         cpu <- max_cores -1 # reserve max-1 cpus if users request too many cpus
     }
     if(cpu > 1){
-      message(paste0("\n parallelize computation using ", cpu, " cores \n"))
+      cat(paste0("\n Parallelize computation using ", cpu, " cores \n"))
       cl <- makeCluster(cpu)
-      registerDoParallel(cl)
       do_par <- TRUE
     }
   } else {
     if(cpu < 1){stop("`cpu` has to be at least 1")}
     do_par <- FALSE
-    message("\n computation using 1 core. you can parallelize computation by setting a higher value to `cpu` argument \n")
+    cat("\n Computation using 1 core. you can parallelize computation by setting a higher value to `cpu` argument \n")
   }
 
   # check inputs
@@ -89,7 +88,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     rownames(geo_coord) <- paste("sample", 1:nrow(geo_coord), sep = "")
   }else{
     if(any(is.na(rownames(geo_coord)))){
-      message("Some samples in `geo_coord` have IDs but some do not. Arbitratry IDs are assigned to all samples...")
+      cat("Some samples in `geo_coord` have IDs but some do not. Arbitratry IDs are assigned to all samples...")
       rownames(geo_coord) <- paste("sample", 1:nrow(geo_coord), sep = "")
     }
   }
@@ -114,8 +113,8 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   }
   # handle samples with identical genotypes
   if(any(pgdM[lower.tri(pgdM)] == 0)){
-    message("Find samples with zero genetic distances.\n")
-    message("Add 10^-6 unit of distance to individual pairs\n")
+    cat("Find samples with zero genetic distances.\n")
+    cat("Add 10^-6 unit of distance to individual pairs\n")
     pgdM <- pgdM + 10^-6
     diag(pgdM) <- 0
   }
@@ -124,12 +123,13 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   ## search for the optimal K
   if(is.null(k)){
     # automatically select k if k=NULL
-    message(paste("\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
+    cat(paste("\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
     k = min(klim)
     all.D <- c()
 
     ## parallel computation (if `cpu` > 1)
     if(do_par){
+      doParallel::registerDoParallel(cl)
       kindx <- seq(from = k, to = max(klim), by = 1)
       all.D <- foreach(k = kindx, .packages=c('geosphere','FNN'), .combine="c") %dopar% {
         knn.indx <- find_gen_knn(pgdM, k=k)
@@ -141,10 +141,11 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
         # calculate Dgeo statistic
         return(sum(cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)))
       }
+      stopCluster(cl)
     } else {
       ## computation with a single cpu
       while(k <= max(klim)){
-        message(paste0("calculating Dgeo with k = ",k,"\r"), appendLF = F)
+        cat(paste0("Calculating Dgeo with k = ",k,"\r"), appendLF = F)
         # find KNN
         knn.indx <- find_gen_knn(pgdM, k=k)
         # KNN prediction
@@ -169,11 +170,11 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     dev.off()
 
     k = opt.k
-    message(paste("\n the optimal k is ",opt.k,". the figure is saved at ", k.sel.plot," \n", sep = ""))
+    cat(paste("\n The optimal k is ",opt.k,". Its figure is saved at ", k.sel.plot," \n", sep = ""))
 
   }
   if(is.null(k)){stop("k is NULL!")}
-  message("searching K nearest neighbors...\n")
+  cat("\nSearching K nearest neighbors...\n")
   #---------------------------------
   # KNN prediction with the optimal K (or K given by users)
   knn.indx <- find_gen_knn(pgdM, k=k)
@@ -182,7 +183,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                                        knn.indx = knn.indx,
                                        w_power = w_power)
   # calculate Dgeo statistic
-  message(paste("D geo is scaled to a unit of",s,"meters \n"))
+  cat(paste("\n\n D geo is scaled to a unit of",s,"meters \n"))
   Dgeo <- cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)
 
   # rescale Dgeo
@@ -197,13 +198,13 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     }
     orig_s <- s
     s <- s * tmps # new scalar
-    message(paste0("\n\n GGoutlieR adjusts the given scalar `s` value from `s=", orig_s, "` to `s=", s, "` to prevent an error in the maximum likelihood estimation process\n"))
-    message(paste0("D geo is re-scaled to a unit of ",s," meters \n"))
+    cat(paste0("\n\n GGoutlieR adjusts the given scalar `s` value from `s=", orig_s, "` to `s=", s, "` to prevent an error in the maximum likelihood estimation process\n"))
+    cat(paste0("\n\n D geo is re-scaled to a unit of ",s," meters \n\n"))
   }
   Dgeo <- Dgeo/tmps
   if(any(Dgeo == 0)){
     tmp.indx <- Dgeo == 0
-    message(paste(sum(tmp.indx),"samples have D geo = 0. Zeros are replaced with 10^-8 to prevent the error in maximum likelihood estimation."))
+    cat(paste("\n\n",sum(tmp.indx),"samples have D geo = 0. Zeros are replaced with 10^-8 to prevent the error in maximum likelihood estimation."))
     Dgeo[tmp.indx] <- 10^-8
   }
 
@@ -223,7 +224,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   ### Loop until paramters converging
   initial.a <- (mean(Dgeo)^2)/var(Dgeo)
   initial.b <- mean(Dgeo)/var(Dgeo)
-  message("Using maximum likelihood estimation to infer the null Gamma distribution...\n")
+  #cat("\n\nUsing maximum likelihood estimation to infer the null Gamma distribution...\n")
   mle.res <- mle(minuslogl = negLL, start = list(a = initial.a, b = initial.b),
                  lower = 10^-8, upper = 10^8, method = "L-BFGS-B")
   current.a <- unname(mle.res@coef["a"])
@@ -235,7 +236,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   gamma.thres <- qgamma(1-p_thres, shape = current.a, rate = current.b)
   null.distr <- rgamma(n , shape = current.a, rate = current.b)
   null.plot <- paste(plot_dir, "/KNN_Dgeo_null_distribution.pdf", sep = "")
-  message(paste("the plot of null distribution is saved at ", null.plot," \n", sep = ""))
+  cat(paste("\nThe plot of null distribution is saved at ", null.plot," \n", sep = ""))
   pdf(null.plot, width = 5, height = 4)
   curve(null.fun, from = 0, to = max(null.distr), add = F, col = "blue",
         ylab = "Density",
@@ -251,7 +252,6 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   #----------------------------
   # return results
   sig.indx <- Dgeo > gamma.thres
-  message("calculating p values...\n")
   p.value <- 1 - pgamma(Dgeo, shape = current.a, rate = current.b)
   out <- data.frame(Dgeo, p.value, significant = sig.indx)
   rownames(out) <- rownames(geo_coord)
@@ -269,10 +269,10 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   }else{
     #-------------------------------------------------------------
     # multi-stage test
-    message(paste0("Start multi-stage KNN test process with k=",k,
-                   " and using the null Gamma distribution with shape=", round(current.a, digits = 3),
+    cat(paste0("\n\nStart the multi-stage KNN test process with k=",k,
+                   " using a null Gamma distribution with shape=", round(current.a, digits = 3),
                    " and rate=",round(current.b, digits = 3),
-                   " (the parameters of Gamma distribution were determined by MLE)\n"))
+                   " (the parameters of Gamma distribution were determined by MLE)\n\n"))
 
     i=1
     to_keep <- res.out$statistics$p.value > min(res.out$statistics$p.value)
@@ -288,7 +288,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
         tmp.geo_coord <- tmp.geo_coord[to_keep,]
       }
 
-      message(paste0("Iteration ", i,"\r"), appendLF = F)
+      cat(paste0("Iteration ", i,"\r"), append = F)
       # find KNN
       tmp.knn.indx <- find_gen_knn(tmp.pgdM, k=k)
       # KNN prediction
@@ -304,7 +304,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       to_keep <- tmp.p.value > min(tmp.p.value)
 
       if(all(tmp.p.value > p_thres)){
-        message("\nNo new significant sample is identified. Multi-stage testing process ends...\n")
+        cat("\nNo new significant sample is identified. Multi-stage testing process ends...\n")
         break
       }else{
         out <- data.frame(tmp.Dgeo, tmp.p.value, significant = tmp.p.value < p_thres)
@@ -346,8 +346,8 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       }
     }
     # make a figure comparing the results of single stage and multi-stage tests
-    logp.plot <- paste0(plot_dir, "/KNN_GenSP_test_multi_stage_Log10P_comparison.pdf")
-    message(paste("the plot for comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
+    logp.plot <- paste0(plot_dir, "/geneticKNN_test_multi_stage_Log10P_comparison.pdf")
+    cat(paste("\n\n\nThe plot for comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
     pdf(logp.plot, width = 4, height = 4.2)
     plot(-log10(res.out$statistics$p.value),
          -log10(collapse_res$statistics$p.value),
