@@ -60,12 +60,12 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
     if(cpu > 1){
       cat(paste0("\n Parallelize computation using ", cpu, " cores \n"))
       cl <- makeCluster(cpu)
-
       do_par <- TRUE
     }
   } else {
     if(cpu < 1){stop("`cpu` has to be at least 1")}
     do_par <- FALSE
+    cl <- NULL
     cat("\n Computation using 1 core. you can parallelize computation by setting a higher value to `cpu` argument \n")
   }
   # check inputs
@@ -117,42 +117,14 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
   if(is.null(k)){
     # automatically select k if k=NULL
     cat(paste("\n\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take a lot of time...\n"))
-    k = min(klim)
-    all.D <- c()
-    ## parallel computation (if `cpu` > 1)
-    if(do_par){
-      doParallel::registerDoParallel(cl)
-      kindx <- seq(from = k, to = max(klim), by = 1)
-      all.D <- foreach(k = kindx, .packages='FNN', .combine="c") %dopar% {
-        # find KNN
-        knn.indx <- find_geo_knn(geo.dM = geo.dM,
-                                 k=k,
-                                 min_nn_dist=min_nn_dist)
-        # KNN prediction
-        pred.q <- pred_q_knn(geo_coord = geo_coord,
-                             gen_coord = gen_coord,
-                             geo.dM =  geo.dM,
-                             knn.indx = knn.indx,
-                             w_power = w_power)
-        # calculate Dg statistic
-        return(sum(cal_Dg(pred.q = pred.q, gen_coord = gen_coord)))
-      }
-      stopCluster(cl)
-    } else {
-      ## computation with a single cpu
-      while(k <= max(klim)){
-        cat(paste0("Calculating Dg with k = ",k,"\r"), append = F)
-        # find KNN
-        knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k, min_nn_dist=min_nn_dist)
-        # KNN prediction
-        pred.q <- pred_q_knn(geo_coord = geo_coord, gen_coord = gen_coord, geo.dM =  geo.dM, knn.indx, w_power = w_power)
-
-        # calculate Dg statistic
-        Dg <- cal_Dg(pred.q, gen_coord)
-        all.D <- c(all.D, sum(Dg))
-        k=k+1
-      }
-    }
+    all.D <- find_optimalK_geoKNN(geo_coord = geo_coord,
+                                     gen_coord = gen_coord,
+                                     geo.dM = geo.dM,
+                                     w_power = w_power,
+                                     klim = klim,
+                                     do_par = do_par,
+                                     min_nn_dist = min_nn_dist,
+                                     cl = cl)
 
     # make a figure for K searching procedure
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]

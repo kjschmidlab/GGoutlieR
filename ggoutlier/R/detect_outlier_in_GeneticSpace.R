@@ -66,6 +66,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
     }
   } else {
     if(cpu < 1){stop("`cpu` has to be at least 1")}
+    cl = NULL
     do_par <- FALSE
     cat("\n Computation using 1 core. you can parallelize computation by setting a higher value to `cpu` argument \n")
   }
@@ -121,45 +122,17 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
 
   ##---------------------------------------------------
   ## search for the optimal K
+
   if(is.null(k)){
-    # automatically select k if k=NULL
     cat(paste("\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
-    k = min(klim)
-    all.D <- c()
 
-    ## parallel computation (if `cpu` > 1)
-    if(do_par){
-      doParallel::registerDoParallel(cl)
-      kindx <- seq(from = k, to = max(klim), by = 1)
-      all.D <- foreach(k = kindx, .packages=c('geosphere','FNN'), .combine="c") %dopar% {
-        knn.indx <- find_gen_knn(pgdM, k=k)
-        # KNN prediction
-        pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,
+    all.D = find_optimalK_geneticKNN(geo_coord = geo_coord,
                                              pgdM = pgdM,
-                                             knn.indx = knn.indx,
-                                             w_power = w_power)
-        # calculate Dgeo statistic
-        return(sum(cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)))
-      }
-      stopCluster(cl)
-    } else {
-      ## computation with a single cpu
-      while(k <= max(klim)){
-        cat(paste0("Calculating Dgeo with k = ",k,"\r"), appendLF = F)
-        # find KNN
-        knn.indx <- find_gen_knn(pgdM, k=k)
-        # KNN prediction
-        pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,
-                                             pgdM = pgdM,
-                                             knn.indx = knn.indx,
-                                             w_power = w_power)
-        # calculate Dg statistic
-        Dgeo <- cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)
-        all.D <- c(all.D, sum(Dgeo))
-        k=k+1
-      }
-    }
-
+                                             w_power = w_power,
+                                             klim = klim,
+                                             do_par = do_par,
+                                             s = s,
+                                             cl = cl)
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")
     pdf(k.sel.plot, width = 5, height = 4)
