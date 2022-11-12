@@ -1,0 +1,305 @@
+\documentclass[11pt]{article}
+\usepackage[margin=24mm]{geometry}
+\usepackage{authblk}
+\usepackage{fullpage}
+\usepackage{amssymb,amsmath}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{siunitx}
+\usepackage{natbib}
+%\usepackage[sort,authoryear,round]{natbib}
+%\usepackage[style=biblatex-spbasic]{biblatex}
+\setcitestyle{aysep={}} % remove comma between authors and year
+%\usepackage[square,numbers]{natbib} % make citation being number -> easy to count number of reference
+%\bibliographystyle{unsrt} %
+\usepackage{adjustbox}
+\usepackage{graphicx}
+
+\usepackage{booktabs}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{multirow}
+\usepackage{rotating,tabularx}
+\usepackage{makecell}
+\usepackage[left]{lineno} % to add line number
+\linenumbers % add line number
+%\usepackage{refcheck} % use to check unused references
+\usepackage{floatrow}
+\floatsetup[table]{capposition=top}
+\usepackage{helvet}
+\usepackage{grffile}
+\usepackage{caption}
+%\usepackage[nomarkers,notablist,nofiglist]{endfloat} % push tables and figures to the end of document
+\renewcommand{\familydefault}{\sfdefault} % Arial font
+%\usepackage{subfig}
+\usepackage[label font=bf,labelformat=simple]{subfig}
+%\usepackage[section]{placeins} % make figures stay in the section
+\usepackage[labelsep=space]{caption}
+\floatsetup[figure]{style=plain,subcapbesideposition=top}
+
+\captionsetup{labelfont={bf,small},figurename={Fig.},skip=0.25\baselineskip}
+\captionsetup[subfigure]{font={bf,small}, skip=1pt, singlelinecheck=false}
+\captionsetup{justification=raggedright,singlelinecheck=false} % caption left align
+\captionsetup[figure]{font=small} % small size for caption
+\graphicspath{{../figures/}}
+\usepackage{setspace} % double spacing
+
+\doublespacing % double spacing
+
+\setcounter{secnumdepth}{5}
+
+\newcommand{\ks}[1]{{\small (kjs:) \textcolor{red}{#1}}}
+\newcommand{\cc}[1]{{\small (cwc:) \textcolor{blue}{#1}}}
+
+\begin{document}
+\begin{flushleft}
+\textbf{A network-based method for identifying samples deviating from isolation-by-distance expectation and visualizing spatial genetic patterns for large populations}
+
+\vspace{2ex}
+
+Che-Wei Chang\textsuperscript{1}, and Karl Schmid\textsuperscript{1}\\[1ex]
+
+\textsuperscript{1}University of Hohenheim, Stuttgart, Germany\\
+
+
+\vspace{2ex}
+
+\textit{Corresponding author:} Karl Schmid, Email: karl.schmid@uni-hohenheim.de
+
+
+\end{flushleft}
+
+\newpage
+%\singlespacing
+\begin{abstract}
+\small
+
+\end{abstract}
+\textbf{Keywords:} 
+
+\newpage
+
+% NOTE:
+% 2022-07-19: The original plan is including the clustering approach and applications with simulation data in this paper. However, I think adding them to the paper will make readers lose focus on the main features of GGNet (identifying outliers and visualization of geo-genetic patterns on individual basis). So it would be better not include them...
+
+% Progress:
+% - introduction: X
+% - materials and methods: basically done. not check spelling and grammer yet. structure need to be refine.
+% - results: X
+% - discussion: X
+
+
+\section*{Introduction}
+%paragraph1 : briefly justify the importance of studying the association of geographic and genetic relationships
+
+%paragraph2 : review existing methods ()
+
+%paragraph3 : why we need a new approach (niche of GGNet)
+
+
+
+%paragraph4 : 1.objectives and 2.summarize the strength of GGNet in one or two sentences
+To facilitate the investigation of geo-genetic patterns, we introduce a framework, named as geo-genetic network (\textit{GGNet}).
+It can characterize and visualize the extent of deviation from isolation-by-distance expectation with network graph on individual basis.
+
+
+
+\section*{Materials and Methods}
+
+\subsection*{Overview}
+
+Under the isolation-by-distance (IBD) assumption, the association between geographical distances and genetic distances of individuals enables the prediction of geographical origins based on genetic variation or, alternatively, the prediction of genetic components according to geographical origins.
+In both prediction scenarios, prediction errors of a given sample increase proportionally to the degree of deviation from the IBD expectation.
+Based on the idea mentioned above, we implemented the K-nearest neighbors (KNN) algorithm, a non-parametric and non-linear method, to characterize the geo-genetic relationship of each sample with its corresponding nearest neighbors.
+Our KNN framework provides a rapid screen to identify outliers that strongly deviate from the IBD expectation.
+These outliers could result from long-distance migration or artifacts, e.g. mix-up of samples.
+Moreover, we presented a network-based visualization tool for geo-genetic patterns, which are available in our R package.
+
+\subsection*{Assumptions}
+
+To develop our KNN framework, we assume that IBD patterns are pervasive among samples, so the population genetic structure is generally accordant to geographical habitats.
+Let the geographical distribution and genetic variation of samples be described with two coordinate systems, $S_{geo}$ and $S_{genetic}$.
+If the IBD assumption holds, the coordinates of an individual in $S_{genetic}$ are predictable from its neighbors in $S_{geo}$ and vice versa.
+
+We further assume that the distances between true and predicted coordinates in $S_{geo}$ follows a Gamma distribution with unknown parameters, written as $\Gamma_{geo}(\alpha,\beta)$. 
+This assumption is made with the expectation of prediction errors approximating to zero under IBD.
+Similarly, the sum of squared prediction errors of coordinates in $S_{genetic}$ is assumed to follow $\Gamma_{genetic}(\alpha,\beta)$.
+
+\subsection*{Characterization of geo-genetic relationship based on KNNs}
+
+\subsubsection*{Coordinate systems of $S_{geo}$ and $S_{genetic}$}
+
+The coordinates of samples in $S_{geo}$ are equal to geographical coordinates of collection sites with decimal degree format.
+For $S_{genetic}$, we used ancestry coefficients \citep{pritchard2000inference} to represent samples' coordinates for the empirical applications because ancestry coefficients are more interpretable and easier to visualize on a geographical map than principal components.
+We regard a matrix of ancestry coefficients ($Q_{N\times F}$) estimated based on $F$ ancestral populations as the coordinates of $N$ samples distributing in a space $S_{genetic}$ with $F$ dimensions.
+Our KNN frameworks are performed as follows with $S_{geo}$ and $S_{genetic}$.
+
+\subsubsection*{\textit{Framework 1}: outlier identification with geographical-based KNNs}
+
+The first KNN framework aims at identifying outliers that are genetically differentiated from corresponding geographical-based KNNs.
+
+\textbf{Step 1.} Compute pairwise geographical distance matrix. 
+If any pairwise geographical distance is zero, one unit of distance is added to the whole geographical distance matrix except the diagonal values to avoid a divisor of zero in the equation \ref{w_eq1} of \textbf{Step 3}.
+
+\textbf{Step 2.} Find KNNs for each individual according to pairwise geographical distances with a given $K$.
+
+\textbf{Step 3.} Predict $\hat{x}_{genetic,i,j}$ using a weighted KNN approach.
+$\hat{x}_{genetic,i,j}$ is the predicted coordinate of an individual $i$ in the dimension $j$ of $S_{genetic}$, where $i = \{1,2,...,N\}$ and $j = \{1,2,...,F\}$. $N$ is the number of individuals and $F$ is the number of dimensions in $S_{genetic}$, i.e. the number of ancestral populations. 
+The weight value of the $k$ th nearest neighbor of an individual $i$ is computed as
+
+\begin{equation} \label{w_eq1}
+w_{i,k}=\frac{\frac{1}{d_{i,k}}}{\sum_{k=1}^{K} \frac{1}{d_{i,k}}}
+\end{equation}
+
+where $d_{i,k}$ is geographical distance between the individual $i$ and its $k$ th nearest neighbor.
+$\hat{x}_{genetic,i,j}$ is calculated as
+
+\begin{equation} \label{wknn_eq1}
+\hat{x}_{genetic,i,j}=\frac{1}{K}\sum_{k=1}^{K}w_{i,k}\ x_{genetic,i,j,k}
+\end{equation}
+where $K$ is a given number of nearest neighbors to consider. $x_{genetic,i,j,k}$ is the coordinate of $k$ th neighbor of individual $i$ in the dimension $j$ of $S_{genetic}$.
+
+\textbf{Step 4.} Compute mean of squared prediction errors as
+
+\begin{equation} \label{Dg_eq}
+D_{genetic, i}=\frac{1}{F}\sum_{j=1}^{f} \hat{\varepsilon}_{i,j}^2 =\frac{1}{F}\sum_{j=1}^{f} (x_{genetic,i,j} - \hat{x}_{genetic,i,j})^2
+\end{equation}
+
+where $x_{genetic,i,j}$ and $\hat{x}_{genetic,i,j}$ are the true and predicted coordinates of the individual $i$ in the dimension $j$ of $S_{genetic}$, respectively.
+
+\textbf{Step 5.1.} Search optimal number of nearest neighbors ($K$) by minimizing $\sum_{i=1}^{n}D_{genetic,i}$. 
+The \textbf{Step 1-4} are repeated with a range of $K$ values.
+The $K$ value resulting in the lowest $\sum_{i=1}^{n}D_{genetic,i}$ is regarded as the best $K$ for the given dataset.
+In our analyses, we set $K$ with a range from 3 to 100.
+
+\textbf{Step 5.2} Repeat \textbf{Step 1-4} with the optimal $K$.
+
+\textbf{Step 6} Obtain an empirical null distribution $\Gamma_{genetic}(\alpha,\beta)$. $\alpha$ and $\beta$ are identified by maximum likelihood estimation.
+
+\textbf{Step 7} Test individuals with the empirical null distribution $\Gamma_{genetic}(\alpha,\beta)$. The null hypothesis is that a focal individual follows the IBD expectation, whereas the alternative hypothesis is that a focal individual is genetically differentiated from its $K$ geographically nearest neighbors.
+Considering that a true outlier may induce the significance of its neighbors, we perform the test in a multi-stage manner.
+In each iteration, we drop the most significant individual and repeat the \textbf{Step 2-4} to exclude the influence from the most significant individual.
+This procedure is repeated until no outlier is identified with a given significant level.
+
+
+\subsubsection*{\textit{Framework 2}: outlier identification with genetic-based KNNs}
+
+The second KNN framework aims at identifying outliers that are geographically remote from genetically similar individuals, i.e. their KNNs in $S_{genetic}$. 
+The underlying rationale is similar to the first part of our outlier identification approach.
+
+\textbf{Step 1.} Compute pairwise Euclidean distances according to a given matrix of genetic coordinates, i.e. ancestry coefficients. 
+If any pairwise distance is zero, $10^{-6}$ is added to the whole genetic distance matrix except the diagonal values to avoid a divisor of zero in the equation \ref{w_eq2} of \textbf{Step 3} below. Alternatively ,\textit{GGNet} accepts a distance matrix given by users in this step if users prefer a customized calculation of genetic distances.
+
+
+\textbf{Step 2.} Find KNNs for each individual according to pairwise genetic distances with a given $K$.
+
+\textbf{Step 3.} Predict $\hat{x}_{geo,i,j}$ using a weighted KNN approach.
+$\hat{x}_{geo,i,j}$ is the predicted coordinate of an individual $i$ in the dimension $j$ of $S_{geo}$, where $i = \{1,2,...,N\}$ and $j = \{1,2\}$. 
+$N$ is the number of individuals and $j$ corresponds to longitude and latitude. 
+The weight value of the $k$ th nearest neighbor of an individual $i$ is computed as
+
+\begin{equation} \label{w_eq2}
+w_{i,k}=\frac{\frac{1}{d_{i,k}^2}}{\sum_{k=1}^{K} \frac{1}{d_{i,k}^2}}
+\end{equation}
+
+where $d_{i,k}$ is genetic distance between the individual $i$ and its $k$ th nearest neighbor computed in the \textbf{Step 1}.
+$\hat{x}_{geo,i,j}$ is calculated as
+
+\begin{equation} \label{wknn_eq2}
+\hat{x}_{geo,i,j}=\frac{1}{K}\sum_{k=1}^{K}w_{i,k}\ x_{geo,i,j,k}
+\end{equation}
+where $K$ is a given number of nearest neighbors to consider. $x_{geo,i,j,k}$ is the coordinate of $k$ th neighbor of individual $i$ in the dimension $j$ of $S_{geo}$.
+
+\textbf{Step 4.} Compute prediction errors as 
+
+\begin{equation} \label{Dgeo_eq}
+D_{geo, i}=GeoDist(x_{geo,i}, \hat{x}_{geo,i})
+\end{equation}
+
+where $GeoDist(x_{geo,i}, \hat{x}_{geo,i})$ is the geographical distance between the true and predicted locations of the individual $i$, which is calculated with the \textit{geosphere} package \citep{hijmansgeosphere}.
+
+\textbf{Step 5-1.} Search optimal number of nearest neighbors ($K$) by minimizing $\sum_{i=1}^{n}D_{geo,i}$. 
+The \textbf{Step 1-4} are repeated with a range of $K$ values.
+The $K$ value resulting in the lowest $\sum_{i=1}^{n}D_{geo,i}$ is considered as the optimal $K$ with the given dataset.
+In our analyses, we set $K$ with a range from 3 to 100.
+
+\textbf{Step 5-2} Repeat \textbf{Step 1-4} with the optimal $K$.
+
+\textbf{Step 6} Obtain an empirical null distribution $\Gamma_{geo}(\alpha,\beta)$. $\alpha$ and $\beta$ are identified by maximum likelihood estimation.
+
+\textbf{Step 7} Test individuals with the empirical null distribution $\Gamma_{geo}(\alpha,\beta)$. 
+The null hypothesis is that a focal individual follows the IBD expectation. The alternative hypothesis is that a focal individual is geographically remote from $K$ individuals that are genetically most similar to a focal individual.
+The test is carried out in a multi-stage manner as described in the \textbf{Step 7} of \textbf{Framework 1}.
+
+\subsection*{Network graph of geo-genetic patterns}
+
+In network graph, an adjacency matrix is used for characterizing the strength of edges between pairs of vertices.
+With the KNN frameworks described above, the geo-genetic pattern of individual pairs could be further characterized as adjacency matrices and visualize by network graphs.
+
+Briefly, the empirical distribution $\Gamma_{genetic}(\alpha,\beta)$ and $\Gamma_{geo}(\alpha,\beta)$ are regarded as transformation functions to convert the 
+%Briefly, $D_{genetic, i}$ (equation \ref{Dg_eq}) and $D_{geo, i}$ (equation \ref{Dgeo_eq}) are computed again individually with KNNs for the sample $x_i$.
+%Next, $D_{genetic, i}$ and $D_{geo, i}$ are converted to adjacency matrices consisting of $p$ values via $\Gamma_{genetic}(\alpha,\beta)$ and $\Gamma_{geo}(\alpha,\beta)$ that are obtained with KNN framework 1 and 2, respectively.
+%In other words, the empirical distribution $\Gamma_{genetic}(\alpha,\beta)$ and $\Gamma_{geo}(\alpha,\beta)$ are regarded as the transformation functions
+The adjacency matrix ($A_1$) from the KNN framework 1 reveals individual pairs that are genetically different but geographically adjacent.
+In contrast, the adjacency matrix ($A_2$) from the KNN framework 2 displays individual pairs that are geographically remote but genetically most similar.
+Finally, network graphs based on the adjacency matrices $A_{1}$ and $A_{2}$ are projected to a geographical map to visualize spatial patterns of genetic similarity.
+
+
+\subsection*{Empirical applications}
+
+
+To demonstrate the usefulness of \textit{GGNet} in visualizing geo-genetic patterns, we implemented our \textit{GGNet} to investigate empirical populations of \textit{Arabidopsis thaliana} \citep{alonso20161, weigel20091001}, barley (\textit{Hordeum vulgare}; \citealt{milner2019genebank}), and rice (\textit{Oryza sativa}; \citep{rice3kproj,wang2018genomic}).
+
+Briefly, for the dataset of each species, we retained biallelic SNPs with minor allele frequency (MAF) $\geq 0.01$ and imputed genotypic data using \textit{Beagle 5.4} \citep{browning2018one} with defaults, resulting in a dataset of dense SNPs.
+Next, we further pruned SNPs with linkage disequilibrium (LD) of $r^2 > 0.1$ using \textit{PLINK 1.9} \citep{chang2015second} to meet admixture model's assumption of allele independence \citep{cabreros2019likelihood}.
+Next, the LD-pruned SNPs were used for calculating ancestry coefficients.
+We used \textit{ALStructure} \citep{cabreros2019likelihood} to estimate ancestry coefficients since it makes minimal model assumptions by bridging principal component analysis and the admixture model \citep{cabreros2019likelihood}.
+For the \textit{Arabidopsis thaliana} dataset, the number of ancestral population ($F$) was defined as $F=9$ according to \cite{alonso20161}.
+For the dataset of barley and rice, we estimated the optimal $F$ values as the rank of an individual-specific allele frequency matrix using the algorithm built in the \textit{ALStructure}.
+We did not use the $F$ values reported in the earlier studies of the rice \citep{alonso20161} and barley \citep{milner2019genebank} because the earlier studies conducted the admixture model analyses using the whole collection including non-georeferenced samples while we only focused the geo-referenced samples here.
+After calculating ancestry coefficients, we carried out \textit{GGNet} analyses to visualize geo-genetic patterns.
+The details of data preparation are described in the Supplementary Materials.
+
+
+The another objective of \textit{GGNet} is to provide a data-driven approach to identify outliers deviating from the IBD expectation that could influence other analyses.
+Thus, we demonstrated the benefit of cleaning outliers with \textit{GGNet} in training deep learning models for geographical origin inference \citep{battey2020predicting}.
+The geographical origin inference was carried out with \textit{Locator}, which is a deep learning method with a fully connected neural network.
+We performed a ten-fold cross-validation with ten repeats and calculated the $R^2$ between the true and predicted geographical coordinates to evaluate the performance of deep learning models.
+The default settings of \textit{Locator} were used in our analyses, which resulted in a network the shape of 10 hidden layers of 256 nodes.
+For each species, we conducted cross-validation respectively using an uncleaned dataset and a dataset excluding outliers identified by \textit{GGNet} ($p \leq 0.05$) to evaluate the benefit of data cleaning with \textit{GGNet} in geographical origin inference.
+
+\section*{Results} 
+
+
+
+
+\section*{Discussion}
+
+% issue1: what's the difference between framework 1 and 2 -> framework 1 focus on geogrpahical neighbor, so it can identify the individuals invade the habitat of an adjacent population
+% issue2: how is the effect of uneven sampling?
+
+
+\section*{Acknowledgments}  
+
+\section*{Author contributions} 
+
+\section*{Competing interests}
+
+
+\section*{Data availability}
+
+\newpage
+
+\bibliography{./suppinfo}
+\bibliographystyle{myspbasic}
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
