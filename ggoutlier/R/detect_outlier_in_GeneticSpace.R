@@ -164,17 +164,17 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   # -> rescaling does not influence our outlier test
   maxD <- max(Dgeo)
   if(maxD > 20){
-    tmps <- 10
-    while (maxD > 10) {
+    tmps <- 1
+    while (maxD > 20) {
       tmps <- tmps * 10
-      maxD <- maxD / tmps
+      maxD <- maxD / 10
     }
     orig_s <- s
     s <- s * tmps # new scalar
     cat(paste0("\n\n GGoutlieR adjusts the given scalar `s` value from `s=", orig_s, "` to `s=", s, "` to prevent an error in the maximum likelihood estimation process\n"))
     cat(paste0("\n\n D geo is re-scaled to a unit of ",s," meters \n\n"))
   }
-  Dgeo <- Dgeo/tmps
+  Dgeo <- cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)
   if(any(Dgeo == 0)){
     tmp.indx <- Dgeo == 0
     cat(paste("\n\n",sum(tmp.indx),"samples have D geo = 0. Zeros are replaced with 10^-8 to prevent the error in maximum likelihood estimation."))
@@ -269,7 +269,7 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                             pgdM = tmp.pgdM,
                             knn.indx = tmp.knn.indx,
                             w_power = w_power)
-      # calculate Dg statistic
+      # calculate Dgeo statistic
       tmp.Dgeo <- cal_Dgeo(pred.geo_coord = tmp.pred.geo_coord,
                            geo_coord = tmp.geo_coord,
                            scalar = s)
@@ -331,7 +331,6 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
 
     if(keep_all_stg_res){
       names(res.Iters) <- paste0("Iter_", 1:length(res.Iters))
-      res.out <- c(res.Iters, collapse_res)
       out <- c(res.Iters, combined_result = list(collapse_res))
       attr(out, "model") <- "ggoutlier_geneticKNN"
       return()

@@ -198,12 +198,10 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
   axis(side = 1 ,at = round(gamma.thres, digits = 3), line = 0.3, tck = 0.02, font = 2)
   dev.off()
 
-  sig.indx <- Dg > gamma.thres
-  p.value <- 1 - pgamma(Dg, shape = current.a, rate = current.b)
-
-
   #--------------------------------------------
   # Return results
+  sig.indx <- Dg > gamma.thres
+  p.value <- 1 - pgamma(Dg, shape = current.a, rate = current.b)
   out <- data.frame(Dg, p.value, significant = sig.indx)
   rownames(out) <- rownames(geo_coord)
   thres <- data.frame(pvalue = c(0.05,0.01,0.005,0.001),statistic = qgamma(1 - c(0.05,0.01,0.005,0.001), shape = current.a, rate = current.b))
@@ -311,7 +309,6 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
 
     if(keep_all_stg_res){
       names(res.Iters) <- paste0("Iter_", 1:length(res.Iters))
-      res.out <- c(res.Iters, collapse_res)
       out <- c(res.Iters, combined_result = list(collapse_res))
       attr(out, "model") <- "ggoutlier_geoKNN"
       return(out)
