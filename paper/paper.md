@@ -30,14 +30,18 @@ bibliography: paper.bib
 # Statement of need
 
 Landscape genomics is a thriving field in ecological conservation (CITATION) and evolutionary genetics (CITATION).
-It provides insights of associations between genetic variation and environmental factors.
-This methodology requires reliable geographical and genomic information of biological samples.
-The pairwise genetic similarity of biological samples is expected to decline as geographical distance between origin habitats increasing, so called isolation-by-distance.
+It provides insights into associations between genetic variation and environmental factors.
+This methodology requires reliable geographical and genomic information for biological samples.
+The pairwise genetic similarities of biological samples are expected to decline as geographical distances between origin habitats increase, so-called isolation-by-distance.
 This assumption could be violated due to long-distance migration or artificial factors, such as human transportation or mistakes in data management.
-Researchers may wish to scrutinize samples against the isolation-by-distance assumptions and decide what action should be done for those samples.
-Several visualization-based tools can help researchers to investigate the association between genetic similarities and geographical origins, like plot of principal component analysis, SPA [@yang2012model], SpaceMix [@bradburd2016spatial], unPC [@house2018evaluating].
-However,
-...
+Thus, researchers may wish to scrutinize samples with the isolation-by-distance assumptions before carrying out further studies.
+Several visualization-based tools can help researchers to study unusual associations between genetic similarities and geographical origins, such as `SPA` [@yang2012model], `SpaceMix` [@bradburd2016spatial], `unPC` [@house2018evaluating], but they do not provide simple statistics to point out outliers. 
+Moreover, with the advances in genome sequencing technologies, researchers nowadays work on much larger sample sizes than in the past, for example, the studies of genebank collections (CITATION).
+Visualization-based approaches may have difficulty in presenting unusual geo-genetic patterns because thousands of samples projected on a figure tend to overlap.
+Therefore, a new approach is needed to assist researchers to detect unusual geo-genetic associations in biological samples.
+We developed a heuristic statistic framework to detect **G**eo-**G**enetic **outlier**s, named `GGoutlieR`.
+Our package `GGoutlieR` computes empirical p-values of violating the isolation-by-distance assumption for individual samples according to geographical origins and genotypic data.
+`GGoutlieR` can also visualize the geo-genetic patterns of outliers on a geographical map.
 
 # Identification of outliers with abnormal geo-genetic patterns
 
