@@ -55,7 +55,6 @@ ggoutlier_compositeKNN <- function(geo_coord,
     }
     if(cpu > 1){
       cat(paste0("\n Parallelize computation using ", cpu, " cores \n"))
-      cl <- makeCluster(cpu)
       do_par <- TRUE
     }
   } else {
@@ -172,6 +171,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   ## NOTE: this step would be skipped if `geneticKNN_output` is available
   if(is.null(k_geneticKNN)){
     cat(paste("\n `k_geneticKNN` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
+    if(do_par){cl <- makeCluster(cpu)}else{cl <- NULL}
     all.D = find_optimalK_geneticKNN(geo_coord = geo_coord,
                                      pgdM = pgdM,
                                      w_power = w_power,
@@ -179,11 +179,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                      do_par = do_par,
                                      s = s,
                                      cl = cl)
-    if(do_par){
-      # fully clean clusters to prevent the error of invalid connection
-      foreach_env <- foreach:::.foreachGlobals
-      rm(list=ls(name=foreach_env), pos=foreach_env)
-    }
+
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")
     pdf(k.sel.plot, width = 5, height = 4)
@@ -253,6 +249,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   if(is.null(k_geoKNN)){
     # automatically select k if k=NULL
     cat(paste("\n\n `k_geoKNN` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take a lot of time...\n"))
+    if(do_par){cl <- makeCluster(cpu)}else{cl <- NULL}
     all.D <- find_optimalK_geoKNN(geo_coord = geo_coord,
                                   gen_coord = gen_coord,
                                   geo.dM = geo.dM,
@@ -261,11 +258,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                   do_par = do_par,
                                   min_nn_dist = min_nn_dist,
                                   cl = cl)
-    if(do_par){
-      # fully clean clusters to prevent the error of invalid connection
-      foreach_env <- foreach:::.foreachGlobals
-      rm(list=ls(name=foreach_env), pos=foreach_env)
-    }
+
     # make a figure for K searching procedure
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k_geoKNN = opt.k # replace k with the optimal k

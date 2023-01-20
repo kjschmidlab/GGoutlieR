@@ -134,12 +134,6 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                                              s = s,
                                              cl = cl)
 
-    if(do_par){
-      # fully clean clusters to prevent the error of invalid connection
-      foreach_env <- foreach:::.foreachGlobals
-      rm(list=ls(name=foreach_env), pos=foreach_env)
-    }
-
     # make a figure of optimal k selection
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")

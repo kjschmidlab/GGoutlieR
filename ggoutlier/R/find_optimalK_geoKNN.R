@@ -13,6 +13,11 @@ find_optimalK_geoKNN <- function(geo_coord,
   if(do_par){
     doParallel::registerDoParallel(cl)
     kindx <- seq(from = min(klim), to = max(klim), by = 1)
+    parallel::clusterExport(cl = cl,
+                            unclass(lsf.str(envir = asNamespace("GGoutlieR"),
+                                            all = T)),
+                            envir = as.environment(asNamespace("GGoutlieR"))
+    )
     all.D <- foreach(k = kindx, .packages='FNN', .combine="c") %dopar% {
       # find KNN
       knn.indx <- find_geo_knn(geo.dM = geo.dM,

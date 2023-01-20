@@ -125,11 +125,7 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
                                      do_par = do_par,
                                      min_nn_dist = min_nn_dist,
                                      cl = cl)
-    if(do_par){
-      # fully clean clusters to prevent the error of invalid connection
-      foreach_env <- foreach:::.foreachGlobals
-      rm(list=ls(name=foreach_env), pos=foreach_env)
-    }
+
     # make a figure for K searching procedure
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k = opt.k # replace k with the optimal k
