@@ -1,4 +1,4 @@
-#' Identify samples genetically different from K nearest geographical neighbors
+#' Identify samples genetically different from K nearest geographical neighbors (geographical space KNN)
 #' @param geo_coord a two column matrix or data.frame. the first column is longitude and the second one is latitude.
 #' @param gen_coord a matrix of "sample's coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.
 #' @param min_nn_dist a minimum distance between a given focal sample with its neighbor. The neighboring samples within this distance will not be selected as KNN of a focal sample. Use this argument if you want to avoid searching KNNs within communities. The default is `NULL`.
@@ -34,8 +34,8 @@
 ggoutlier_geoKNN <- function(geo_coord, gen_coord,
                                        min_nn_dist = NULL,
                                        k = NULL,
-                                       klim = c(3,100),
-                                       s = 1000,
+                                       klim = c(3,50),
+                                       s = 100,
                                        plot_dir = ".",
                                        w_power = 1,
                                        p_thres = 0.05,
@@ -125,7 +125,11 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
                                      do_par = do_par,
                                      min_nn_dist = min_nn_dist,
                                      cl = cl)
-
+    if(do_par){
+      # fully clean clusters to prevent the error of invalid connection
+      foreach_env <- foreach:::.foreachGlobals
+      rm(list=ls(name=foreach_env), pos=foreach_env)
+    }
     # make a figure for K searching procedure
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k = opt.k # replace k with the optimal k

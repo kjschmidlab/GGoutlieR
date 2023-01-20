@@ -1,4 +1,4 @@
-#' Identify samples geographically remote from K genetically nearest neighbors
+#' Identify samples geographically remote from K genetically nearest neighbors (genetic space KNN)
 #' @param geo_coord a two column matrix or data.frame. the first column is longitude and the second one is latitude.
 #' @param gen_coord a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have to provide `pgdM` if `gen_coord` is not given.
 #' @param pgdM a pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.
@@ -36,7 +36,7 @@
 
 ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                                            k = NULL,
-                                           klim = c(3,100),
+                                           klim = c(3,50),
                                            plot_dir = ".",
                                            w_power = 2,
                                            p_thres = 0.05,
@@ -133,6 +133,14 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                                              do_par = do_par,
                                              s = s,
                                              cl = cl)
+
+    if(do_par){
+      # fully clean clusters to prevent the error of invalid connection
+      foreach_env <- foreach:::.foreachGlobals
+      rm(list=ls(name=foreach_env), pos=foreach_env)
+    }
+
+    # make a figure of optimal k selection
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")
     pdf(k.sel.plot, width = 5, height = 4)

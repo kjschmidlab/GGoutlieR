@@ -1,10 +1,11 @@
-#' Identify samples geographically remote from K genetically nearest neighbors
+#' Perform outlier identification with genetic space KNN and geographical space KNN.
+#' If `multi_stages=T`, in each iteration, the most significant outlier among the results of two approaches will be sequentially excluded and then search for new KNNs.
 #' @param geo_coord a two column matrix or data.frame. the first column is longitude and the second one is latitude.
 #' @param gen_coord a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have to provide `pgdM` if `gen_coord` is not given.
 #' @param pgdM a pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.
 #' @param k_geneticKNN number of the nearest neighbor in a genetic space. the default is `NULL`.
-#' @param k_geo number of the nearest neighbor in a geographical space. the default is `NULL`.
-#' @param klim if `k = NULL`, an optimal k will be searched between the first and second value of `klim`
+#' @param k_geoKNN number of the nearest neighbor in a geographical space. the default is `NULL`.
+#' @param klim if `k_geneticKNN = NULL` or `k_geoKNN`, an optimal k will be searched between the first and second value of `klim`
 #' @param s a scalar of geographical distance. The default `s=100` scales the distance to a unit of 1 kilometer.
 #' @param plot_dir the path to save plots
 #' @param w_power a value controlling the power of distance weight in KNN prediction. For example, if `w_power=2`, the weight of KNN is 1/d^2/sum(1/d^2).
@@ -14,12 +15,13 @@
 #' @param maxIter maximal iteration number of multi-stage KNN test.
 #' @param keep_all_stg_res logic. results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)
 #' @param warning_minR2 the prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. if any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.
-#' @return a list including five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
+#' @return a list with two list. Each list includes five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
 #'
 #'
 #'
 #' @examples
-# STATUS: NOT FINISHED
+#' @export
+# STATUS: NOT FINISHED (function itself is done; user manual should be updated)
 ggoutlier_compositeKNN <- function(geo_coord,
                                    gen_coord,
                                    pgdM = NULL,
@@ -177,6 +179,11 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                      do_par = do_par,
                                      s = s,
                                      cl = cl)
+    if(do_par){
+      # fully clean clusters to prevent the error of invalid connection
+      foreach_env <- foreach:::.foreachGlobals
+      rm(list=ls(name=foreach_env), pos=foreach_env)
+    }
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")
     pdf(k.sel.plot, width = 5, height = 4)
@@ -254,7 +261,11 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                   do_par = do_par,
                                   min_nn_dist = min_nn_dist,
                                   cl = cl)
-
+    if(do_par){
+      # fully clean clusters to prevent the error of invalid connection
+      foreach_env <- foreach:::.foreachGlobals
+      rm(list=ls(name=foreach_env), pos=foreach_env)
+    }
     # make a figure for K searching procedure
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k_geoKNN = opt.k # replace k with the optimal k
