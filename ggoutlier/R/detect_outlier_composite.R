@@ -617,7 +617,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
          main = "KNN in Geographical space")
     invisible(dev.off())
 
-    # reture multi-stage test outputs
+    # return multi-stage test outputs
     if(keep_all_stg_res){
       ## geneticKNN output
       names(res.Iters_geneticKNN) <- paste0("Iter_", 1:length(res.Iters_geneticKNN))
@@ -631,13 +631,17 @@ ggoutlier_compositeKNN <- function(geo_coord,
       out_geoKNN <- c(res.Iters_geoKNN, combined_result = list(collapse_res_geoKNN))
       attr(out_geoKNN, "model") <- "ggoutlier_geoKNN"
 
-      return(list("geneticKNN_result" = out_geneticKNN,
-                  "geoKNN_result" = out_geoKNN))
+      final_out <- list("geneticKNN_result" = out_geneticKNN,
+                        "geoKNN_result" = out_geoKNN)
+      attr(final_out, "model") <- "composite"
+      return(final_out)
     }else{
       attr(collapse_res_geneticKNN, "model") <- "ggoutlier_geneticKNN"
       attr(collapse_res_geoKNN, "model") <- "ggoutlier_geoKNN"
-      return(list("geneticKNN_result" = collapse_res_geneticKNN,
-                  "geoKNN_result" = collapse_res_geoKNN))
+      final_out <- list("geneticKNN_result" = collapse_res_geneticKNN,
+                        "geoKNN_result" = collapse_res_geoKNN)
+      attr(final_out, "model") <- "composite"
+      return(final_out)
     }
   } # multi-stage test end
 } # ggoutlier_compositeKNN end
