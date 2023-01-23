@@ -1,0 +1,145 @@
+---
+title: "Outlier detection"
+author: "Che-Wei Chang"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Outlier detection}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<!---
+The dataset used in this walk through were obtained and pre-processed.
+For details, see: http://server228vsl.ipsp.uni-hohenheim.de/CheWeiChang/ggnet/-/blob/master/analysis/data.Rmd
+
+Files for demo were copied from `ggnet` repos and renamed to make them be easier to understand
+`gbs_georef_1661inds_beagle_imputed_maf0.01_SNPonly_rmChrUn_LDprune0.1.vcf.gz` 
+      -> `IPKbarley_GBS1661landraces_LDpruned.vcf.gz`
+`georef_1661ind_geo_coord_for_locator.txt`
+      -> `IPK_1661ind_geo_coord.txt`
+`alstructure_Q_hat_1661inds.csv`
+      -> `IPK_1661inds_alstructure_Q_hat.csv`
+      
+TO DO:
+ - modify the plotting functions to take single input from ggoutlier -> switch plotting modes according to attributes
+ - add progress bar to internal functions of ggoutlier
+ - make a function to summarize ggoutlier output
+--->
+
+## Introduction
+
+In this vignette, we would ...
+
+## Barley landrace data
+
+The data of IPK barley landraces came from the study of [Milner et al. 2019](https://www.nature.com/articles/s41588-018-0266-x).
+The SNPs were obtained by aligning GBS sequences against the `Morex v3` genome.
+The raw genotypic data of cultivated barley were then filtered with `mac > 10` and `mis < 0.95` and subsequently imputed by `BEAGLE v5.2`.
+
+After imputation, a total of 1661 georeferenced landraces were selected from the whole IPK collection according to the passport data procured from the [IPK BRIDGE database](https://bridge.ipk-gatersleben.de/).
+Next, we pruned redundant SNPs based on linkage disequilibrium with `PLINK`.
+
+* 1,661 geo-referenced landraces (no duplicates)
+      * 29,219 SNPs; LD prunned with SNP $r^2$ < 0.1; MAF > 0.01; no missing: `IPKbarley_GBS1661landraces_LDpruned.vcf.gz`  
+
+To run `GGoutlieR`, we computed ancestry coefficients for 1,661 geo-referenced landraces using `ALStructure` ([Cabreros and Storey 2019](https://doi.org/10.1534/genetics.119.302159)).
+Users can also use other software, such as `STRUCTURE` ([Pritchard et al. 2000](https://doi.org/10.1093/genetics/155.2.945)), `ADMIXTURE` ([Alexander et al. 2009](https://genome.cshlp.org/content/19/9/1655.short)), and `sNMF` ([Frichot et al. 2014](https://doi.org/10.1534/genetics.113.160572)), to infer ancestry coefficients.
+The key point of this step is to ensure that your data matrix of ancestry coefficients has individuals in rows and ancestral populations in columns.
+
+The R codes below first read `vcf.gz` with the `vcfR` package and converted `vcf` to a matrix of allele counts.
+Next, we used `estimate_d` to identify the optimal number of ancestral populations (`dhat`), and then inferred ancestry coefficients accordingly.
+The ancestry coefficients were saved as `IPK_1661inds_alstructure_Q_hat.csv`, which can be found in our repository (`http://server228vsl.ipsp.uni-hohenheim.de/CheWeiChang/ggoutlier/-/tree/master/data/`).
+
+```{r compute_Q, eval=F}
+library(vcfR)
+# a function to convert VCF to a numberic matrix
+vcf_to_nummatrix <- function(vcf){
+  require(vcfR)
+  out <-
+    apply(extract.gt(vcf), 2, function(x){
+      c(0,0,1,1,1,2,2)[match(x, c("0/0", "0|0", "0/1", "0|1","1|0", "1/1", "1|1"))]
+    })
+  return(out)
+} # vcf_to_nummatrix end
+
+## read vcf
+vcf <- read.vcfR("../data/IPKbarley_GBS1661landraces_LDpruned.vcf.gz")
+Xmat <- vcf_to_nummatrix(vcf = vcf) # convert VCF to a numeric matrix
+any(is.na(Xmat)) # FALSE
+
+# estimate ancestry coefficients for 1661 individuals
+colnames(Xmat) <- gsub(colnames(Xmat), pattern = "^0_", replacement = "") # remove prefix
+library(alstructure)
+dhat <- estimate_d(Xmat) # optimal d is 5
+fit.als <- alstructure(Xmat, d = dhat)
+alsQ <- fit.als$Q_hat
+colnames(alsQ) <- colnames(Xmat)
+write.table(alsQ, "../data/IPK_1661inds_alstructure_Q_hat.csv", row.names = F, col.names = T, sep = ",")
+```
+
+Here we used `GGoutlieR` to identify individuals with abnormal geo-genetic associations.
+
+
+```{r run_ggoutlier, eval=FALSE}
+library(GGoutlieR)
+
+geo_coord <- read.table("../data/IPK_1661ind_geo_coord.txt", header = T, stringsAsFactors = F)
+rownames(geo_coord) <- geo_coord[,1]
+geo_coord <- geo_coord[,-1]
+anc.coef <- t(as.matrix(read.csv("../data/IPK_1661inds_alstructure_Q_hat.csv", header = F, stringsAsFactors = F)))
+pthres = 0.01
+
+## run GGoutlieR with the approach of genetic space KNN only
+geneticknn_res <- ggoutlier(geo_coord = geo_coord,
+                            gen_coord = anc.coef,
+                            plot_dir = "../fig", 
+                            p_thres = pthres, 
+                            w_power = 2, 
+                            cpu = 4, 
+                            klim = c(3,50), 
+                            method = "geneticKNN")
+
+## run GGoutlieR with the approach of geographical space KNN only
+geoknn_res <- ggoutlier(geo_coord = geo_coord,
+                        gen_coord = anc.coef,
+                        plot_dir = "../fig", 
+                        p_thres = pthres, 
+                        w_power = 2, 
+                        cpu = 4, 
+                        klim = c(3,50), 
+                        method = "geoKNN")
+
+## run GGoutlieR with the composite approach
+compositeknn_res <- ggoutlier(geo_coord = geo_coord,
+                              gen_coord = anc.coef,
+                              plot_dir = "../fig", 
+                              p_thres = pthres, 
+                              w_power = 2, 
+                              cpu = 4, 
+                              klim = c(3,50), 
+                              method = "composite")
+
+
+```
+
+```{r write_and_read_ggoutlier_output, eval=FALSE, echo=FALSE}
+
+saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output.RDS")
+saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output.RDS")
+saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output.RDS")
+
+geneticknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geneticKNN_output.RDS")
+geoknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geoKNN_output.RDS")
+compositeknn_res <- readRDS("../data/IPK_landrace_ggoutlier_composite_output.RDS")
+
+
+
+```
+
+
+
+```{r show_result_table, eval=TRUE}
+head(compositeknn_res$geneticKNN_result$statistics)
+
+```
+
