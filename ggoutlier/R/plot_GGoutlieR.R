@@ -14,8 +14,8 @@
 #' @param  color_res the resolution of color scale
 #' @param  dot_cex the size of dots denoting the positions of samples on a geographical map.
 #' @param  map_type the type of plot to draw. it can be `"geographic_knn"`, `"genetic_knn"` and `"both"`.
-#' @param  geo_xlim values controlling longitude boundaries to select outliers to present on a geographical map. the default is `geo_xlim = c(-180,180)`.
-#' @param  geo_ylim values controlling latitude boundaries to select outliers to present on a geographical map. the default is `geo_ylim = c(-90,90)`.
+#' @param  geo_xlim values controlling longitude boundaries of a window to select outliers to present on a geographical map. the default is `geo_xlim = c(-180,180)`.
+#' @param  geo_ylim values controlling latitude boundaries of a window to select outliers to present on a geographical map. the default is `geo_ylim = c(-90,90)`.
 #' @param  plot_xlim values controlling longitude boundaries of a map.
 #' @param  plot_ylim values controlling latitude boundaries of a map.
 #' @param  only_edges_in_xylim logic. only the edges with starting points within the given `geo_xlim` and `geo_ylim` will display on a geographical map. the default is `TRUE`.
@@ -23,20 +23,20 @@
 #' @param  red_alpha a value controlling the transparency of red lines. the default is 0.8
 #' @param  map_resolution the resolution of the geographical map. See details in the manual of `rworldmap::getMap()`
 #' @param  show_knn_pie logic. If `TRUE`, the ancestry coefficients of K nearest neighbors of significant samples will display on the map. The default is `FALSE`.
-#' @param  which_sample a string vector. If users want to only
+#' @param  which_sample a string vector of sample ID(s). If users want to only show specific sample(s)
 #' @export
 
 #------------------------------------------------------------------
-# status: finished (2022-05-03)
+# status: finished (need to update user manual)
 #------------------------------------------------------------------
 
-plot_GGoutlieR <- function(geo_coord,
-                           GGNet_adjm,
+plot_ggoutlier <- function(ggoutlier_res,
+                           geo_coord,
                            anc_coef = NULL,
+                           gen_coord = NULL,
+                           mutual = FALSE,
                            pie_color = NULL,
                            p_thres = NULL,
-                           GeoSP_knn_res = NULL,
-                           GenSP_knn_res = NULL,
                            color_res = 10,
                            dot_cex = 0.4,
                            map_type = c("geographic_knn", "genetic_knn", "both"),
@@ -47,23 +47,40 @@ plot_GGoutlieR <- function(geo_coord,
                            only_edges_in_xylim = TRUE,
                            pie_r_scale = 1,
                            red_alpha = 0.8,
-                           map_resolution = "high",
+                           map_resolution = "low",
                            show_knn_pie = FALSE,
-                           which_sample = NULL
+                           which_sample = NULL,
+                           add_benchmark_graph = TRUE,
+                           vertical_plots = TRUE,
+                           adjust_p_value_projection = TRUE
 
 ){
-  require(rworldmap)
-  require(scales)
-  require(plotrix)
-  require(mapplots)
-  require(RColorBrewer)
-  require(rworldxtra)
+  required_pkgs <- c("rworldmap", "scales", "plotrix",
+                     "mapplots", "RColorBrewer",
+                     "rworldxtra","dichromat")
+  invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
+
+
+  # extract data
+  if(attributes(ggoutlier_res)$model == "composite"){
+    GeoSP_knn_res <- ggoutlier_res$geoKNN_result
+    GenSP_knn_res <- ggoutlier_res$geneticKNN_result
+  }
+  if(attributes(ggoutlier_res)$model == "ggoutlier_geoKNN"){
+    GeoSP_knn_res <- ggoutlier_res
+    GenSP_knn_res <- NULL
+  }
+  if(attributes(ggoutlier_res)$model == "ggoutlier_geneticKNN"){
+    GeoSP_knn_res <- NULL
+    GenSP_knn_res <- ggoutlier_res
+  }
+
   # check input
   map_type = match.arg(map_type)
-  if(!is.null(anc_coef)|!is.null(p_thres)){
+  if(!is.null(anc_coef) & !is.null(p_thres)){
     if(map_type == "both" | map_type == "geographic_knn"){
       if(is.null(GeoSP_knn_res)){
-        stop("As `plot_GGoutlieR` is designed to map only outliers on a geographical map when `p_thres`` is given, please provide `GeoSP_knn_res` (an output of `detect_outlier_in_GeoSpace`)")
+        stop("`plot_ggoutlier` is designed to map outliers on a geographical map, please provide `GeoSP_knn_res` (an output of `detect_outlier_in_GeoSpace`) if you set `map_type = both` or `map_type = geographic_knn`")
       }else{
         if(nrow(GeoSP_knn_res$statistics) != nrow(geo_coord)){
           stop("the sample size in `GeoSP_knn_res` and `geo_coord` does not match!")
@@ -72,7 +89,7 @@ plot_GGoutlieR <- function(geo_coord,
     }
     if(map_type == "both" | map_type == "genetic_knn"){
       if(is.null(GenSP_knn_res)){
-        stop("As `plot_GGoutlieR` is designed to map only outliers on a geographical map when `p_thres`` is given, please provide `GenSP_knn_res` (an output of `detect_outlier_in_GeneticSpace`) if you set `map_type = 'both'` or `map_type = 'GenSP'`")
+        stop("`plot_ggoutlier` is designed to map outliers on a geographical map, please provide `GenSP_knn_res` (an output of `detect_outlier_in_GeneticSpace`) if you set `map_type = 'both'` or `map_type = 'genetic_knn'`")
       }
       if(nrow(GenSP_knn_res$statistics) != nrow(geo_coord)){
         stop("the sample size in `GenSP_knn_res` and `geo_coord` does not match!")
@@ -100,8 +117,28 @@ plot_GGoutlieR <- function(geo_coord,
     warning("`p_thres` is `NULL`. ancestry coefficients will NOT be projected to your geographical map. the pie charts of outliers could be added to the map if you give `p_thres`.")
   }
 
+  if(is.null(anc_coef) & is.null(gen_coord)){
+    stop("please provide at least either `anc_coef` or `gen_coord`")
+  }else{
+    if(is.null(gen_coord)){gen_coord <- anc_coef}
+    if(is.null(anc_coef)){anc_coef <- gen_coord}
+  }
 
   geomap <- getMap(resolution = map_resolution)
+
+  # get an adjancency matrix 'GGNet_adjm'
+  if(all(dim(gen_coord) == dim(anc_coef))){
+    if(all(round(anc_coef, digits = 5) == round(anc_coef, digits = 5))){
+      gen_coord_eq_AncCoeff = TRUE
+    }else{gen_coord_eq_AncCoeff = FALSE}
+  }
+
+  GGNet_adjm <- get_GGNet_adjacency_matrix(ggoutlier_res = ggoutlier_res,
+                                           gen_coord = gen_coord,
+                                           geo_coord = geo_coord,
+                                           mutual = mutual,
+                                           adjust_p_value = adjust_p_value_projection
+                                           )
 
   # get edge colors
   edge.col <- get_GGNet_edge_col(GGNet_adjm, color_res = color_res)
@@ -196,7 +233,25 @@ plot_GGoutlieR <- function(geo_coord,
     }
   }
 
+  if(add_benchmark_graph & !is.null(anc_coef)){
+    if(vertical_plots){
+      par(mfrow = c(2,1), mar = c(1,1,1,1))
+    }else{
+      par(mfrow = c(1,2), mar = c(1,1,1,1))
+    }
+    plot(geomap, xlim = plot_xlim, ylim = plot_ylim)
+    pie.r = abs(diff(par("usr")[1:2]) )*0.005
+    for(i in 1:nrow(anc_coef)){
+      add.pie(z = round(anc_coef[i,]*10^5),
+              x = geo_coord[i,1],
+              y = geo_coord[i,2],
+              col = pie_color,
+              labels = NA,
+              radius = pie.r*pie_r_scale)
+    }
+  }
 
+  ## make a blank map
   plot(geomap, xlim = plot_xlim, ylim = plot_ylim, col = NA, border = "white")
   if(map_type == "both" | map_type == "geographic_knn"){
     if(is.null(p_thres)){
@@ -350,52 +405,74 @@ plot_GGoutlieR <- function(geo_coord,
     par(xpd = NA)
     color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
                   xr = plot_xlim[2],
-                  yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.01,
-                  yt = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*(-0.02) , # the coordinates
+                  yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.06,
+                  yt = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.03 , # the coordinates
                   legend = c(0, round(max(-log10(geosp.pvalue)))) ,
                   gradient="x",
                   rect.col=edge.col$GeoSP_colkey, align="rb")
     color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
                   xr = plot_xlim[2],
-                  yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.10,
-                  yt = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.07, # the coordinates
+                  yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.15,
+                  yt = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.12, # the coordinates
                   legend = c(0, round(max(-log10(gensp.pvalue)))) ,
                   gradient="x",
                   rect.col=edge.col$GenSP_colkey, align="rb")
 
     text(x = plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.075,
-         y = plot_ylim[2] + abs(plot_ylim[2] - plot_ylim[1])*0.1,
+         y = plot_ylim[2] + abs(plot_ylim[2] - plot_ylim[1])*0.02,
          labels = expression(-log[10](p)), font = 2, cex = 1.1
     )
     par(xpd = FALSE)
   }
-} # plot_GGoutlieR end
+  par(mfrow = c(1,1), mar = c(4,4,4,4)) # recover plot setting
+} # plot_ggoutlier end
 
 
 #-------------------------------------------------------------
 # assign colors to edges
-# `get_GGNet_edge_col` is a function used in the `plot_GGoutlieR`
+# `get_GGNet_edge_col` is a function used in the `plot_ggoutlier`
 #-------------------------------------------------------------
 # Argument:
 # GGNet_adjm: an output of `get_GGNet_adjacency_matrix
 # color_res: the resolution of color scale
 get_GGNet_edge_col <- function(GGNet_adjm, color_res = 10){
-  require(dichromat)
+
   GeoSP.colfun <- colorRampPalette(c("white", "dodgerblue"))
   GeoSP.col <- GeoSP.colfun(color_res)
-  GeoSP_col <- rep(NA, length(GGNet_adjm$GeoSP_pvalue))
-  geosp.indx <- c(GGNet_adjm$GeoSP_pvalue) > 0
-  GeoSP_col[geosp.indx] <- as.character(GeoSP.col[as.numeric(cut(-log10(GGNet_adjm$GeoSP_pvalue[geosp.indx]), breaks = color_res))])
+  if(!is.null(GGNet_adjm$GeoSP_pvalue)){
+    GeoSP_col <- rep(NA, length(GGNet_adjm$GeoSP_pvalue))
+    geosp.indx <- c(GGNet_adjm$GeoSP_pvalue) > 0
+    GeoSP_col[geosp.indx] <- as.character(GeoSP.col[as.numeric(cut(-log10(GGNet_adjm$GeoSP_pvalue[geosp.indx]), breaks = color_res))])
+  }
 
   GenSP.colfun <- colorRampPalette(c("white", "orangered"))
   GenSP.col <- GenSP.colfun(color_res)
-  GenSP_col <- rep(NA, length(GGNet_adjm$GenSP_pvalue))
-  gensp.indx <- c(GGNet_adjm$GenSP_pvalue) > 0
-  GenSP_col[gensp.indx] <- as.character(GenSP.col[as.numeric(cut(-log10(GGNet_adjm$GenSP_pvalue[gensp.indx]), breaks = color_res))])
+  if(!is.null(GGNet_adjm$GenSP_pvalue)){
+    GenSP_col <- rep(NA, length(GGNet_adjm$GenSP_pvalue))
+    gensp.indx <- c(GGNet_adjm$GenSP_pvalue) > 0
+    GenSP_col[gensp.indx] <- as.character(GenSP.col[as.numeric(cut(-log10(GGNet_adjm$GenSP_pvalue[gensp.indx]), breaks = color_res))])
+  }
 
-  return(list(GeoSP_col = c(GeoSP_col),
-              GenSP_col = c(GenSP_col),
-              GeoSP_colkey = c(GeoSP.col),
-              GenSP_colkey = c(GenSP.col)
-  ))
+  # if only geographical KNN result available
+  if(!is.null(GGNet_adjm$GeoSP_pvalue) & is.null(GGNet_adjm$GenSP_pvalue)){
+    return(list(GeoSP_col = c(GeoSP_col),
+                GeoSP_colkey = c(GeoSP.col),
+    ))
+  }
+  # if only genetic KNN result available
+  if(is.null(GGNet_adjm$GeoSP_pvalue) & !is.null(GGNet_adjm$GenSP_pvalue)){
+    return(list(GenSP_col = c(GenSP_col),
+                GenSP_colkey = c(GenSP.col)
+    ))
+  }
+
+  # if both geographical KNN result and genetic KNN result
+  if(!is.null(GGNet_adjm$GeoSP_pvalue) & !is.null(GGNet_adjm$GenSP_pvalue)){
+    return(list(GeoSP_col = c(GeoSP_col),
+                GenSP_col = c(GenSP_col),
+                GeoSP_colkey = c(GeoSP.col),
+                GenSP_colkey = c(GenSP.col)
+    ))
+  }
+
 } # get_GGNet_edge_col end

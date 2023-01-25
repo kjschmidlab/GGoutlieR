@@ -7,8 +7,6 @@
 #' @param pgsM a matrix of pairwise genetic similarity with n x n dimensions. Weights of edges are extracted from this matrix according to the KNN results. In our demonstration, we used the output of `anc_coeff_to_GeneticSimilarityMatrix`. Users can consider other approaches to characterize genetic similarity.
 #' @param mutual logic. If a multi-stage test is used in the outlier identification, some samples could not be a mutual neighbor with its K nearest neighbors. In this case, setting `mutual=TRUE` can force those samples to become mutual neighbors in the output adjacency matrix.
 #' @return a list consisting of four matrices that can be used in building network graphs. The default is `TRUE`
-#' `GeoSP_adjm` is a matrix describing the strength of edges as genetic similarity times p values from the empirical Gamma distribution identified by `detect_outlier_in_GeoSpace`
-#' `GenSP_adjm` is a matrix describing the strength of edges as genetic similarity times p values from the empirical Gamma distribution identified by `detect_outlier_in_GeneticSpace`
 #' `GeoSP_pvalue` is a matrix describing the strength of edges as p values from the empirical Gamma distribution identified by `detect_outlier_in_GeoSpace`
 #' `GenSP_pvalue` is a matrix describing the strength of edges as p values from the empirical Gamma distribution identified by `detect_outlier_in_GeneticSpace`
 #' @examples
@@ -29,87 +27,90 @@
 #' @export
 # TO DO: make this function to take any ggoulier output
 get_GGNet_adjacency_matrix <- function(ggoutlier_res,
-    #GeoSP_knn_res,
-    #                                   GenSP_knn_res,
                                        geo_coord,
                                        gen_coord,
-                                       pgsM = NULL,
-                                       mutual = FALSE
+                                       mutual = FALSE,
+                                       adjust_p_value = TRUE
 ){
   if(attributes(ggoutlier_res)$model == "composite"){
     GeoSP_knn_res <- ggoutlier_res$geoKNN_result
     GenSP_knn_res <- ggoutlier_res$geneticKNN_result
-    ggoutlier_method <- "composite"
     n = nrow(GeoSP_knn_res$statistics)
   }
   if(attributes(ggoutlier_res)$model == "ggoutlier_geoKNN"){
     GeoSP_knn_res <- ggoutlier_res
-    ggoutlier_method <- "ggoutlier_geoKNN"
+    GenSP_knn_res <- NULL
+    n = nrow(GeoSP_knn_res$statistics)
   }
-  if(attributes(geneticknn_res)$model == "ggoutlier_geneticKNN"){
+  if(attributes(ggoutlier_res)$model == "ggoutlier_geneticKNN"){
+    GeoSP_knn_res <- NULL
     GenSP_knn_res <- ggoutlier_res
-    ggoutlier_method <- "ggoutlier_geneticKNN"
+    n = nrow(GenSP_knn_res$statistics)
   }
 
 
   # check input data
-  if(any(names(GeoSP_knn_res) == "combined_result")){
-    GeoSP_knn_res <- GeoSP_knn_res$combined_result # extract the combined results (if setting `keep_all_stg_res=T` in previous analyses)
+  if(!is.null(GeoSP_knn_res)){
+    if(any(names(GeoSP_knn_res) == "combined_result")){
+      GeoSP_knn_res <- GeoSP_knn_res$combined_result # extract the combined results (if setting `keep_all_stg_res=T` in `ggoutlier` analyses)
+    }
   }
-  if(any(names(GenSP_knn_res) == "combined_result")){
-    GenSP_knn_res <- GenSP_knn_res$combined_result # extract the combined results (if setting `keep_all_stg_res=T` in previous analyses)
+  if(!is.null(GenSP_knn_res)){
+    if(any(names(GenSP_knn_res) == "combined_result")){
+      GenSP_knn_res <- GenSP_knn_res$combined_result # extract the combined results (if setting `keep_all_stg_res=T` in `ggoutlier` analyses)
+    }
   }
-  if(nrow(GeoSP_knn_res$statistics) != nrow(GenSP_knn_res$statistics)){
-    stop("the sample sizes of `GeoSP_knn_res` and `GenSP_knn_res` are not equal. please check if correct inputs are provided.")
+  if(!is.null(GeoSP_knn_res) & !is.null(GenSP_knn_res)){
+    if(nrow(GeoSP_knn_res$statistics) != nrow(GenSP_knn_res$statistics)){
+      stop("the sample sizes of `GeoSP_knn_res` and `GenSP_knn_res` are not equal. please check if correct inputs are provided.")
+    }
   }
-  if(is.null(pgsM)){
-    pgsM <- anc_coeff_to_GeneticSimilarityMatrix(anc_coef = gen_coord)
-  }
-  pgsM <- as.matrix(unname(pgsM))
+
   message("obtaining p values of comparisons with k nearest neighbors\n")
-  GeoSP.knn.p <- get_knn_pvalue(knn_res = GeoSP_knn_res, gen_coord = gen_coord)
-  GenSP.knn.p <- get_knn_pvalue(knn_res = GenSP_knn_res, geo_coord = geo_coord)
-
-  message("pairwise genetic similarity matrix `pgsM` is used as weights of edges\n")
-  GeoSP.knn.pgsM <- matrix(NA, ncol = ncol(GeoSP_knn_res$knn_index), nrow = n)
-  GenSP.knn.pgsM <- matrix(NA, ncol = ncol(GenSP_knn_res$knn_index), nrow = n)
-
-  # get weights for KNNs
-  for(i in 1:n){
-    tmp.geosp.indx <- GeoSP_knn_res$knn_index[i,]
-    tmp.gensp.indx <- GenSP_knn_res$knn_index[i,]
-    GeoSP.knn.pgsM[i,] <- c(pgsM[i,tmp.geosp.indx])
-    GenSP.knn.pgsM[i,] <- c(pgsM[i,tmp.gensp.indx])
+  if(adjust_p_value){
+    if(!is.null(GeoSP_knn_res)){GeoSP.knn.p <- get_knn_pvalue(knn_res = GeoSP_knn_res, gen_coord = gen_coord)}
+    if(!is.null(GenSP_knn_res)){GenSP.knn.p <- get_knn_pvalue(knn_res = GenSP_knn_res, geo_coord = geo_coord)}
+  }else{
+    if(!is.null(GeoSP_knn_res)){GeoSP.knn.p <- get_knn_pvalue_v2(knn_res = GeoSP_knn_res, gen_coord = gen_coord)}
+    if(!is.null(GenSP_knn_res)){GenSP.knn.p <- get_knn_pvalue_v2(knn_res = GenSP_knn_res, geo_coord = geo_coord)}
   }
-  # remove edges if shared ancestral allele proportion < 0.8
-  #GeoSP.knn.pgsM[GeoSP.knn.pgsM < 0.8] <- 0
-  #GenSP.knn.pgsM[GenSP.knn.pgsM < 0.9] <- 0
+
+
+  #------------------------------------------------------------------
   # forming a weighted adjacency matrix according to geographical KNN
-  GeoSP.adjm <- matrix(0, ncol = n, nrow = n)
-  GenSP.adjm <- matrix(0, ncol = n, nrow = n)
-  GeoSP.pm <- matrix(0, ncol = n, nrow = n)
-  GenSP.pm <- matrix(0, ncol = n, nrow = n)
-  if(!is.null(rownames(GeoSP_knn_res$statistics))){
-    colnames(GeoSP.adjm) = rownames(GeoSP.adjm) =
-      colnames(GenSP.adjm) = rownames(GenSP.adjm) =
-      colnames(GeoSP.pm) = rownames(GeoSP.pm) =
-      colnames(GenSP.pm) = rownames(GenSP.pm) =
-      rownames(GeoSP_knn_res$statistics)
-  }
-
   ## in a adjacency matrix, direction of arrow is from samples on rows to samples on columns
   ## so we fill in values by rows (although I decided to let GGNet as an undirected graph in the end to make plots neater)
   ## the weights are defined as "probablility of a sample not belong to the group of its KNNs" times "genetic similarity"
   ## the way of calculating genetic similarity can be customized by users
-  for(i in 1:n){
-    # likelihood multiplied with genetic similarity
-    GeoSP.adjm[i,GeoSP_knn_res$knn_index[i,]] <- (GeoSP.knn.p[i,]) * GeoSP.knn.pgsM[i,]
-    GenSP.adjm[i,GenSP_knn_res$knn_index[i,]] <- (GenSP.knn.p[i,]) * GenSP.knn.pgsM[i,]
-    # likelihood only
-    GeoSP.pm[i,GeoSP_knn_res$knn_index[i,]] <- GeoSP.knn.p[i,]
-    GenSP.pm[i,GenSP_knn_res$knn_index[i,]] <- GenSP.knn.p[i,]
-    #GenSP.adjm[i,GenSP_knn_res$knn_index[i,]] <- (GenSP.knn.p[i,])
-  }
+  if(!is.null(GeoSP_knn_res)){
+    GeoSP.pm <- matrix(0, ncol = n, nrow = n)
+    if(!is.null(rownames(GeoSP_knn_res$statistics))){
+        colnames(GeoSP.pm) = rownames(GeoSP.pm) =
+        rownames(GeoSP_knn_res$statistics)
+    }
+    for(i in 1:n){
+      # p value only
+      GeoSP.pm[i,GeoSP_knn_res$knn_index[i,]] <- GeoSP.knn.p[i,]
+    } # for i loop end
+  }else{
+    # return NULL if the output from "geoKNN" is not available
+    GeoSP.pm <- NULL
+  } # if !is.null(GeoSP_knn_res) end
+
+  if(!is.null(GenSP_knn_res)){
+    GenSP.pm <- matrix(0, ncol = n, nrow = n)
+    if(!is.null(rownames(GenSP_knn_res$statistics))){
+        colnames(GenSP.pm) = rownames(GenSP.pm) =
+        rownames(GenSP_knn_res$statistics)
+    }
+    for(i in 1:n){
+      # p value only
+      GenSP.pm[i,GenSP_knn_res$knn_index[i,]] <- GenSP.knn.p[i,]
+    } # for i loop end
+  }else{
+    # return NULL if the output from "geneticKNN" is not available
+    GenSP.pm <- NULL
+  } # if !is.null(GenSP_knn_res) end
 
   ## convert the output to mutual neighborhood matrix
   if(mutual){
@@ -121,15 +122,21 @@ get_GGNet_adjacency_matrix <- function(ggoutlier_res,
       return(Mat)
     }
 
-    GeoSP.adjm <- make_mutual_Mat(GeoSP.adjm)
-    GenSP.adjm <- make_mutual_Mat(GenSP.adjm)
-    GeoSP.pm <- make_mutual_Mat(GeoSP.pm)
-    GenSP.pm <- make_mutual_Mat(GenSP.pm)
+    if(!is.null(GeoSP_knn_res)){
+      GeoSP.pm <- make_mutual_Mat(GeoSP.pm)
+    }else{
+      # return NULL if the output from "geoKNN" is not available
+      GeoSP.pm <- NULL
+    }
+    if(!is.null(GenSP_knn_res)){
+      GenSP.pm <- make_mutual_Mat(GenSP.pm)
+    }else{
+      # return NULL if the output from "geneticKNN" is not available
+      GenSP.pm <- NULL
+    }
   }
 
-  return(list(GeoSP_adjm = GeoSP.adjm,
-              GenSP_adjm = GenSP.adjm,
-              GeoSP_pvalue = GeoSP.pm,
+  return(list(GeoSP_pvalue = GeoSP.pm,
               GenSP_pvalue = GenSP.pm))
 
 
