@@ -6,6 +6,7 @@
 #' @param k_geneticKNN `integer` number of the nearest neighbor in a genetic space. the default is `NULL`.
 #' @param k_geoKNN `integer` number of the nearest neighbor in a geographical space. the default is `NULL`.
 #' @param klim if `k_geneticKNN = NULL` or `k_geoKNN`, an optimal k will be searched between the first and second value of `klim`
+#' @param min_nn_dist a minimum distance (in a unit of 1 meter) between a given focal sample with its neighbor. The neighboring samples within this distance will not be selected as KNN of a focal sample. Use this argument if you want to avoid searching KNNs within communities. The default is `NULL`. `min_nn_dist` will be adjusted automatically with the `s` parameter if `min_nn_dist` is given. The default is 100 meters.
 #' @param s a scalar of geographical distance. The default `s=100` scales the distance to a unit of 1 kilometer.
 #' @param plot_dir the path to save plots
 # w_power a value controlling the power of distance weight in KNN prediction. For example, if `w_power=2`, the weight of KNN is 1/d^2/sum(1/d^2).
@@ -24,6 +25,8 @@
 #' @examples
 #' @export
 # STATUS: NOT FINISHED (function itself is done; user manual should be updated)
+# TO DO:
+# - [done] modify the design of scalar and min_nn_dist
 ggoutlier_compositeKNN <- function(geo_coord,
                                    gen_coord,
                                    pgdM = NULL,
@@ -36,7 +39,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                    p_thres = 0.05,
                                    n = 10^6,
                                    s = 100,
-                                   min_nn_dist = NULL,
+                                   min_nn_dist = 1000,
                                    multi_stages = TRUE,
                                    maxIter=NULL,
                                    keep_all_stg_res = FALSE,
@@ -123,7 +126,10 @@ ggoutlier_compositeKNN <- function(geo_coord,
       geo.dM <- geo.dM + 1
       diag(geo.dM) <- 0
     }else{
-      if(verbose) cat(paste0("\n\nIgnore neighbors within ",min_nn_dist, " unit(s) of distance (the default unit of distance is km)\n"))
+      if(verbose) cat("Ignore neighbors whose pairwise distance is less than `min_nn_dist` when searching KNNs.\n")
+      orig_min_nn_dist <- min_nn_dist
+      min_nn_dist <- orig_min_nn_dist/s
+      if(verbose) cat(paste0("\n\nIgnore neighbors within ",min_nn_dist, " unit(s) of distance (the default unit of distance is m; `min_nn_dist` is adjusted automatically according to `s`)\n"))
     }
   }
 
@@ -228,8 +234,10 @@ ggoutlier_compositeKNN <- function(geo_coord,
     }
     orig_s <- s
     s <- s * tmps # new scalar
+    min_nn_dist <- orig_min_nn_dist/s # new min_nn_dist adjusted accdording to new s
     if(verbose) cat(paste0("\n\n GGoutlieR adjusts the given scalar `s` value from `s=", orig_s, "` to `s=", s, "` to prevent an error in the maximum likelihood estimation process\n"))
     if(verbose) cat(paste0("\n\n D geo is re-scaled to a unit of ",s," meters \n\n"))
+    if(verbose) cat(paste0("\n\n `min_nn_dist` is re-scaled to a unit of ",s," meters \n\n"))
   }
   Dgeo <- cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)
   if(any(Dgeo == 0)){
