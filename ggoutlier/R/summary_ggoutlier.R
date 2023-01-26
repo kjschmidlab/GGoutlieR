@@ -1,7 +1,7 @@
 #'
 #' @details
 #' Get a summary table from the `ggoutlier` output
-#' @param  geo_coord a two column matrix or data.frame. the first column is longitude and the second one is latitude.
+#' @param  ggoutlier_res output from the function `ggoutlier`
 
 #' @export
 
@@ -55,6 +55,9 @@ summary_ggoutlier <- function(ggoutlier_res){
     summary_out <- sig_geoKNN
   }
   rownames(summary_out) <- NULL
+  sig_ID_list <- unique(summary_out$ID)
   attr(summary_out, "proportion_of_outliers") = prop_sig
+  attr(summary_out, "significant_samples" = sig_ID_list)
+  class(summary_out) <- "ggoutlier_summary"
   return(summary_out)
 } # summary_ggoutlier end

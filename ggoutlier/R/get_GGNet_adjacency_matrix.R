@@ -24,7 +24,7 @@
 #'                                   gen_coord = gen_coord,
 #'                                   geo_coord = geo_coord,
 #'                                   pgsM = pgsM)
-#' @export
+
 # TO DO: make this function to take any ggoulier output
 get_GGNet_adjacency_matrix <- function(ggoutlier_res,
                                        geo_coord,
