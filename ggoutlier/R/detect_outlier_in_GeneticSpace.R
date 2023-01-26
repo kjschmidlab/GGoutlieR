@@ -49,12 +49,14 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
                                            cpu = 1,
                                            verbose = TRUE
                                     ){
-  require(geosphere) # for calculating geographical distances
-  require(stats4) # package to perform maximum likelihood estimation
-  require(FastKNN) # search KNN with an arbitrary distance matrix
+  required_pkgs <- c("geosphere", # for calculating geographical distances
+                     "stats4", # package to perform maximum likelihood estimation
+                     "FastKNN", # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
+                     "foreach", "doParallel",
+                     "iterators","parallel")
+  invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
+
   if(cpu > 1){
-    require(foreach)
-    require(doParallel)
     max_cores=detectCores()
     if(cpu >= max_cores){
         warning(paste0("\n The maximum number of CPUs is ", max_cores, ". Set `cpu` to ", max_cores-1," \n"))

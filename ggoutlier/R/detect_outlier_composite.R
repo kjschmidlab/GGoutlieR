@@ -2,14 +2,16 @@
 #' If `multi_stages=T`, in each iteration, the most significant outlier among the results of two approaches will be sequentially excluded and then search for new KNNs.
 #' @param geo_coord a two column matrix or data.frame. the first column is longitude and the second one is latitude.
 #' @param gen_coord a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have to provide `pgdM` if `gen_coord` is not given.
-#' @param pgdM a pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.
-#' @param k_geneticKNN number of the nearest neighbor in a genetic space. the default is `NULL`.
-#' @param k_geoKNN number of the nearest neighbor in a geographical space. the default is `NULL`.
+#' @param pgdM `integer` a pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.
+#' @param k_geneticKNN `integer` number of the nearest neighbor in a genetic space. the default is `NULL`.
+#' @param k_geoKNN `integer` number of the nearest neighbor in a geographical space. the default is `NULL`.
 #' @param klim if `k_geneticKNN = NULL` or `k_geoKNN`, an optimal k will be searched between the first and second value of `klim`
 #' @param s a scalar of geographical distance. The default `s=100` scales the distance to a unit of 1 kilometer.
 #' @param plot_dir the path to save plots
-#' @param w_power a value controlling the power of distance weight in KNN prediction. For example, if `w_power=2`, the weight of KNN is 1/d^2/sum(1/d^2).
-#' @param p_thres a significance level
+# w_power a value controlling the power of distance weight in KNN prediction. For example, if `w_power=2`, the weight of KNN is 1/d^2/sum(1/d^2).
+#' @param w_geo `integer` power of distance weight in geographical space KNN regression to predict genetic coordinates. For example, if `w_geo=2`, the weight of KNN is 1/d^2/sum(1/d^2).
+#' @param w_genetic `integer` power of distance weight in genetic space KNN regression to predict geographical coordinates. For example, if `w_genetic=2`, the weight of KNN is 1/d^2/sum(1/d^2).
+#' @param p_thres `numeric` a significance level
 #' @param n number of samples to draw from the null distribution (to obtain the range of x axis to make a curve plot of null distribution)
 #' @param multi_stages logic. a multi-stage test will be performed if is `TRUE` (the default is `TRUE`).
 #' @param maxIter maximal iteration number of multi-stage KNN test.
@@ -29,7 +31,8 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                    k_geoKNN = NULL,
                                    klim = c(3,50),
                                    plot_dir = ".",
-                                   w_power = 2,
+                                   w_geo = 1,
+                                   w_genetic = 2,
                                    p_thres = 0.05,
                                    n = 10^6,
                                    s = 100,
@@ -43,12 +46,14 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                    geoKNN_output = NULL,
                                    verbose = TRUE
                                     ){
-  require(geosphere) # for calculating geographical distances
-  require(stats4) # package to perform maximum likelihood estimation
-  require(FastKNN) # search KNN with an arbitrary distance matrix
+  required_pkgs <- c("geosphere", # for calculating geographical distances
+                     "stats4", # package to perform maximum likelihood estimation
+                     "FastKNN", # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
+                     "foreach", "doParallel",
+                     "iterators","parallel")
+  invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
+
   if(cpu > 1){
-    require(foreach)
-    require(doParallel)
     max_cores=detectCores()
     if(cpu >= max_cores){
         warning(paste0("\n The maximum number of CPUs is ", max_cores, ". Set `cpu` to ", max_cores-1," \n"))
@@ -175,7 +180,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
     if(do_par){cl <- makeCluster(cpu)}else{cl <- NULL}
     all.D = find_optimalK_geneticKNN(geo_coord = geo_coord,
                                      pgdM = pgdM,
-                                     w_power = w_power,
+                                     w_power = w_genetic,
                                      klim = klim,
                                      do_par = do_par,
                                      s = s,
@@ -206,7 +211,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,
                                        pgdM = pgdM,
                                        knn.indx = knn.indx_geneticKNN,
-                                       w_power = w_power)
+                                       w_power = w_genetic)
   # calculate Dgeo statistic
   if(verbose) cat(paste("\n\n D geo is scaled to a unit of",s,"meters \n"))
   Dgeo <- cal_Dgeo(pred.geo_coord = pred.geo_coord, geo_coord = geo_coord, scalar = s)
@@ -254,7 +259,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
     all.D <- find_optimalK_geoKNN(geo_coord = geo_coord,
                                   gen_coord = gen_coord,
                                   geo.dM = geo.dM,
-                                  w_power = w_power,
+                                  w_power = w_geo,
                                   klim = klim,
                                   do_par = do_par,
                                   min_nn_dist = min_nn_dist,
@@ -283,7 +288,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   ##---------------------------------------------------
   if(verbose) cat("\nSearching K nearest neighbors...\n")
   knn.indx_geoKNN <- find_geo_knn(geo.dM = geo.dM, k=k_geoKNN, min_nn_dist=min_nn_dist)
-  pred.q <- pred_q_knn(geo_coord = geo_coord, gen_coord = gen_coord, geo.dM =  geo.dM, knn.indx_geoKNN, w_power = w_power)
+  pred.q <- pred_q_knn(geo_coord = geo_coord, gen_coord = gen_coord, geo.dM =  geo.dM, knn.indx_geoKNN, w_power = w_geo)
   # calculate Dg statistic
   Dg <- cal_Dg(pred.q, gen_coord)
   if(any(Dg == 0)){
@@ -488,12 +493,12 @@ ggoutlier_compositeKNN <- function(geo_coord,
       tmp.pred.geo_coord <- pred_geo_coord_knn(geo_coord = tmp.geo_coord,
                             pgdM = tmp.pgdM,
                             knn.indx = tmp.knn.indx_geneticKNN,
-                            w_power = w_power)
+                            w_power = w_genetic)
       tmp.pred.q <- pred_q_knn(geo_coord = tmp.geo_coord,
                                gen_coord = tmp.gen_coord,
                                geo.dM = tmp.geo.dM,
                                knn.indx = tmp.knn.indx_geoKNN,
-                               w_power = w_power)
+                               w_power = w_geo)
       # calculate Dgeo statistic and p values
       tmp.Dgeo <- cal_Dgeo(pred.geo_coord = tmp.pred.geo_coord,
                            geo_coord = tmp.geo_coord,
