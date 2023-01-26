@@ -23,12 +23,19 @@ Files for demo were copied from `ggnet` repos and renamed to make them be easier
 TO DO:
  - modify the plotting functions to take single input from ggoutlier -> switch plotting modes according to attributes
  - add progress bar to internal functions of ggoutlier
- - make a function to summarize ggoutlier output
+ - [done] make a function to summarize ggoutlier output
+ - suppress library messages
+ - make w_power separate?
 --->
 
 ## Introduction
 
-In this vignette, we would ...
+This is a tutorial of the R package `GGoutlieR`.
+`GGoutlieR` is developed to identify biological samples with anomalous geo-genetic associations that violate the assumption of isolation-by-distance.
+Unlike conventional visualization-based approaches, `GGoutlieR` is more feasible to investigate a large data set because it provides heuristic statistics that allow users to sort out samples tending to be outliers.
+Moreover, `GGoutlieR` also has a plotting function to visualize the unusual geo-genetic associations on a real-world map.
+
+In this vignette, we used the data set of global barley landraces as an example for investigating unusual geo-genetic patterns of a large sample with > 1,000 individuals.
 
 ## Barley landrace data
 
@@ -77,8 +84,18 @@ colnames(alsQ) <- colnames(Xmat)
 write.table(alsQ, "../data/IPK_1661inds_alstructure_Q_hat.csv", row.names = F, col.names = T, sep = ",")
 ```
 
-Here we used `GGoutlieR` to identify individuals with abnormal geo-genetic associations.
+Here we used `GGoutlieR` to identify individuals with unusual geo-genetic associations.
+`ggoutlier` is the main function to carry out the `GGoutlieR` framework analysis.
+We can implement different methods with the argument `method`. 
+There are three options:
 
+* `method = "geneticKNN"`
+* `method = "geoKNN"`
+* `method = "composite"`
+
+The `"composite"` method...
+The codes below use `verbose = FALSE` to suppress the printout message.
+If you want to see the running progress of `ggoutlier`, set `verbose = TRUE`.
 
 ```{r run_ggoutlier, eval=FALSE}
 library(GGoutlieR)
@@ -94,36 +111,35 @@ geneticknn_res <- ggoutlier(geo_coord = geo_coord,
                             gen_coord = anc.coef,
                             plot_dir = "../fig", 
                             p_thres = pthres, 
-                            w_power = 2, 
                             cpu = 4, 
                             klim = c(3,50), 
-                            method = "geneticKNN")
+                            method = "geneticKNN",
+                            verbose = F)
 
 ## run GGoutlieR with the approach of geographical space KNN only
 geoknn_res <- ggoutlier(geo_coord = geo_coord,
                         gen_coord = anc.coef,
                         plot_dir = "../fig", 
                         p_thres = pthres, 
-                        w_power = 2, 
-                        cpu = 4, 
+                        cpu = 4,
+                        min_nn_dist = 1000, 
                         klim = c(3,50), 
-                        method = "geoKNN")
+                        method = "geoKNN",
+                        verbose = F)
 
 ## run GGoutlieR with the composite approach
 compositeknn_res <- ggoutlier(geo_coord = geo_coord,
                               gen_coord = anc.coef,
                               plot_dir = "../fig", 
                               p_thres = pthres, 
-                              w_power = 2, 
                               cpu = 4, 
                               klim = c(3,50), 
-                              method = "composite")
-
-
+                              method = "composite",
+                              verbose = F,
+                              min_nn_dist = 1000)
 ```
 
 ```{r write_and_read_ggoutlier_output, eval=FALSE, echo=FALSE}
-
 saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output.RDS")
 saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output.RDS")
 saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output.RDS")
@@ -131,15 +147,79 @@ saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_outpu
 geneticknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geneticKNN_output.RDS")
 geoknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geoKNN_output.RDS")
 compositeknn_res <- readRDS("../data/IPK_landrace_ggoutlier_composite_output.RDS")
-
-
-
 ```
 
-
+After 
 
 ```{r show_result_table, eval=TRUE}
+## check the head of result table
 head(compositeknn_res$geneticKNN_result$statistics)
+
+head(summary_ggoutlier(compositeknn_res))
+```
+
+```{r}
+
+plot_ggoutlier(ggoutlier_res = geneticknn_res,
+               gen_coord = anc.coef,
+               geo_coord = geo_coord,
+               p_thres = pthres,
+               map_type = "genetic_knn",
+               select_xlim = c(-20,140),
+               select_ylim = c(10,70),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,70),
+               pie_r_scale = 1.2,
+               map_resolution = "course"
+               )
+plot_ggoutlier(ggoutlier_res = geoknn_res,
+               gen_coord = anc.coef,
+               geo_coord = geo_coord,
+               p_thres = pthres,
+               map_type = "geographic_knn",
+               select_xlim = c(-20,140),
+               select_ylim = c(10,70),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,70),
+               pie_r_scale = 1.2,
+               map_resolution = "course"
+               )
+plot_ggoutlier(ggoutlier_res = geoknn_res,
+               gen_coord = anc.coef,
+               geo_coord = geo_coord,
+               p_thres = 0.05,
+               map_type = "geographic_knn",
+               select_xlim = c(-20,140),
+               select_ylim = c(10,70),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,70),
+               pie_r_scale = 1.2,
+               map_resolution = "course"
+               )
+plot_ggoutlier(ggoutlier_res = geneticknn_res,
+               gen_coord = anc.coef,
+               geo_coord = geo_coord,
+               p_thres = pthres,
+               map_type = "genetic_knn",
+               select_xlim = c(20,40),
+               select_ylim = c(30,50),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,70),
+               pie_r_scale = 0.8,
+               map_resolution = "course")
+
+plot_ggoutlier(ggoutlier_res = compositeknn_res,
+               gen_coord = anc.coef,
+               geo_coord = geo_coord,
+               p_thres = pthres,
+               map_type = "both",
+               select_xlim = c(-20,140),
+               select_ylim = c(10,70),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,70),
+               pie_r_scale = 1.2,
+               map_resolution = "course",
+              adjust_p_value_projection = T)
 
 ```
 
