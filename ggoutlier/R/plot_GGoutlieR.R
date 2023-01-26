@@ -14,11 +14,11 @@
 #' @param  color_res the resolution of color scale
 #' @param  dot_cex the size of dots denoting the positions of samples on a geographical map.
 #' @param  map_type the type of plot to draw. it can be `"geographic_knn"`, `"genetic_knn"` and `"both"`.
-#' @param  geo_xlim values controlling longitude boundaries of a window to select outliers to present on a geographical map. the default is `geo_xlim = c(-180,180)`.
-#' @param  geo_ylim values controlling latitude boundaries of a window to select outliers to present on a geographical map. the default is `geo_ylim = c(-90,90)`.
+#' @param  select_xlim values controlling longitude boundaries of a window to select outliers to present on a geographical map. the default is `select_xlim = c(-180,180)`.
+#' @param  select_ylim values controlling latitude boundaries of a window to select outliers to present on a geographical map. the default is `select_ylim = c(-90,90)`.
 #' @param  plot_xlim values controlling longitude boundaries of a map.
 #' @param  plot_ylim values controlling latitude boundaries of a map.
-#' @param  only_edges_in_xylim logic. only the edges with starting points within the given `geo_xlim` and `geo_ylim` will display on a geographical map. the default is `TRUE`.
+#' @param  only_edges_in_xylim logic. only the edges with starting points within the given `select_xlim` and `select_ylim` will display on a geographical map. the default is `TRUE`.
 #' @param  pie_r_scale a scale controlling the radius of pie charts
 #' @param  red_alpha a value controlling the transparency of red lines. the default is 0.8
 #' @param  map_resolution the resolution of the geographical map. See details in the manual of `rworldmap::getMap()`
@@ -40,8 +40,8 @@ plot_ggoutlier <- function(ggoutlier_res,
                            color_res = 10,
                            dot_cex = 0.4,
                            map_type = c("geographic_knn", "genetic_knn", "both"),
-                           geo_xlim = c(-180,180),
-                           geo_ylim = c(-90,90),
+                           select_xlim = c(-180,180),
+                           select_ylim = c(-90,90),
                            plot_xlim = NULL,
                            plot_ylim = NULL,
                            only_edges_in_xylim = TRUE,
@@ -167,12 +167,12 @@ plot_ggoutlier <- function(ggoutlier_res,
     }
     ## remove edges out of the given margins
     if(only_edges_in_xylim){
-      geo_xlim_max <- max(geo_xlim)
-      geo_xlim_min <- min(geo_xlim)
-      geo_ylim_max <- max(geo_ylim)
-      geo_ylim_min <- min(geo_ylim)
-      tmp1 <- apply(geo_coord[geosp.df$row,],1, function(x){x[1] < geo_xlim_max & x[1] > geo_xlim_min & x[2] < geo_ylim_max & x[2] > geo_ylim_min})
-      #tmp2 <- apply(geo_coord[geosp.df$col,],1, function(x){x[1] < geo_xlim_max & x[1] > geo_xlim_min & x[2] < geo_ylim_max & x[2] > geo_ylim_min})
+      select_xlim_max <- max(select_xlim)
+      select_xlim_min <- min(select_xlim)
+      select_ylim_max <- max(select_ylim)
+      select_ylim_min <- min(select_ylim)
+      tmp1 <- apply(geo_coord[geosp.df$row,],1, function(x){x[1] < select_xlim_max & x[1] > select_xlim_min & x[2] < select_ylim_max & x[2] > select_ylim_min})
+      #tmp2 <- apply(geo_coord[geosp.df$col,],1, function(x){x[1] < select_xlim_max & x[1] > select_xlim_min & x[2] < select_ylim_max & x[2] > select_ylim_min})
 
       if(!is.null(p_thres)){
         tmp3 <- geosp.df$row %in% which(GeoSP_knn_res$statistics$p.value < p_thres)
@@ -186,8 +186,8 @@ plot_ggoutlier <- function(ggoutlier_res,
   }
 
   ## set plot_xlim and plot_ylim if NULL
-  if(is.null(plot_xlim)){plot_xlim <- geo_xlim}
-  if(is.null(plot_ylim)){plot_ylim <- geo_ylim}
+  if(is.null(plot_xlim)){plot_xlim <- select_xlim}
+  if(is.null(plot_ylim)){plot_ylim <- select_ylim}
   par(mar = c(1,1,1,1))
   #******************************
   # edges of genetic space (GenSP) KNN outlier likelihood
@@ -216,12 +216,12 @@ plot_ggoutlier <- function(ggoutlier_res,
 
     ## remove edges out of the given margins
     if(only_edges_in_xylim){
-      geo_xlim_max <- max(geo_xlim)
-      geo_xlim_min <- min(geo_xlim)
-      geo_ylim_max <- max(geo_ylim)
-      geo_ylim_min <- min(geo_ylim)
-      tmp1 <- apply(geo_coord[gensp.df$row,],1, function(x){x[1] < geo_xlim_max & x[1] > geo_xlim_min & x[2] < geo_ylim_max & x[2] > geo_ylim_min})
-      #tmp2 <- apply(geo_coord[gensp.df$col,],1, function(x){x[1] < geo_xlim_max & x[1] > geo_xlim_min & x[2] < geo_ylim_max & x[2] > geo_ylim_min})
+      select_xlim_max <- max(select_xlim)
+      select_xlim_min <- min(select_xlim)
+      select_ylim_max <- max(select_ylim)
+      select_ylim_min <- min(select_ylim)
+      tmp1 <- apply(geo_coord[gensp.df$row,],1, function(x){x[1] < select_xlim_max & x[1] > select_xlim_min & x[2] < select_ylim_max & x[2] > select_ylim_min})
+      #tmp2 <- apply(geo_coord[gensp.df$col,],1, function(x){x[1] < select_xlim_max & x[1] > select_xlim_min & x[2] < select_ylim_max & x[2] > select_ylim_min})
       if(!is.null(p_thres)){
         tmp3 <- gensp.df$row %in% which(GenSP_knn_res$statistics$p.value < p_thres)
         to_keep <- mapply(a = tmp1, b = tmp3, function(a,b){return(a&b)}) # if starting points are out of the given range and also not outliers -> remove
@@ -318,7 +318,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     if(!is.null(p_thres) & map_type %in% c("both","geographic_knn")){
       sig.row <- unique(geosp.df$row[geosp.df$sig.tag])
       if(length(sig.row) == 0){
-          warning("there is no outlier in the region selected according to `geo_xlim` and `geo_ylim`")
+          warning("there is no outlier in the region selected according to `select_xlim` and `select_ylim`")
       }else{
         pie.r = abs(diff(par("usr")[1:2]) )*0.005
         for(i in 1:length(sig.row)){
@@ -347,7 +347,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     if(!is.null(p_thres)  & map_type %in% c("both","genetic_knn")){
       sig.row <- unique(gensp.df$row[gensp.df$sig.tag])
       if(length(sig.row) == 0){
-        warning("there is no outlier in the region selected according to `geo_xlim` and `geo_ylim`")
+        warning("there is no outlier in the region selected according to `select_xlim` and `select_ylim`")
       }else{
         pie.r = abs(diff(par("usr")[1:2]) )*0.005
         for(i in 1:length(sig.row)){
@@ -456,7 +456,7 @@ get_GGNet_edge_col <- function(GGNet_adjm, color_res = 10){
   # if only geographical KNN result available
   if(!is.null(GGNet_adjm$GeoSP_pvalue) & is.null(GGNet_adjm$GenSP_pvalue)){
     return(list(GeoSP_col = c(GeoSP_col),
-                GeoSP_colkey = c(GeoSP.col),
+                GeoSP_colkey = c(GeoSP.col)
     ))
   }
   # if only genetic KNN result available
