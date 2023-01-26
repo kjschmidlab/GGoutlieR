@@ -24,6 +24,7 @@
 ggoutlier <- function(geo_coord,
                       gen_coord,
                       pgdM = NULL,
+                      K = NULL,
                       k_geneticKNN = NULL,
                       k_geoKNN = NULL,
                       klim = c(3,50),
@@ -33,10 +34,10 @@ ggoutlier <- function(geo_coord,
                       p_thres = 0.05,
                       n = 10^6,
                       s = 100,
-                      min_nn_dist = NULL,
-                      multi_stages = T,
+                      min_nn_dist = 100,
+                      multi_stages = TRUE,
                       maxIter=NULL,
-                      keep_all_stg_res = F,
+                      keep_all_stg_res = FALSE,
                       warning_minR2 = 0.9,
                       cpu = 1,
                       geneticKNN_output = NULL,
@@ -46,6 +47,10 @@ ggoutlier <- function(geo_coord,
 
     ){
   method <- match.arg(method)
+  if(!is.null(K)){
+      k_geneticKNN <- K
+      k_geoKNN <- K
+    }
   if(method == "geneticKNN"){
     out <-
       ggoutlier_geneticKNN(geo_coord = geo_coord,
