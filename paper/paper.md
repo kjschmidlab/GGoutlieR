@@ -1,5 +1,5 @@
 ---
-title: 'GGoutlieR: an R package to identify and visualize abnormal geo-genetic patterns of biological samples'
+title: 'GGoutlieR: an R package to identify and visualize unusual geo-genetic patterns of biological samples'
 tags:
   - R
   - landscape genomics
@@ -9,17 +9,15 @@ tags:
 authors:
   - name: Che-Wei Chang
     orcid: 0000-0001-6704-3732
-    equal-contrib: true
     affiliation: 1
   - name: Karl Schmid
     orcid: 0000-0001-5129-895X
-    equal-contrib: true 
     affiliation: 1
 
 affiliations:
  - name: University of Hohenheim, Stuttgart, Germany
    index: 1
- - name: Institution Name, Country
+ 
 
 date: 09 Jan 2023
 bibliography: paper.bib
@@ -54,7 +52,9 @@ Our package `GGoutlieR` computes empirical p-values of violating the isolation-b
 This feature enables users to easily select outliers from thousands of samples for further investigation.
 Furthermore, `GGoutlieR` visualizes the geo-genetic patterns of outliers in network fashion on a geographical map, providing insights into the relationships of geography and genetic clusters.
 
-# Identification of outliers with abnormal geo-genetic patterns
+# Concept of `GGoutlieR`
+
+Identification of outliers with anomalous geo-genetic patterns
 
 Under the isolation-by-distance assumption, the geographical origins are predictable from genetic variations (CITATION), and vice versa.
 With this respect, prediction models should result in large prediction errors for samples that oppose the isolation-by-distance assumption.
@@ -65,8 +65,20 @@ Next, prediction errors are transformed to distance-based statistics following a
 An empirical Gamma distribution is obtained as the null distribution by searching optimal parameters with maximum likelihood estimation.
 With the null Gamma distribution, `GGoutlieR` tests the null hypothesis that the geo-genetic pattern of a given sample agrees with the isolation-by-distance assumption.
 Finally, p values for every sample are computed with the empirical null distribution and statistics computed from prediction errors.
-The details of the `GGoutlieR` framework are described in the supplementary material (GITHUB_LINK).
+The details of the `GGoutlieR` framework are described step-by-step in the supplementary material (GITHUB_LINK).
+For demonstration, we used the genotypic data and passport data of the global barley landrace collection with 1,661 accessions from the IPK genebank (CITATION).
+The full analysis of the barley data set with `GGoutlieR` is available in the vignette (GITLAB_LINK).
+
+In the example below, the computation was done with the function `ggoutlier`.
+The function `summary_ggoutlier` could be used to obtain a summary table of outliers by taking the output of `ggoutlier`.
+
+```R
+
+```
+
 
 # Visualization on a geographical map
+
+
 
 # References
