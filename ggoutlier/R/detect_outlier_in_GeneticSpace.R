@@ -241,8 +241,13 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
   res.out <- list(out, thres, gamma.par, knn.indx, knn.name, s)
   names(res.out) <- c("statistics","threshold","gamma_parameter", "knn_index", "knn_name", "scalar")
 
+  arguments <- c(s, w_power, k, NA, multi_stages)
+  names(arguments) <- c("scalar", "genetic_weight_power", "K", "min_neighbor_dist", "multi_stage_test")
+
   if(!multi_stages){
     attr(res.out, "model") <- "ggoutlier_geneticKNN"
+    ## save arguments used in GGoutlieR
+    attr(res.out, "arguments") <- arguments
     return(res.out)
   }else{
     #-------------------------------------------------------------
@@ -338,9 +343,13 @@ ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
       names(res.Iters) <- paste0("Iter_", 1:length(res.Iters))
       out <- c(res.Iters, combined_result = list(collapse_res))
       attr(out, "model") <- "ggoutlier_geneticKNN"
-      return()
+      ## save arguments used in GGoutlieR
+      attr(out, "arguments") <- arguments
+      return(out)
     }else{
       attr(collapse_res, "model") <- "ggoutlier_geneticKNN"
+      ## save arguments used in GGoutlieR
+      attr(collapse_res, "arguments") <- arguments
       return(collapse_res)
     }
   } # multi-stage test end

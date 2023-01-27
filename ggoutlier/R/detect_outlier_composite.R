@@ -448,9 +448,18 @@ ggoutlier_compositeKNN <- function(geo_coord,
                          knn.name_geoKNN)
   names(res.out_geoKNN) <- c("statistics","threshold","gamma_parameter", "knn_index", "knn_name")
 
+  ## arguments used in GGoutlieR
+  arguments_geoKNN <- c(s, w_geo, k_geoKNN, min_nn_dist, multi_stages)
+  names(arguments_geoKNN) <- c("scalar", "geo_weight_power", "K", "min_neighbor_dist", "multi_stage_test")
+  arguments_geneticKNN <- c(s, w_genetic, k_geneticKNN, min_nn_dist, multi_stages)
+  names(arguments_geneticKNN) <- c("scalar", "genetic_weight_power", "K", "min_neighbor_dist", "multi_stage_test")
+
   if(!multi_stages){
     attr(res.out_geneticKNN, "model") <- "ggoutlier_geneticKNN"
     attr(res.out_geoKNN, "model") <- "ggoutlier_geoKNN"
+    ## save arguments used in GGoutlieR
+    attr(res.out_geneticKNN, "arguments") <- arguments_geneticKNN
+    attr(res.out_geoKNN, "arguments") <- arguments_geoKNN
     return(list("geneticKNN_result" = res.out_geneticKNN,
                 "geoKNN_result" = res.out_geoKNN))
   }else{
@@ -645,6 +654,10 @@ ggoutlier_compositeKNN <- function(geo_coord,
       out_geoKNN <- c(res.Iters_geoKNN, combined_result = list(collapse_res_geoKNN))
       attr(out_geoKNN, "model") <- "ggoutlier_geoKNN"
 
+      ## save arguments used in GGoutlieR
+      attr(out_geneticKNN, "arguments") <- arguments_geneticKNN
+      attr(out_geoKNN, "arguments") <- arguments_geoKNN
+
       final_out <- list("geneticKNN_result" = out_geneticKNN,
                         "geoKNN_result" = out_geoKNN)
       attr(final_out, "model") <- "composite"
@@ -652,6 +665,11 @@ ggoutlier_compositeKNN <- function(geo_coord,
     }else{
       attr(collapse_res_geneticKNN, "model") <- "ggoutlier_geneticKNN"
       attr(collapse_res_geoKNN, "model") <- "ggoutlier_geoKNN"
+
+      ## save arguments used in GGoutlieR
+      attr(collapse_res_geneticKNN, "arguments") <- arguments_geneticKNN
+      attr(collapse_res_geoKNN, "arguments") <- arguments_geoKNN
+
       final_out <- list("geneticKNN_result" = collapse_res_geneticKNN,
                         "geoKNN_result" = collapse_res_geoKNN)
       attr(final_out, "model") <- "composite"

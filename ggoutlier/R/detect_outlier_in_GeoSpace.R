@@ -215,12 +215,17 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
   names(gamma.par) <- c("alpha", "beta")
   rownames(knn.indx) <- rownames(geo_coord)
   knn.name <- apply(knn.indx,2, function(x){rownames(geo_coord)[x]})
-  res.out <- list(out, thres, gamma.par, knn.indx, knn.name)
+  res.out <- list(out, thres, gamma.par, knn.indx, knn.name, )
   names(res.out) <- c("statistics","threshold","gamma_parameter", "knn_index", "knn_name")
 
+  ## arguments used in GGoutlieR
+  arguments <- c(s, w_power, k, min_nn_dist, multi_stages)
+  names(arguments) <- c("scalar", "geo_weight_power", "K", "min_neighbor_dist", "multi_stage_test")
 
   if(!multi_stages){
     attr(res.out, "model") <- "ggoutlier_geoKNN"
+    ## save arguments used in GGoutlieR
+    attr(res.out, "arguments") <- arguments
     return(res.out)
   }else{
     #---------------------
@@ -317,9 +322,13 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
       names(res.Iters) <- paste0("Iter_", 1:length(res.Iters))
       out <- c(res.Iters, combined_result = list(collapse_res))
       attr(out, "model") <- "ggoutlier_geoKNN"
+      ## save arguments used in GGoutlieR
+      attr(out, "arguments") <- arguments
       return(out)
     }else{
       attr(collapse_res, "model") <- "ggoutlier_geoKNN"
+      ## save arguments used in GGoutlieR
+      attr(collapse_res, "arguments") <- arguments
       return(collapse_res)
     }
   } # multi-stage test end
