@@ -204,7 +204,7 @@ get_knn_pvalue <- function(knn_res, geo_coord = NULL, gen_coord = NULL, test_typ
       knn.p[i,] <- 1 - pgamma(unname(knn.Dg), shape = a, rate = b)
     }
   }else{
-    s <- knn_res$scalar
+    s <- attributes(knn_res)$arguments["scalar"]
     for(i in 1:n){
       tmp.geo_coord <- unname(geo_coord[i,])
       knn.geo_coord <- geo_coord[knn_res$knn_index[i,],]
@@ -216,9 +216,6 @@ get_knn_pvalue <- function(knn_res, geo_coord = NULL, gen_coord = NULL, test_typ
   }
 
   return(knn.p)
-  #plot(-log10(apply(knn.p,1,mean)), -log10(knn_res$statistics$p.value),
-  #     xlim = c(0,10), ylim=c(0,10))
-  #cor((apply(knn.p,1,mean)), (knn_res$statistics$p.value))
 } # get_knn_pvalue end
 
 

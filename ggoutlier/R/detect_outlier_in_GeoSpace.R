@@ -215,7 +215,7 @@ ggoutlier_geoKNN <- function(geo_coord, gen_coord,
   names(gamma.par) <- c("alpha", "beta")
   rownames(knn.indx) <- rownames(geo_coord)
   knn.name <- apply(knn.indx,2, function(x){rownames(geo_coord)[x]})
-  res.out <- list(out, thres, gamma.par, knn.indx, knn.name, )
+  res.out <- list(out, thres, gamma.par, knn.indx, knn.name)
   names(res.out) <- c("statistics","threshold","gamma_parameter", "knn_index", "knn_name")
 
   ## arguments used in GGoutlieR
