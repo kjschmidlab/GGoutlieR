@@ -24,8 +24,9 @@ TO DO:
  - modify the plotting functions to take single input from ggoutlier -> switch plotting modes according to attributes
  - add progress bar to internal functions of ggoutlier
  - [done] make a function to summarize ggoutlier output
- - suppress library messages
- - make w_power separate?
+ - [done] suppress library messages
+ - [done] make w_power separate?
+ - add scalar and w to output
 --->
 
 ## Introduction
@@ -90,6 +91,8 @@ Here we used `GGoutlieR` to identify individuals with unusual geo-genetic associ
 In short, `GGoutlieR` framework include following major steps...
 
 * search for an optimal number of nearest neighbors which is the default of `ggoutlier` function. Users can specify number of nearest neighbors with the argument `K`.
+* obtain a heuristic null distribution with maximum likelihood estimation.
+* iteratively search KNNs, conduct statistical tests and remove the most significant samples until no new significant sample
 
 We can implement different methods with the argument `method`. 
 There are three options:
@@ -98,24 +101,33 @@ There are three options:
 * `method = "geoKNN"`
 * `method = "composite"`
 
-The `"composite"` method 
+The `method = "composite"` is recommended. 
 
 
 The codes below use `verbose = FALSE` to suppress the printout message.
 If you want to see the running progress of `ggoutlier`, set `verbose = TRUE`.
 
+
+```{r put_barley_data_in_package, eval=FALSE}
+ipk_geo_coord <- read.table("../data/IPK_1661ind_geo_coord.txt", header = T, stringsAsFactors = F)
+rownames(ipk_geo_coord) <- ipk_geo_coord[,1]
+ipk_geo_coord <- ipk_geo_coord[,-1]
+ipk_anc_coef <- t(as.matrix(read.csv("../data/IPK_1661inds_alstructure_Q_hat.csv", header = F, stringsAsFactors = F)))
+
+usethis::use_data(ipk_geo_coord)
+usethis::use_data(ipk_anc_coef)
+```
+
+
 ```{r run_ggoutlier, eval=FALSE}
 library(GGoutlieR)
-
-geo_coord <- read.table("../data/IPK_1661ind_geo_coord.txt", header = T, stringsAsFactors = F)
-rownames(geo_coord) <- geo_coord[,1]
-geo_coord <- geo_coord[,-1]
-anc.coef <- t(as.matrix(read.csv("../data/IPK_1661inds_alstructure_Q_hat.csv", header = F, stringsAsFactors = F)))
+data("ipk_anc_coef")
+data("ipk_geo_coord")
 pthres = 0.01
 
 ## run GGoutlieR with the approach of genetic space KNN only
-geneticknn_res <- ggoutlier(geo_coord = geo_coord,
-                            gen_coord = anc.coef,
+geneticknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
+                            gen_coord = ipk_anc_coef,
                             plot_dir = "../fig", 
                             p_thres = pthres, 
                             cpu = 4, 
@@ -124,8 +136,8 @@ geneticknn_res <- ggoutlier(geo_coord = geo_coord,
                             verbose = F)
 
 ## run GGoutlieR with the approach of geographical space KNN only
-geoknn_res <- ggoutlier(geo_coord = geo_coord,
-                        gen_coord = anc.coef,
+geoknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
+                        gen_coord = ipk_anc_coef,
                         plot_dir = "../fig", 
                         p_thres = pthres, 
                         cpu = 4,
@@ -135,8 +147,8 @@ geoknn_res <- ggoutlier(geo_coord = geo_coord,
                         verbose = F)
 
 ## run GGoutlieR with the composite approach
-compositeknn_res <- ggoutlier(geo_coord = geo_coord,
-                              gen_coord = anc.coef,
+compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
+                              gen_coord = ipk_anc_coef,
                               plot_dir = "../fig", 
                               p_thres = pthres, 
                               cpu = 4, 
@@ -147,29 +159,34 @@ compositeknn_res <- ggoutlier(geo_coord = geo_coord,
 ```
 
 ```{r write_and_read_ggoutlier_output, eval=FALSE, echo=FALSE}
-saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output.RDS")
-saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output.RDS")
-saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output.RDS")
+#saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.05.RDS")
+#saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output_p0.05.RDS")
+#saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output_p0.05.RDS")
+saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.01.RDS")
+saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output_p0.01.RDS")
+saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output_p0.01.RDS")
 
-geneticknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geneticKNN_output.RDS")
-geoknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geoKNN_output.RDS")
-compositeknn_res <- readRDS("../data/IPK_landrace_ggoutlier_composite_output.RDS")
+geneticknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.01.RDS")
+geoknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geoKNN_output_p0.01.RDS")
+compositeknn_res <- readRDS("../data/IPK_landrace_ggoutlier_composite_output_p0.01.RDS")
 ```
 
-After 
+After running `ggoutlier`, we `summary_ggoutlier` to extract the IDs and p-values of outliers. 
 
 ```{r show_result_table, eval=TRUE}
 ## check the head of result table
 head(compositeknn_res$geneticKNN_result$statistics)
 
 head(summary_ggoutlier(compositeknn_res))
+length(unique(summary_ggoutlier(compositeknn_res)$ID))
 ```
+
 
 ```{r}
 
 plot_ggoutlier(ggoutlier_res = geneticknn_res,
-               gen_coord = anc.coef,
-               geo_coord = geo_coord,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
                p_thres = pthres,
                map_type = "genetic_knn",
                select_xlim = c(-20,140),
@@ -180,8 +197,8 @@ plot_ggoutlier(ggoutlier_res = geneticknn_res,
                map_resolution = "course"
                )
 plot_ggoutlier(ggoutlier_res = geoknn_res,
-               gen_coord = anc.coef,
-               geo_coord = geo_coord,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
                p_thres = pthres,
                map_type = "geographic_knn",
                select_xlim = c(-20,140),
@@ -192,8 +209,8 @@ plot_ggoutlier(ggoutlier_res = geoknn_res,
                map_resolution = "course"
                )
 plot_ggoutlier(ggoutlier_res = geoknn_res,
-               gen_coord = anc.coef,
-               geo_coord = geo_coord,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
                p_thres = 0.05,
                map_type = "geographic_knn",
                select_xlim = c(-20,140),
@@ -204,8 +221,8 @@ plot_ggoutlier(ggoutlier_res = geoknn_res,
                map_resolution = "course"
                )
 plot_ggoutlier(ggoutlier_res = geneticknn_res,
-               gen_coord = anc.coef,
-               geo_coord = geo_coord,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
                p_thres = pthres,
                map_type = "genetic_knn",
                select_xlim = c(20,40),
@@ -216,9 +233,9 @@ plot_ggoutlier(ggoutlier_res = geneticknn_res,
                map_resolution = "course")
 
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
-               gen_coord = anc.coef,
-               geo_coord = geo_coord,
-               p_thres = pthres,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
+               p_thres = 0.01,
                map_type = "both",
                select_xlim = c(-20,140),
                select_ylim = c(10,70),
