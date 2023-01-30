@@ -49,10 +49,11 @@ plot_ggoutlier <- function(ggoutlier_res,
                            red_alpha = 0.8,
                            map_resolution = "low",
                            show_knn_pie = FALSE,
+                           show_col_bar = TRUE,
                            which_sample = NULL,
                            add_benchmark_graph = TRUE,
                            vertical_plots = TRUE,
-                           adjust_p_value_projection = TRUE
+                           adjust_p_value_projection = FALSE
 
 ){
   required_pkgs <- c("rworldmap", "scales", "plotrix",
@@ -374,7 +375,7 @@ plot_ggoutlier <- function(ggoutlier_res,
       }
     }
   }
-  if(map_type == "genetic_knn"){
+  if(map_type == "genetic_knn" & show_col_bar){
     color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
                   xr = plot_xlim[2],
                   yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.07,
@@ -388,7 +389,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     )
   }
 
-  if(map_type == "geographic_knn"){
+  if(map_type == "geographic_knn" & show_col_bar){
     color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
                   xr = plot_xlim[2],
                   yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.07,
@@ -401,7 +402,7 @@ plot_ggoutlier <- function(ggoutlier_res,
          labels = expression(-log[10](p)), font = 2, cex = 1.1
     )
   }
-  if(map_type == "both"){
+  if(map_type == "both" & show_col_bar){
     par(xpd = NA)
     color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
                   xr = plot_xlim[2],
