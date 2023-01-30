@@ -149,6 +149,8 @@ get_GGNet_adjacency_matrix <- function(ggoutlier_res,
 # NOTE: the `get_knn_pvalue` here is the first version.
 # `get_knn_pvalue` is used in `get_GGNet_adjacency_matrix`
 # obtain p values by computing D statistics between a sample and its KNNs individually with the null Gamma distribution procured in the KNN outlier testing
+# NOTICE!! p values here is computed for the sample pairs (a focal sample and one of its nearest neighbors),
+#          Therefore, if there are N samples and each has K nearest neighbor, then N * K p-values will be calculated based on the heuristic Gamma distribution obtained by `ggoutlier`.
 # status: finished
 # arguments:
 # knn_res: the output from `detect_outlier_in_GeoSpace` or `detect_outlier_in_GeneticSpace`
