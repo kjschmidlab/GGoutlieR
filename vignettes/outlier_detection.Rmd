@@ -267,22 +267,96 @@ As described in the supplementary material (ADD_GITLAB_LINK), `GGoutlieR` framew
 * **geographical KNN**: K nearest neighbors defined based on geographical distances which are used to predict genetic components.  
 * **genetic KNN**: K nearest neighbors defined based on genetic distances which are used to predict geographical locations.
 
-In the `plot_ggoutlier`, the geographical KNNs of outliers are displayed with blue lines, whereas the genetic KNNs are presented with red lines.
+In the graph made by `plot_ggoutlier`, the geographical KNNs of outliers are displayed with blue lines, whereas the genetic KNNs are presented with red lines.
+In other words, blue lines and red lines indicate:
+
+* Blue lines: sample pairs with unusually **high genetic difference** within a **short geographical distance**  
+* Red lines: sample pairs with unusually **high genetic similarity** across a **long geographical distance**
+
 Users can decide which type of KNNs to draw with `map_type = "geographic_knn"`, `map_type = "genetic_knn"` or `map_type = "both"`.
 
-```{r ggoutlier_graph}
+Additionally, the `plot_ggoutlier` function projects ancestry coefficients of outliers to a geographical map as pie charts (the default with `show_knn_pie = TRUE`).
+Users can therefore present population genetic structure integrating geo-genetic patterns unveiled by `GGoutlieR`.
+
+The code block below produced two figures
+The figure on the top is a geographical map with ancestry coefficients as pie charts.
+The figure at the bottom presents the results of `GGoutlieR`.
+The example here overlaid both red and blue lines on the same map (with the argument `map_type = "both"`).
+Users can keep only blue or red lines by setting `map_type = "geographic_knn"` or `map_type = "genetic_knn"`, respectively.
+
+```{r ggoutlier_graph, eval=FALSE}
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
                p_thres = pthres,
                map_type = "both",
-               select_xlim = c(-20,140),
-               select_ylim = c(10,70),
+               select_xlim = c(-20,140), 
+               select_ylim = c(10,62),
                plot_xlim = c(-20,140),
-               plot_ylim = c(10,70),
+               plot_ylim = c(10,62),
                pie_r_scale = 1.2,
                map_resolution = "course",
                adjust_p_value_projection = F)
 
+```
+
+![](../fig/IPK_ggoutlier_for_paper.jpg)
+*Ancestry coefficients and geo-genetic associations of outliers identified by GGoutlieR*
+
+`plot_ggoutlier` can crop the network graph by setting `select_xlim` and `select_ylim`.
+The codes below retain the links between outliers located in UK and corresponding KNNs.
+We can find that the outliers in UK are genetically close to the samples in Nepal.
+This pattern would be difficult to identify with conventional visualization tools, such as PCA.
+
+```{r ggoutlier_graph_highlightUK, eval=FALSE}
+plot_ggoutlier(ggoutlier_res = compositeknn_res,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
+               p_thres = pthres,
+               map_type = "both",
+               select_xlim = c(-12,4), 
+               select_ylim = c(47,61),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,62),
+               pie_r_scale = 1.2,
+               map_resolution = "course",
+               adjust_p_value_projection = F,
+               add_benchmark_graph = F)
+```
+
+
+```{r make_fig_for_paper,eval=FALSE,echo=FALSE}
+jpeg(filename = "../fig/IPK_ggoutlier_for_paper.jpg", res = 400,
+     height = 3000, width = 3000)
+plot_ggoutlier(ggoutlier_res = compositeknn_res,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
+               p_thres = pthres,
+               map_type = "both",
+               select_xlim = c(-20,140), 
+               select_ylim = c(10,62),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,62),
+               pie_r_scale = 1.2,
+               map_resolution = "course",
+               adjust_p_value_projection = F)
+dev.off()
+
+jpeg(filename = "../fig/IPK_ggoutlier_highlighUK.jpg", res = 400,
+     height = 1500, width = 3000)
+plot_ggoutlier(ggoutlier_res = compositeknn_res,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
+               p_thres = pthres,
+               map_type = "both",
+               select_xlim = c(-12,4), 
+               select_ylim = c(47,61),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,62),
+               pie_r_scale = 1.2,
+               map_resolution = "course",
+               adjust_p_value_projection = F,
+               add_benchmark_graph = F)
+dev.off()
 ```
 
