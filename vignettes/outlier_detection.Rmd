@@ -1,5 +1,5 @@
 ---
-title: "Outlier detection"
+title: "Outlier detection with GGoutlieR"
 author: "Che-Wei Chang"
 output: rmarkdown::html_vignette
 vignette: >
@@ -7,6 +7,12 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>", tidy='styler', tidy.opts=list(strict=FALSE)
+)
+```
 
 <!---
 The dataset used in this walk through were obtained and pre-processed.
@@ -26,17 +32,20 @@ TO DO:
  - [done] make a function to summarize ggoutlier output
  - [done] suppress library messages
  - [done] make w_power separate?
- - add scalar and w to output
+ - [done] add scalar and w to output
+ - add git links before publishing the package
 --->
 
 ## Introduction
 
-This is a short tutorial of the R package `GGoutlieR`.
+This file is a short tutorial of the R package `GGoutlieR`.
 `GGoutlieR` is developed to identify biological samples with anomalous geo-genetic associations that violate the assumption of isolation-by-distance.
-Unlike conventional visualization-based approaches, `GGoutlieR` is more feasible to investigate a large data set because it provides heuristic statistics that allow users to sort out samples tending to be outliers.
+Conventional visualization-based approaches have been used to investigate samples with unusual geo-genetic patterns.
+However, they may not suitable for investigating large samples due to overlaps of data points on a graph.
+Unlike conventional visualization-based approaches, **`GGoutlieR` is more feasible to explore a large data set because it provides heuristic statistics** that allow users to sort out samples tending to be outliers.
 Moreover, `GGoutlieR` also has a plotting function to visualize the unusual geo-genetic associations on a real-world map.
 
-In this vignette, we used the data set of global barley landraces as an example for investigating unusual geo-genetic patterns of a large sample with > 1,000 individuals.
+In this vignette, we used a collection of global barley landraces as an example for investigating unusual geo-genetic patterns of a large sample with > 1,000 individuals.
 
 ## R functions
 
@@ -50,24 +59,25 @@ The `GGoutlieR` package has three main functions:
 * `plot_ggoutlier`  
 
 The function `ggoutlier` is used to carry out the `GGoutlieR` statistical framework. 
-It will produce a `list` object recording all details, including statistics, p-values, the IDs of nearest neighbors of every samples, and etc.
+It will produce a `list` object recording all details, including statistics, p-values, the IDs of nearest neighbors of every sample, etc.
 
 By giving the outputs from `ggoutlier`, `summary_ggoutlier` will produce a `data.frame` table showing the IDs and p-values of outliers.
 
-For visualization, `plot_ggoutlier` takes the outputs from `ggoutleir` to overlay colored lines connecting outliers to its K nearest neighbors.
-The depth of color and the width of lines are proportional to the -log(p) values.
+For visualization, `plot_ggoutlier` takes the outputs from `ggoutleir` to overlay colored lines connecting outliers to their K nearest neighbors.
+The depth of color and the width of lines is proportional to the -log(p) values.
 
 ## Barley landrace data
 
-The data of IPK barley landraces came from the study of [Milner et al. 2019](https://www.nature.com/articles/s41588-018-0266-x).
-The SNPs were obtained by aligning GBS sequences against the `Morex v3` genome.
-The raw genotypic data of cultivated barley were then filtered with `mac > 10` and `mis < 0.95` and subsequently imputed by `BEAGLE v5.2`.
+In this tutorial, we use the data of IPK barley landraces from the study of [Milner et al. 2019](https://www.nature.com/articles/s41588-018-0266-x).
+
+The SNPs of barley landraces were obtained by aligning GBS sequences against the `Morex v3` genome.
+The raw genotypic data of cultivated barley were then filtered with the criteria of `mac > 10` and `mis < 0.95` and subsequently imputed by `BEAGLE v5.2`.
 
 After imputation, a total of 1661 georeferenced landraces were selected from the whole IPK collection according to the passport data procured from the [IPK BRIDGE database](https://bridge.ipk-gatersleben.de/).
 Next, we pruned redundant SNPs based on linkage disequilibrium with `PLINK`.
 
 * 1,661 geo-referenced landraces (no duplicates)
-      * 29,219 SNPs; LD prunned with SNP $r^2$ < 0.1; MAF > 0.01; no missing   
+      * 29,219 SNPs; LD pruned with SNP $r^2$ < 0.1; MAF > 0.01; no missing   
       
 The `vcf.gz` file is available at: ADD_GITLABorGITHUB_LINK_HERE/`IPKbarley_GBS1661landraces_LDpruned.vcf.gz`
 
@@ -87,7 +97,7 @@ The key point of this step is to prepare your data matrix of ancestry coefficien
 The R codes below first read `vcf.gz` with the `vcfR` package and converted `vcf` to a matrix of allele counts.
 If you already have a matrix of allele counts coded with `0`, `1` and `2`, you can go to the [next section](#estimate-ancestry-coefficients).
 
-```{r get_numeric_genotypic_matrix}
+```{r get_numeric_genotypic_matrix, eval=FALSE, echo=TRUE}
 library(vcfR)
 # a function to convert VCF to a numberic matrix
 vcf_to_nummatrix <- function(vcf){
@@ -115,12 +125,17 @@ To go through this demo, you can get the ancestry coefficients by typing
 
 * `data("ipk_anc_coef")`
 
+Also, we need geographical data of our IPK barley landraces.
+You can get the data with
+
+* `data("ipk_geo_coord")`
+
 <!---
 The ancestry coefficients were saved as `IPK_1661inds_alstructure_Q_hat.csv`, which can be found in our repository (`http://server228vsl.ipsp.uni-hohenheim.de/CheWeiChang/ggoutlier/-/tree/master/data/`).
 --->
 
 
-```{r compute_Q, eval=F}
+```{r compute_Q, eval=FALSE}
 # estimate ancestry coefficients for 1661 individuals
 library(alstructure) # load ALSTRUCTURE
 
@@ -131,10 +146,13 @@ dhat <- estimate_d(Xmat) # optimal d is 5
 fit.als <- alstructure(Xmat, d = dhat)
 alsQ <- fit.als$Q_hat
 colnames(alsQ) <- colnames(Xmat)
-write.table(alsQ, "../data/IPK_1661inds_alstructure_Q_hat.csv", row.names = F, col.names = T, sep = ",")
+
+## write csv 
+write.table(alsQ, "../data/IPK_1661inds_alstructure_Q_hat.csv",
+            row.names = F, col.names = T, sep = ",")
 ```
 
-```{r put_barley_data_in_package, eval=FALSE}
+```{r put_barley_data_in_package, eval=FALSE, echo=FALSE}
 ipk_geo_coord <- read.table("../data/IPK_1661ind_geo_coord.txt", header = T, stringsAsFactors = F)
 rownames(ipk_geo_coord) <- ipk_geo_coord[,1]
 ipk_geo_coord <- ipk_geo_coord[,-1]
@@ -154,25 +172,27 @@ To run `GGoutlieR`, users need two data:
 
 ### Get example data
 
-The IPK barley landrace data are available in `GGoutlieR` package.
+As mentioned in the previous section, the IPK barley landrace data are available in the `GGoutlieR` package.
 We can load the data set with `data()` as below.
 
 ```{r get_ipk_data, eval=TRUE}
 library(GGoutlieR)
 data("ipk_anc_coef") # get ancestry coefficients
 data("ipk_geo_coord") # get geographical coordinates
+
+# check data
 head(ipk_anc_coef)
 head(ipk_geo_coord)
 ```
 
 ### Run `GGoutlieR` analysis
 
-`ggoutlier` is the main function to carry out the `GGoutlieR` framework analysis.
+`ggoutlier` is the main function for carrying out the `GGoutlieR` framework analysis.
 (Please find the details of `GGoutlieR` framework in the supplementary material: ADD_GITLAB_LINK_HERE)
 
-In short, `GGoutlieR` framework include following major steps:
+In short, `GGoutlieR` framework includes following major steps:
 
-* search for an optimal number of nearest neighbors which is the default of `ggoutlier` function. Users can specify number of nearest neighbors with the argument `K`.   
+* search for an optimal number (K) of nearest neighbors (`ggoutlier` searches the optimal K by default. Users can specify the number of nearest neighbors with the argument `K`.)   
 * search K nearest neighbors (KNNs) with the optimal K or the given K.  
 * compute distance-based `D` statistics
 * obtain a heuristic null distribution of `D` with maximum likelihood estimation.
@@ -194,7 +214,7 @@ We would use the results from the `composite` method for further demonstration.
 The argument `verbose = FALSE` is used to suppress the printout message.
 If you want to see the running progress of `ggoutlier`, set `verbose = TRUE`.
 
-```{r run_ggoutlier, eval=FALSE}
+```{r run_ggoutlier, eval=FALSE, echo = TRUE}
 pthres = 0.025 # set a threshold
 
 ## run GGoutlieR with the composite approach
@@ -231,27 +251,27 @@ geoknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                         klim = c(3,50), 
                         method = "geoKNN",
                         verbose = F)
-
 ```
 
 
-```{r write_and_read_ggoutlier_output, eval=FALSE, echo=FALSE}
+```{r write_and_read_ggoutlier_output, eval=TRUE, echo=FALSE}
 #saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.05.RDS")
 #saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output_p0.05.RDS")
 #saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output_p0.05.RDS")
 #saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.01.RDS")
 #saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output_p0.01.RDS")
 #saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output_p0.01.RDS")
-saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.025.RDS")
-saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output_p0.025.RDS")
-saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output_p0.025.RDS")
+#saveRDS(geneticknn_res, file = "../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.025.RDS")
+#saveRDS(geoknn_res, file = "../data/IPK_landrace_ggoutlier_geoKNN_output_p0.025.RDS")
+#saveRDS(compositeknn_res, file = "../data/IPK_landrace_ggoutlier_composite_output_p0.025.RDS")
 
-geneticknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.025.RDS")
-geoknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geoKNN_output_p0.025.RDS")
-compositeknn_res <- readRDS("../data/IPK_landrace_ggoutlier_composite_output_p0.025.RDS")
+#geneticknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.025.RDS")
+#geoknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geoKNN_output_p0.025.RDS")
+compositeknn_res <- readRDS("../data/IPK_landrace_ggoutlier_composite_output_p0.025.RDS") # load ggoutlier results saved in advance
 ```
 
 After running `ggoutlier`, we use `summary_ggoutlier` to extract the IDs and p-values of outliers. 
+Users can select outliers according to the summary table from `summary_ggoutlier` for further investigation.
 
 ```{r show_result_table, eval=TRUE}
 ## check the head of summary table
@@ -259,15 +279,15 @@ head(summary_ggoutlier(compositeknn_res))
 length(unique(summary_ggoutlier(compositeknn_res)$ID))
 ```
 
-To visualize outliers on a geographical map, `plot_ggoutlier` draws colored lines connecting outliers to corresponding nearst neighbors on a geographical map.
+To visualize outliers on a geographical map, `plot_ggoutlier` draws colored lines connecting outliers to corresponding nearest neighbors on a geographical map.
 The color depth and thickness of lines are proportional to the -log(p) values.
 
 As described in the supplementary material (ADD_GITLAB_LINK), `GGoutlieR` framework identifies outliers based on two types of KNN approaches:
 
-* **geographical KNN**: K nearest neighbors defined based on geographical distances which are used to predict genetic components.  
-* **genetic KNN**: K nearest neighbors defined based on genetic distances which are used to predict geographical locations.
+* **geographical KNN**: K nearest neighbors defined based on geographical distances, used to predict genetic components.  
+* **genetic KNN**: K nearest neighbors defined based on genetic distances, used to predict geographical locations.
 
-In the graph made by `plot_ggoutlier`, the geographical KNNs of outliers are displayed with blue lines, whereas the genetic KNNs are presented with red lines.
+In the graph made by `plot_ggoutlier`, the geographical KNNs of outliers are displayed with blue lines, whereas red lines present genetic KNNs.
 In other words, blue lines and red lines indicate:
 
 * Blue lines: sample pairs with unusually **high genetic difference** within a **short geographical distance**  
@@ -278,7 +298,7 @@ Users can decide which type of KNNs to draw with `map_type = "geographic_knn"`, 
 Additionally, the `plot_ggoutlier` function projects ancestry coefficients of outliers to a geographical map as pie charts (the default with `show_knn_pie = TRUE`).
 Users can therefore present population genetic structure integrating geo-genetic patterns unveiled by `GGoutlieR`.
 
-The code block below produced two figures
+The code block below produced two figures (**Fig. 1**)
 The figure on the top is a geographical map with ancestry coefficients as pie charts.
 The figure at the bottom presents the results of `GGoutlieR`.
 The example here overlaid both red and blue lines on the same map (with the argument `map_type = "both"`).
@@ -300,13 +320,14 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
 
 ```
 
-![](../fig/IPK_ggoutlier_for_paper.jpg)
-*Ancestry coefficients and geo-genetic associations of outliers identified by GGoutlieR*
+![](../fig/IPK_ggoutlier_for_paper.jpg){width=100%}
+*Figure 1. Ancestry coefficients and geo-genetic patterns of outliers identified by GGoutlieR*
 
-`plot_ggoutlier` can crop the network graph by setting `select_xlim` and `select_ylim`.
-The codes below retain the links between outliers located in UK and corresponding KNNs.
-We can find that the outliers in UK are genetically close to the samples in Nepal.
-This pattern would be difficult to identify with conventional visualization tools, such as PCA.
+`plot_ggoutlier` can crop the network graph by setting `select_xlim` and `select_ylim` (`plot_xlim` and `plot_xlim` are used to control the boundaries of a geographical map)
+The codes below retain the links between outliers located in the UK and corresponding KNNs (**Fig. 2**).
+We can find that the outliers in the UK are genetically close to the samples from Southern Tibet.
+This pattern would be difficult to identify with conventional visualization tools, such as PCA of DNA markers or projection of ancestry coefficients on a geographical map, due to overlaps of data points on a graph.
+Also, our visualization tool provides more insights into unusual geo-genetic associations on an individual basis.
 
 ```{r ggoutlier_graph_highlightUK, eval=FALSE}
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
@@ -324,8 +345,10 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
                add_benchmark_graph = F)
 ```
 
+![](../fig/IPK_ggoutlier_highlighUK.jpg){width=100%}
+*Figure 2. GGoutlieR results with highlights of outliers in the UK*
 
-```{r make_fig_for_paper,eval=FALSE,echo=FALSE}
+```{r make_fig_for_paper_and_vignette,eval=FALSE,echo=FALSE}
 jpeg(filename = "../fig/IPK_ggoutlier_for_paper.jpg", res = 400,
      height = 3000, width = 3000)
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
