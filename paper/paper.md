@@ -54,11 +54,9 @@ Furthermore, `GGoutlieR` visualizes the geo-genetic patterns of outliers in netw
 
 # Concept of `GGoutlieR`
 
-Identification of outliers with anomalous geo-genetic patterns
-
 Under the isolation-by-distance assumption, the geographical origins are predictable from genetic variations (CITATION), and vice versa.
 With this respect, prediction models should result in large prediction errors for samples that oppose the isolation-by-distance assumption.
-We developed the `GGoutlieR` framework with this idea to model abnormal geo-genetic patterns.
+We developed the `GGoutlieR` framework with this idea to model anomalous geo-genetic patterns.
 
 In brief, `GGoutlierR` uses KNN regression to predict genetic components with the K nearest geographical neighbors and also does prediction contrariwise.
 Next, prediction errors are transformed to distance-based statistics following a Gamma distribution with unknown parameters.
@@ -66,19 +64,65 @@ An empirical Gamma distribution is obtained as the null distribution by searchin
 With the null Gamma distribution, `GGoutlieR` tests the null hypothesis that the geo-genetic pattern of a given sample agrees with the isolation-by-distance assumption.
 Finally, p values for every sample are computed with the empirical null distribution and statistics computed from prediction errors.
 The details of the `GGoutlieR` framework are described step-by-step in the supplementary material (GITHUB_LINK).
+
+# Example
+
+### Outlier identification
+
 For demonstration, we used the genotypic data and passport data of the global barley landrace collection with 1,661 accessions from the IPK genebank (CITATION).
 The full analysis of the barley data set with `GGoutlieR` is available in the vignette (GITLAB_LINK).
-
-In the example below, the computation was done with the function `ggoutlier`.
-The function `summary_ggoutlier` could be used to obtain a summary table of outliers by taking the output of `ggoutlier`.
+The outlier analysis was done with the function `ggoutlier`.
+The function `summary_ggoutlier` was then used to obtain a summary table of outliers by taking the output of `ggoutlier`.
 
 ```R
+library(GGoutlieR)
+data("ipk_anc_coef") # get ancestry coefficients
+data("ipk_geo_coord") # get geographical coordinates
 
+pthres = 0.025 # set a p-value threshold
+
+## run GGoutlieR
+ggoutlier_result <- ggoutlier(geo_coord = ipk_geo_coord,
+                              gen_coord = ipk_anc_coef,
+                              plot_dir = "./fig", 
+                              p_thres = pthres, 
+                              cpu = 4, 
+                              klim = c(3,50), 
+                              method = "composite",
+                              verbose = F,
+                              min_nn_dist = 1000)
+
+## print out outliers
+head(summary_ggoutlier(ggoutlier_result))
+
+#>                 ID     method      p.value
+#> 1  BRIDGE_HOR_2827     geoKNN 0.0002533251
+#> 2 BRIDGE_HOR_12795     geoKNN 0.0002871882
+#> 3    BRIDGE_BCC_37     geoKNN 0.0003011807
+#> 4 BRIDGE_HOR_10557     geoKNN 0.0003500990
+#> 5 BRIDGE_HOR_10555     geoKNN 0.0003697789
+#> 6        BTR_FT519 geneticKNN 0.0003816026
 ```
 
+### Visualization of unusual geo-genetic patterns
 
-# Visualization on a geographical map
+The unusual geo-genetic patterns detected by `GGoutlieR` can be presented on a geographical map with the function `plot_ggoutlier`.
 
+```R
+plot_ggoutlier(ggoutlier_res = ggoutlier_result,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
+               p_thres = pthres,
+               map_type = "both",
+               select_xlim = c(-20,140), 
+               select_ylim = c(10,62),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,62),
+               pie_r_scale = 1.2,
+               map_resolution = "course",
+               adjust_p_value_projection = F)
+```
 
+![Visualization example of GGoutlieR with IPK barley landrace data. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers identified by GGoutlieR.](../fig/IPK_ggoutlier_for_paper.jpg)
 
 # References
