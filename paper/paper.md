@@ -36,7 +36,7 @@ Furthermore, `GGoutlieR` provides a plotting function to display the geo-genetic
 
 # Statement of need
 
-Landscape genomics is a thriving field in ecological conservation (CITATION) and evolutionary genetics (CITATION), which provides insights into associations between genetic variation and environmental factors.
+Landscape genomics is a thriving field in ecological conservation and evolutionary genetics [@aguirre2021evolutionary; @lasky2023genotype], which provides insights into associations between genetic variation and environmental factors.
 This methodology requires reliable geographical and genomic information of biological samples.
 To recognize whether data are reliable, researchers may scrutinize associations between genetic similarities and geographical origins of biological samples before carrying out further studies.
 The pairwise genetic similarities of samples are expected to decline as geographical distances between origin habitats increase, so-called isolation-by-distance assumption.
@@ -44,8 +44,8 @@ This assumption could be violated due to long-distance migration or artificial f
 
 Visualization-based tools, such as `SPA` [@yang2012model], `SpaceMix` [@bradburd2016spatial], `unPC` [@house2018evaluating], help researchers to unveil samples with geo-genetic patterns opposing the isolation-by-distance assumption, but those tools do not provide statistics to simply pinpoint outliers.
 This shortage could be detrimental to the reproducibility of research.
-Moreover, with the advances in genome sequencing technologies, researchers nowadays work on much larger sample sizes than in the past, for example, the studies of genebank collections (CITATION).
-Visualization-based approaches may have difficulty in presenting unusual geo-genetic patterns because thousands of samples projected on a graph tend to overlap.
+Moreover, with the advances in genome sequencing technologies, researchers nowadays work on increasing sample sizes, for example, genebank collection studies of rice [@gutaker2020genomic; @wang2018genomic], barley [@milner2019genebank], wheat [@schulthess2022genomics], soybean [@liu2020pan] and maize [@li2019identifying].
+Visualization-based approaches may have difficulty in presenting unusual geo-genetic patterns in a large data set because numerous data points on a graph tend to overlap.
 Therefore, a new approach is needed to facilitate the detection of unusual geo-genetic associations in biological samples.
 We developed a heuristic statistic framework to detect **G**eo-**G**enetic **outlier**s, named `GGoutlieR`.
 Our package `GGoutlieR` computes empirical p-values of violating the isolation-by-distance assumption for individual samples according to geographical origins and genotypic data.
@@ -54,7 +54,7 @@ Furthermore, `GGoutlieR` visualizes the geo-genetic patterns of outliers in netw
 
 # Concept of `GGoutlieR`
 
-Under the isolation-by-distance assumption, the geographical origins are predictable from genetic variations (CITATION), and vice versa.
+Under the isolation-by-distance assumption, the geographical origins are predictable from genetic variations [@battey2020predicting;@guillot2016accurate], and vice versa.
 With this respect, prediction models should result in large prediction errors for samples that oppose the isolation-by-distance assumption.
 We developed the `GGoutlieR` framework with this idea to model anomalous geo-genetic patterns.
 
@@ -69,7 +69,7 @@ The details of the `GGoutlieR` framework are described step-by-step in the suppl
 
 ### Outlier identification
 
-For demonstration, we used the genotypic data and passport data of the global barley landrace collection with 1,661 accessions from the IPK genebank (CITATION).
+For demonstration, we used the genotypic data and passport data of the global barley landrace collection with 1,661 accessions from the IPK genebank [@milner2019genebank; @konig2020bridge].
 The full analysis of the barley data set with `GGoutlieR` is available in the vignette (GITLAB_LINK).
 The outlier analysis was done with the function `ggoutlier`.
 The function `summary_ggoutlier` was then used to obtain a summary table of outliers by taking the output of `ggoutlier`.
