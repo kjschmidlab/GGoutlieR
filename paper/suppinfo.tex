@@ -70,14 +70,6 @@ Che-Wei Chang\textsuperscript{1}, and Karl Schmid\textsuperscript{1}\\[1ex]
 \end{flushleft}
 
 \newpage
-%\singlespacing
-\begin{abstract}
-\small
-
-\end{abstract}
-\textbf{Keywords:} 
-
-\newpage
 
 % NOTE:
 % 2022-07-19: The original plan is including the clustering approach and applications with simulation data in this paper. However, I think adding them to the paper will make readers lose focus on the main features of GGoutlieR (identifying outliers and visualization of geo-genetic patterns on individual basis). So it would be better not include them...
@@ -133,8 +125,8 @@ The first approach in the \textit{GGoutlieR} framework aims at identifying outli
 \textbf{Step 1.} Compute pairwise geographical distance matrix. 
 
 \textbf{Step 2.} Find KNNs for each individual according to pairwise geographical distances with a given.
-To avoid a divisor of zero in the equation \ref{w_eq1} of \textbf{Step 3}, \textit{GGoutlieR} will ignore neighbors within 100 meters by the default (controlled by the \textbf{min\_nn\_dist} argument).
-Otherwise, one unit of distance is added to the off-diagonal values of geographical distance matrix before searching KNNs if any pairwise distance is zero and \textbf{min\_nn\_dist} is set to zero.
+To avoid a divisor of zero in the equation \ref{w_eq1} of \textbf{Step 3}, \textit{GGoutlieR} will ignore neighbors within 100 meters by the default (controlled by the \textit{min\_nn\_dist} argument).
+Otherwise, one unit of distance is added to the off-diagonal values of geographical distance matrix before searching KNNs if any pairwise distance is zero and \textit{min\_nn\_dist} is set to zero.
 
 \textbf{Step 3.} Predict $\hat{x}_{genetic,i,j}$ using a weighted KNN approach.
 $\hat{x}_{genetic,i,j}$ is the predicted coordinate of an individual $i$ in the dimension $j$ of $S_{genetic}$, where $i = \{1,2,...,N\}$ and $j = \{1,2,...,F\}$. $N$ is the number of individuals and $F$ is the number of dimensions in $S_{genetic}$, i.e. the number of ancestral populations. 
