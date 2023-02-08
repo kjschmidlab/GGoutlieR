@@ -134,7 +134,6 @@ You can get the data with
 The ancestry coefficients were saved as `IPK_1661inds_alstructure_Q_hat.csv`, which can be found in our repository (`http://server228vsl.ipsp.uni-hohenheim.de/CheWeiChang/ggoutlier/-/tree/master/data/`).
 --->
 
-
 ```{r compute_Q, eval=FALSE}
 # estimate ancestry coefficients for 1661 individuals
 library(alstructure) # load ALSTRUCTURE
@@ -199,8 +198,6 @@ In short, `GGoutlieR` framework includes following major steps:
 * carry out statistical tests:  
       - compute p-values for every sample according to `D` if `multi_stages = TRUE`.   
       - iteratively search KNNs, conduct statistical tests and remove the most significant samples until no new significant sample raises if `multi_stages = FALSE` (default).  
-
-
 
 Three different methods are available by setting the argument `method`:
 
