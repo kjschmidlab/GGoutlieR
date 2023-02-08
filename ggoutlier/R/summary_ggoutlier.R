@@ -1,8 +1,8 @@
-#'
-#' @details
+#' Summarize GGoutlieR results
+#' @description
 #' Get a summary table from the `ggoutlier` output
 #' @param  ggoutlier_res output from the function `ggoutlier`
-
+#' @return a table contains IDs of outliers and p-values.
 #' @export
 
 summary_ggoutlier <- function(ggoutlier_res){
