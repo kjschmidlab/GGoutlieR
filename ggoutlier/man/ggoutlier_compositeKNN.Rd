@@ -2,8 +2,7 @@
 % Please edit documentation in R/detect_outlier_composite.R
 \name{ggoutlier_compositeKNN}
 \alias{ggoutlier_compositeKNN}
-\title{Perform outlier identification with genetic space KNN and geographical space KNN.
-If `multi_stages=T`, in each iteration, the most significant outlier among the results of two approaches will be sequentially excluded and then search for new KNNs.}
+\title{GGoutlieR with the composite approach}
 \usage{
 ggoutlier_compositeKNN(
   geo_coord,
@@ -30,44 +29,49 @@ ggoutlier_compositeKNN(
 )
 }
 \arguments{
-\item{geo_coord}{a two column matrix or data.frame. the first column is longitude and the second one is latitude.}
+\item{geo_coord}{matrix or data.frame with two columns. The first column is longitude and the second one is latitude.}
 
-\item{gen_coord}{a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have to provide `pgdM` if `gen_coord` is not given.}
+\item{gen_coord}{matrix. A matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.}
 
-\item{pgdM}{`integer` a pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.}
+\item{pgdM}{matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.}
 
-\item{k_geneticKNN}{`integer` number of the nearest neighbor in a genetic space. the default is `NULL`.}
+\item{k_geneticKNN}{integer. Number of the nearest neighbors in a genetic space. The default is `NULL`. The `ggoutlier` will search the optimal K if `k_geneticKNN = NULL`.}
 
-\item{k_geoKNN}{`integer` number of the nearest neighbor in a geographical space. the default is `NULL`.}
+\item{k_geoKNN}{integer. Number of the nearest neighbors in a geographical space. the default is `NULL`. The `ggoutlier` will search the optimal K if `k_geoKNN = NULL`.}
 
-\item{klim}{if `k_geneticKNN = NULL` or `k_geoKNN`, an optimal k will be searched between the first and second value of `klim`}
+\item{klim}{vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`}
 
-\item{plot_dir}{the path to save plots}
+\item{plot_dir}{string. The path to save plots}
 
-\item{w_geo}{`integer` power of distance weight in geographical space KNN regression to predict genetic coordinates. For example, if `w_geo=2`, the weight of KNN is 1/d^2/sum(1/d^2).}
+\item{w_geo}{numeric. A value controlling the power of distance weight in geographical KNN prediction.}
 
-\item{w_genetic}{`integer` power of distance weight in genetic space KNN regression to predict geographical coordinates. For example, if `w_genetic=2`, the weight of KNN is 1/d^2/sum(1/d^2).}
+\item{w_genetic}{numeric. A value controlling the power of distance weight in genetic KNN prediction.}
 
-\item{p_thres}{`numeric` a significance level}
+\item{p_thres}{numeric. A significance level}
 
-\item{n}{number of samples to draw from the null distribution (to obtain the range of x axis to make a curve plot of null distribution)}
+\item{s}{integer. A scalar of geographical distance. The default `s=100` scales the distance to a unit of 0.1 kilometer.}
 
-\item{s}{a scalar of geographical distance. The default `s=100` scales the distance to a unit of 1 kilometer.}
+\item{min_nn_dist}{numeric. A minimal geographical distance for searching KNNs. Neighbors of a focal sample within this distance will be excluded from the KNN searching procedure.}
 
-\item{min_nn_dist}{a minimum distance (in a unit of 1 meter) between a given focal sample with its neighbor. The neighboring samples within this distance will not be selected as KNN of a focal sample. Use this argument if you want to avoid searching KNNs within communities. The default is `NULL`. `min_nn_dist` will be adjusted automatically with the `s` parameter if `min_nn_dist` is given. The default is 100 meters.}
+\item{multi_stages}{logic. A multi-stage test will be performed if is `TRUE` (the default is `TRUE`).}
 
-\item{multi_stages}{logic. a multi-stage test will be performed if is `TRUE` (the default is `TRUE`).}
+\item{maxIter}{numeric. Maximal iteration number of multi-stage KNN test.}
 
-\item{maxIter}{maximal iteration number of multi-stage KNN test.}
+\item{keep_all_stg_res}{logic. Results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)}
 
-\item{keep_all_stg_res}{logic. results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)}
+\item{warning_minR2}{numeric. The prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. If any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.}
 
-\item{warning_minR2}{the prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. if any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.}
+\item{cpu}{integer. Number of CPUs to use for searching the optimal K.}
+
+\item{geneticKNN_output}{output of `ggoutlier_geneticKNN`. Users can use this argument if running `ggoutlier_geneticKNN` in advance.}
+
+\item{geoKNN_output}{output of `ggoutlier_geoKNN`. Users can use this argument if running `ggoutlier_geoKNN` in advance.}
+
+\item{verbose}{logic. If `verbose = FALSE`, `ggoutlier` will suppress printout messages.}
 }
 \value{
 a list with two list. Each list includes five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
 }
 \description{
-Perform outlier identification with genetic space KNN and geographical space KNN.
-If `multi_stages=T`, in each iteration, the most significant outlier among the results of two approaches will be sequentially excluded and then search for new KNNs.
+perform outlier identification with genetic space KNN and geographical space KNN.
 }

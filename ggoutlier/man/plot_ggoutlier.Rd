@@ -2,14 +2,13 @@
 % Please edit documentation in R/plot_GGoutlieR.R
 \name{plot_ggoutlier}
 \alias{plot_ggoutlier}
-\title{Project GGNet on a geographical map}
+\title{Visualize GGoutlieR results on a geographical map}
 \usage{
 plot_ggoutlier(
   ggoutlier_res,
   geo_coord,
   anc_coef = NULL,
   gen_coord = NULL,
-  mutual = FALSE,
   pie_color = NULL,
   p_thres = NULL,
   color_res = 10,
@@ -24,55 +23,62 @@ plot_ggoutlier(
   red_alpha = 0.8,
   map_resolution = "low",
   show_knn_pie = FALSE,
+  show_col_bar = TRUE,
   which_sample = NULL,
   add_benchmark_graph = TRUE,
   vertical_plots = TRUE,
-  adjust_p_value_projection = TRUE
+  adjust_p_value_projection = FALSE
 )
 }
 \arguments{
-\item{geo_coord}{a two column matrix or data.frame. the first column is longitude and the second one is latitude.}
+\item{ggoutlier_res}{output of `ggoutlier`}
 
-\item{anc_coef}{a matrix of ancestry coefficients with samples ordered by rows. Ancestry coefficients are used to make pie charts on a geographical map. This argument is optional.}
+\item{geo_coord}{matrix or data.frame with two columns. The first column is longitude and the second one is latitude.}
 
-\item{pie_color}{colors of pie charts. colors are automatically assigned if `pie_color = NULL` (which is the default). This argument is optional.}
+\item{anc_coef}{matrix. A matrix of ancestry coefficients with samples ordered by rows. Ancestry coefficients are used to make pie charts on a geographical map. This argument is optional.}
 
-\item{p_thres}{a value of significant level. only samples with p values less than `p_thres` are mapped on a geographical map if `p_thres` is provided (the default is `NULL`). This argument is optional.}
+\item{gen_coord}{matrix. A matrix of "coordinates in a genetic space". It should be identical to the `gen_coord` used for running `ggoutlier`}
 
-\item{color_res}{the resolution of color scale}
+\item{pie_color}{string. Colors of pie charts. colors are automatically assigned if `pie_color = NULL` (which is the default). This argument is optional.}
 
-\item{dot_cex}{the size of dots denoting the positions of samples on a geographical map.}
+\item{p_thres}{numeric. A value of significant level. Only outliers (p values less than `p_thres`) are mapped on a geographical map if `p_thres` is provided (the default is `NULL`). This argument is optional.}
 
-\item{map_type}{the type of plot to draw. it can be `"geographic_knn"`, `"genetic_knn"` and `"both"`.}
+\item{color_res}{integer. The resolution of color scale.}
 
-\item{select_xlim}{values controlling longitude boundaries of a window to select outliers to present on a geographical map. the default is `select_xlim = c(-180,180)`.}
+\item{dot_cex}{numeric. The size of dots denoting the positions of samples on a geographical map.}
 
-\item{select_ylim}{values controlling latitude boundaries of a window to select outliers to present on a geographical map. the default is `select_ylim = c(-90,90)`.}
+\item{map_type}{string. The type of plot to draw. It can be `"geographic_knn"`, `"genetic_knn"` and `"both"`.}
 
-\item{plot_xlim}{values controlling longitude boundaries of a map.}
+\item{select_xlim}{vector. Values controlling longitude boundaries of a window to select outliers to present on a geographical map. The default is `select_xlim = c(-180,180)`.}
 
-\item{plot_ylim}{values controlling latitude boundaries of a map.}
+\item{select_ylim}{vector. Values controlling latitude boundaries of a window to select outliers to present on a geographical map. The default is `select_ylim = c(-90,90)`.}
+
+\item{plot_xlim}{vector. Values controlling longitude boundaries of a map.}
+
+\item{plot_ylim}{vector. Values controlling latitude boundaries of a map.}
 
 \item{only_edges_in_xylim}{logic. only the edges with starting points within the given `select_xlim` and `select_ylim` will display on a geographical map. the default is `TRUE`.}
 
-\item{pie_r_scale}{a scale controlling the radius of pie charts}
+\item{pie_r_scale}{numeric. A scale controlling the radius of pie charts}
 
-\item{red_alpha}{a value controlling the transparency of red lines. the default is 0.8}
+\item{red_alpha}{numeric. A value controlling the transparency of red lines. the default is 0.8}
 
-\item{map_resolution}{the resolution of the geographical map. See details in the manual of `rworldmap::getMap()`}
+\item{map_resolution}{string. The resolution of the geographical map. See details in the manual of `rworldmap::getMap()`}
 
 \item{show_knn_pie}{logic. If `TRUE`, the ancestry coefficients of K nearest neighbors of significant samples will display on the map. The default is `FALSE`.}
 
+\item{show_col_bar}{logic. If `TRUE`, a color key will be added to the output graph.}
+
 \item{which_sample}{a string vector of sample ID(s). If users want to only show specific sample(s)}
 
-\item{GGNet_adjm}{the output of `get_GGNet_adjacency_matrix`}
+\item{add_benchmark_graph}{logic. If `TRUE`, a benchmark graph with only pie charts of ancestry coefficients for comparison with the outlier graph.}
 
-\item{GeoSP_knn_res}{an output from `detect_outlier_in_GeoSpace`}
+\item{vertical_plots}{logic. If `TRUE`, a benchmark graph and outlier graph will be combined in a vertical direction.}
 
-\item{GenSP_knn_res}{an output from `detect_outlier_in_GeneticSpace`}
+\item{adjust_p_value_projection}{logic. If `TRUE`, the function will perform KNN prediction by forcing K=1 and compute new p-values for visualization.}
 }
 \description{
-Project GGNet on a geographical map
+Visualize geo-genetic patterns of outliers with their K nearest neighbors
 }
 \details{
 Red links on the map denote individual pairs that are genetically similar but geographically remote.
