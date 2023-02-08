@@ -25,54 +25,53 @@ bibliography: paper.bib
 
 # Summary
 
-Landscape genomics is a rising research field integrating genomic and environmental information to explore driving forces of evolution.
-Reliable geographical origin data of biological samples are a prerequisite for landscape genomics studies.
-Conventionally, researchers discover potentially questionable samples with visualization-based tools.
-However, such approaches are infeasible to handle large sample sizes due to overlapping data points on a graph and may encumber reproducible research.
-To address this shortage, we developed **G**eo-**G**enetic **outlier** (`GGoutlieR`), an R package of a heuristic framework to reveal and visualize samples with unusual geo-genetic patterns.
-`GGoutlieR` can calculate empirical p values for every sample, allowing researchers to easily spot outliers from thousands of samples.
-Furthermore, `GGoutlieR` provides a plotting function to display the geo-genetic patterns of outliers on a geographical map.
-`GGoutlieR` could greatly reduce the researcher's effort for data cleaning before conducting landscape genomics analyses.
+Landscape genomics is an emerging field of research that integrates genomic and environmental information to explore the drivers of evolution.
+Reliable data on the geographical origin of biological samples is a prerequisite for accurate landscape genomics studies.
+Traditionally, researchers discover potentially questionable samples using visualisation-based tools.
+However, such approaches cannot handle large sample sizes due to overlapping data points on a graph and can hinder reproducible research.
+To address this shortcoming, we developed **G**eo-**G**enetic **outlier** (`GGoutlieR`), an R package of a heuristic framework for detecting and visualising samples with unusual geo-genetic patterns.
+Outliers are identified by calculating empirical p-values for each sample, allowing users to  identify them in data sets with thousands of samples.
+The package also provides a plotting function to display the geo-genetic patterns of outliers on a geographical map.
+GGoutlieR could significantly reduce the amount of data cleaning that researchers need to do before carrying out landscape genomics analyses.
 
 # Statement of need
 
-Landscape genomics is a thriving field in ecological conservation and evolutionary genetics [@aguirre2021evolutionary; @lasky2023genotype], which provides insights into associations between genetic variation and environmental factors.
-This methodology requires reliable geographical and genomic information of biological samples.
-To recognize whether data are reliable, researchers may scrutinize associations between genetic similarities and geographical origins of biological samples before carrying out further studies.
-The pairwise genetic similarities of samples are expected to decline as geographical distances between origin habitats increase, so-called isolation-by-distance assumption.
-This assumption could be violated due to long-distance migration or artificial factors, such as human activities or mistakes in data and sample management.
+Landscape genomics is a thriving field in ecological conservation and evolutionary genetics [@aguirre2021evolutionary; @lasky2023genotype], providing insights into the links between genetic variation and environmental factors.
+This methodology requires reliable geographical and genomic information on biological samples.
+To determine whether data are reliable, researchers can examine associations between genetic similarities and the geographic origin of biological samples before proceeding with further studies.
+Under the assumption of isolation-by-distance, pairwise genetic similarities of samples are expected to decrease with increasing geographical distance between the sample origins.
+This assumption may be violated by long-distance migration or artificial factors such as human activity or data/sample management errors.
 
-Visualization-based tools, such as `SPA` [@yang2012model], `SpaceMix` [@bradburd2016spatial], `unPC` [@house2018evaluating], help researchers to unveil samples with geo-genetic patterns opposing the isolation-by-distance assumption, but those tools do not provide statistics to simply pinpoint outliers.
-This shortage could be detrimental to the reproducibility of research.
-Moreover, with the advances in genome sequencing technologies, researchers nowadays work on increasing sample sizes, for example, genebank collection studies in rice [@gutaker2020genomic; @wang2018genomic], barley [@milner2019genebank], wheat [@schulthess2022genomics], soybean [@liu2020pan] and maize [@li2019identifying].
-Visualization-based approaches may have difficulty in presenting unusual geo-genetic patterns in a large data set because of numerous overlapping data points on a graph.
-Therefore, a new approach is needed to facilitate the detection of unusual geo-genetic associations in biological samples.
-We developed a heuristic statistic framework to detect **G**eo-**G**enetic **outlier**s, named `GGoutlieR`.
-Our package `GGoutlieR` computes empirical p-values of violating the isolation-by-distance assumption for individual samples according to geographical origins and genotypic data.
-This feature enables researchers to easily select outliers from thousands of samples for further investigation.
-Furthermore, `GGoutlieR` visualizes the geo-genetic patterns of outliers in a network manner on a geographical map, providing insights into the relationships of geography and genetic clusters.
+Visualisation-based tools such as `SPA` [@yang2012model], `SpaceMix` [@bradburd2016spatial], `unPC` [@house2018evaluating] allow to identify samples with geo-genetic patterns that violate the isolation-by-distance assumption, but these tools do not provide statistics to robustly label outliers.
+Advances in genome sequencing technologies lead to much larger sample sizes, such as in geo-genetic analyses of genebank collections of rice [@gutaker2020genomic; @wang2018genomic], barley [@milner2019genebank], wheat [@schulthess2022genomics], soybean [@liu2020pan] and maize [@li2019identifying].
+Visualisation-based approaches may not be suitable to display unusual geo-genetic patterns in big datasets due to the large number of overlapping data points on a graph.
+To overcome this problem, we developed a heuristic statistical framework for detecting **G**eo-**G**enetic **outliers**, named `GGoutlieR`.
+Our `GGoutlieR` package computes empirical p-values for violation of the isolation-by-distance assumption for individual samples according to prior information on their geographic origin and genotyping data.
+This feature allows researchers to easily select outliers from thousands of samples for further investigation.
+In addition, `GGoutlieR` visualises the geo-genetic patterns of outliers as a network on a geographical map, providing insights into the relationships between geography and genetic clusters.
 
-# Concept of `GGoutlieR`
+# Algorithm of `GGoutlieR`
 
-Under the isolation-by-distance assumption, the geographical origins are predictable from genetic variations [@battey2020predicting;@guillot2016accurate], and vice versa.
-With this respect, prediction models should result in large prediction errors for samples that oppose the isolation-by-distance assumption.
-We developed the `GGoutlieR` framework based on this concept to model anomalous geo-genetic patterns.
+Under the isolation-by-distance assumption, the geographical origins of samples are predictable from their patterns of genetic variation [@battey2020predicting;@guillot2016accurate], and vice versa.
+In this context, prediction models should produce large prediction errors for samples that violate the isolation-by-distance assumption.
+Based on this concept, we developed the GGoutlieR framework to model anomalous geo-genetic patterns.
 
-In brief, `GGoutlierR` uses KNN regression to predict genetic components with the K nearest geographical neighbors and also does prediction contrariwise.
-Next, prediction errors are transformed into distance-based (*D*) statistics and the optimal K is identified by minimizing the sum of *D* statistics.
-*D* statistics is assumed following a Gamma distribution with unknown parameters.
-An empirical Gamma distribution is obtained as the null distribution by searching optimal parameters with maximum likelihood estimation.
-With the null Gamma distribution, `GGoutlieR` tests the null hypothesis that the geo-genetic pattern of a given sample agrees with the isolation-by-distance assumption.
-Finally, p values for every sample are computed with the empirical null distribution and statistics computed from prediction errors.
-The details of the `GGoutlieR` framework are described step-by-step in the supplementary material (GITHUB_LINK).
+Briefly, `GGoutlierR` uses *K*-nearest neighbour (KNN) regression to predict genetic components with the *K* nearest geographical neighbours, and also predicts in the opposite direction.
+Next, the prediction errors are transformed into distance-based (*D*) statistics and the optimal *K* is identified by minimising the sum of the *D* statistics.
+The *D* statistic is assumed to follow a gamma distribution with unknown parameters.
+An empirical gamma distribution is obtained as the null distribution by finding optimal parameters using maximum likelihood estimation.
+With the null gamma distribution, `GGoutlieR` tests the null hypothesis that the geogenetic pattern of a given sample is consistent with the isolation-by-distance assumption.
+Finally, p-values are calculated for each sample using the empirical null distribution and prediction error statistics.
+The details of the `GGoutlieR` framework are described step by step in the supplementary material (GITHUB_LINK).
+
 
 # Example
 
 ### Outlier identification
 
-For demonstration, we used the genotypic data and passport data of the global barley landrace collection with 1,661 accessions from the IPK genebank [@milner2019genebank; @konig2020bridge].
-The full analysis of the barley data set with `GGoutlieR` is available in the vignette (GITLAB_LINK).
-The outlier identification was done with the function `ggoutlier`.
+For demonstration, we used the genotypic and passport data of the global barley landrace collection of 1,661 accessions from the IPK genebank [@milner2019genebank; @konig2020bridge].
+The full analysis of the barley dataset with `GGoutlieR` is available in the vignette (GITLAB_LINK).
+Outliers were identified using the `ggoutlier` function.
 The function `summary_ggoutlier` was then used to obtain a summary table of outliers by taking the output of `ggoutlier`.
 
 ```R
