@@ -2,24 +2,25 @@
 % Please edit documentation in R/detect_outlier_in_GeoSpace.R
 \name{ggoutlier_geoKNN}
 \alias{ggoutlier_geoKNN}
-\title{Identify samples genetically different from K nearest geographical neighbors}
+\title{Identify samples genetically different from K nearest geographical neighbors (geographical space KNN)}
 \usage{
 ggoutlier_geoKNN(
   geo_coord,
   gen_coord,
-  min_nn_dist = NULL,
+  min_nn_dist = 100,
   k = NULL,
-  klim = c(3, 100),
-  s = 1000,
+  klim = c(3, 50),
+  s = 100,
   plot_dir = ".",
   w_power = 1,
   p_thres = 0.05,
   n = 10^6,
-  multi_stages = T,
+  multi_stages = TRUE,
   maxIter = NULL,
-  keep_all_stg_res = F,
+  keep_all_stg_res = FALSE,
   warning_minR2 = 0.9,
-  cpu = 1
+  cpu = 1,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -27,13 +28,13 @@ ggoutlier_geoKNN(
 
 \item{gen_coord}{a matrix of "sample's coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.}
 
-\item{min_nn_dist}{a minimum distance between a given focal sample with its neighbor. The neighboring samples within this distance will not be selected as KNN of a focal sample. Use this argument if you want to avoid searching KNNs within communities. The default is `NULL`.}
+\item{min_nn_dist}{a minimum distance (in a unit of 1 meter) between a given focal sample with its neighbor. The neighboring samples within this distance will not be selected as KNN of a focal sample. Use this argument if you want to avoid searching KNNs within communities. The default is `NULL`. `min_nn_dist` will be adjusted automatically with the `s` parameter if `min_nn_dist` is given. The default is 100 meters.}
 
 \item{k}{number of the nearest neighbor. the default is `NULL`.}
 
 \item{klim}{if `k = NULL`, an optimal k will be searched between the first and second value of `klim`}
 
-\item{s}{a scalar of geographical distance. The default `s=1000` scales the distance to a unit of 1 kilometer.}
+\item{s}{a scalar of geographical distance. The default `s=100` scales the distance to a unit of 0.1 kilometer.}
 
 \item{plot_dir}{the path to save plots}
 
@@ -55,7 +56,7 @@ ggoutlier_geoKNN(
 a list including five items. `statistics` is a `data.frame` consisting of the D_g values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
 }
 \description{
-Identify samples genetically different from K nearest geographical neighbors
+Identify samples genetically different from K nearest geographical neighbors (geographical space KNN)
 }
 \examples{
 # example 1 -> using ancestry coefficients:

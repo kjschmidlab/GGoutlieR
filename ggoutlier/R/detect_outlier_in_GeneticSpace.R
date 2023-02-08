@@ -1,54 +1,40 @@
-#' Identify samples geographically remote from K genetically nearest neighbors (genetic space KNN)
-#' @param geo_coord a two column matrix or data.frame. the first column is longitude and the second one is latitude.
-#' @param gen_coord a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have to provide `pgdM` if `gen_coord` is not given.
-#' @param pgdM a pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.
-#' @param k number of the nearest neighbor. the default is `NULL`.
-#' @param klim if `k = NULL`, an optimal k will be searched between the first and second value of `klim`
-#' @param s a scalar of geographical distance. The default `s=100` scales the distance to a unit of 1 kilometer.
-#' @param plot_dir the path to save plots
-#' @param w_power a value controlling the power of distance weight in KNN prediction. For example, if `w_power=2`, the weight of KNN is 1/d^2/sum(1/d^2).
-#' @param p_thres a significance level
-#' @param n number of samples to draw from the null distribution (to obtain the range of x axis to make a curve plot of null distribution)
-#' @param multi_stages logic. a multi-stage test will be performed if is `TRUE` (the default is `TRUE`).
-#' @param maxIter maximal iteration number of multi-stage KNN test.
-#' @param keep_all_stg_res logic. results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)
-#' @param warning_minR2 the prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. if any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.
-#' @return a list including five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
+#' GGoutlieR with the genetic KNN approach
+#' @description identify samples geographically remote from K genetically nearest neighbors (genetic KNN)
+#' @param geo_coord matrix or data.frame with two columns. The first column is longitude and the second one is latitude.
+#' @param gen_coord matrix. A matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.
+#' @param pgdM matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.
+#' @param method string. The method to run `GGoutlieR`. It can be "composite", "geneticKNN", or "geoKNN".
+#' @param k integer. Number of the nearest neighbors.
+#' @param klim vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`
+#' @param plot_dir string. The path to save plots
+#' @param w_power numeric. A value controlling the power of distance weight in genetic KNN prediction.
+#' @param p_thres numeric. A significance level
+#' @param s integer. A scalar of geographical distance. The default `s=100` scales the distance to a unit of 0.1 kilometer.
+#' @param min_nn_dist numeric. A minimal geographical distance for searching KNNs. Neighbors of a focal sample within this distance will be excluded from the KNN searching procedure.
+#' @param cpu integer. Number of CPUs to use for searching the optimal K.
+#' @param verbose logic. If `verbose = FALSE`, `ggoutlier` will suppress printout messages.
+#' @param multi_stages logic. A multi-stage test will be performed if is `TRUE` (the default is `TRUE`).
+#' @param maxIter numeric. Maximal iteration number of multi-stage KNN test.
+#' @param keep_all_stg_res logic. Results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)
+#' @param warning_minR2 numeric. The prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. If any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.
 #' @export
-#'
-#'
-#' @examples
-#' # example 1 -> using ancestry coefficients:
-#'  geo_coord <- read.table("./data/georef_1661ind_geo_coord_for_locator.txt", header = T, stringsAsFactors = F)
-#'  rownames(geo_coord) <- geo_coord[,1]
-#'  geo_coord <- geo_coord[,-1]
-#'  anc.coef <- t(as.matrix(read.csv("./data/alstructure_Q_hat_1661inds.csv", header = F, stringsAsFactors = F)))
-#'  sus2 <- ggoutlier_geneticKNN(geo_coord = geo_coord, gen_coord = anc.coef,
-#'                                     plot_dir = "./fig", p_thres = 0.05, w_power = 2,
-#'                                     k = NULL, klim = c(3,100), keep_all_stg_res = F)
-#'  example 2 -> using eigenvectors:
-#'  pc <- read.table("data/gbs_georef_1661inds_PCA.eigenvec", stringsAsFactors = F)
-#'  rownames(pc) <- gsub(pc[,2], pattern = "^0_", replacement = "")
-#'  pc <- apply(pc[,-c(1:2)], 2, function(x){scale(x)}) # removing FID and IID and normalizing data
-#'  sus2 <- ggoutlier_geneticKNN(geo_coord = geo_coord, gen_coord = pc[,1:5],
-#'                                        plot_dir = "./fig", p_thres = 0.05, w_power = 2,
-#'                                        k = NULL, klim = c(3,100), keep_all_stg_res = F)
-
-ggoutlier_geneticKNN <- function(geo_coord, gen_coord = NULL, pgdM = NULL,
-                                           k = NULL,
-                                           klim = c(3,50),
-                                           plot_dir = ".",
-                                           w_power = 2,
-                                           p_thres = 0.05,
-                                           n = 10^6,
-                                           s = 100,
-                                           multi_stages = TRUE,
-                                           maxIter=NULL,
-                                           keep_all_stg_res = FALSE,
-                                           warning_minR2 = 0.9,
-                                           cpu = 1,
-                                           verbose = TRUE
-                                    ){
+ggoutlier_geneticKNN <- function(geo_coord,
+                                 gen_coord = NULL,
+                                 pgdM = NULL,
+                                 k = NULL,
+                                 klim = c(3,50),
+                                 plot_dir = ".",
+                                 w_power = 2,
+                                 p_thres = 0.05,
+                                 n = 10^6,
+                                 s = 100,
+                                 multi_stages = TRUE,
+                                 maxIter=NULL,
+                                 keep_all_stg_res = FALSE,
+                                 warning_minR2 = 0.9,
+                                 cpu = 1,
+                                 verbose = TRUE
+                                 ){
   required_pkgs <- c("geosphere", # for calculating geographical distances
                      "stats4", # package to perform maximum likelihood estimation
                      "FastKNN", # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
