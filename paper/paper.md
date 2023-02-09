@@ -127,7 +127,7 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_result,
 
 # Acknowledgement
 
-We appreciate Max Haupt for preparing the raw VCF data of barley landraces that was used in the example.
+We appreciate Martin Mascher and Max Haupt of Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) for preparing the raw VCF data of barley landraces that was used in the example.
 The project at Schmid lab was supported by the funds from the Federal Ministry of Food and Agriculture (BMEL) according to a decision of the parliament of the Federal Republic of Germany via the Federal Office for Agriculture and Food (BLE) under the Federal Programme for Ecological Farming and Other Forms of Sustainable Agriculture (Project number 2818202615). 
 C.W.C was supported by the Study Abroad Fellowship from the Education Ministry of Taiwan (R.O.C.) (Project number 1100123625).
 
