@@ -312,9 +312,8 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
                plot_xlim = c(-20,140),
                plot_ylim = c(10,62),
                pie_r_scale = 1.2,
-               map_resolution = "course",
+               map_resolution = "coarse",
                adjust_p_value_projection = F)
-
 ```
 
 ![](../fig/IPK_ggoutlier_for_paper.jpg){width=100%}
