@@ -275,7 +275,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
     k.sel.plot <- paste(plot_dir, "/KNN_Dg_optimal_k_selection.pdf", sep = "")
     pdf(k.sel.plot, width = 5, height = 4)
     par(mar=c(4,6,1,1))
-    plot(x = klim[1]:klim[2], y = all.D, xlab="K", ylab=expression(sum(D[i], i==1, n)))
+    plot(x = klim[1]:klim[2], y = all.D, xlab="K", ylab=expression(sum(D["genetic,i"], i==1, n)))
     abline(v = opt.k)
     legend("top",legend = paste("optimal k =", opt.k), pch="", bty = "n",cex = 1.2)
     invisible(dev.off())
