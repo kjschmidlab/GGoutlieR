@@ -61,7 +61,7 @@ plot_ggoutlier <- function(ggoutlier_res,
 ){
   required_pkgs <- c("rworldmap", "scales", "plotrix",
                      "mapplots", "RColorBrewer",
-                     "rworldxtra","dichromat")
+                     "rworldxtra","dichromat", "sp")
   invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
 
 
@@ -243,7 +243,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     }else{
       par(mfrow = c(1,2), mar = c(1,1,1,1))
     }
-    plot(geomap, xlim = plot_xlim, ylim = plot_ylim)
+    sp::plot(geomap, xlim = plot_xlim, ylim = plot_ylim)
     pie.r = abs(diff(par("usr")[1:2]) )*0.005
     for(i in 1:nrow(anc_coef)){
       add.pie(z = round(anc_coef[i,]*10^5),
@@ -256,7 +256,7 @@ plot_ggoutlier <- function(ggoutlier_res,
   }
 
   ## make a blank map
-  plot(geomap, xlim = plot_xlim, ylim = plot_ylim, col = NA, border = "white")
+  sp::plot(geomap, xlim = plot_xlim, ylim = plot_ylim, col = NA, border = "white")
   if(map_type == "both" | map_type == "geographic_knn"){
     if(is.null(p_thres)){
       segments(x0 = geo_coord[geosp.df$row,1],
@@ -314,7 +314,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     }
   }
 
-  plot(geomap, xlim = plot_xlim, ylim = plot_ylim, add=T)
+  sp::plot(geomap, xlim = plot_xlim, ylim = plot_ylim, add=T)
   if(is.null(anc_coef)){points(x = geo_coord[,1], y = geo_coord[,2], pch = 16, cex = dot_cex)}
   if(!is.null(anc_coef)){
     points(x = geo_coord[,1], y = geo_coord[,2], pch = 16, cex = dot_cex)
