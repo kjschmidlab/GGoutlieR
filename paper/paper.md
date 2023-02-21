@@ -106,7 +106,8 @@ head(summary_ggoutlier(ggoutlier_result))
 
 ### Visualization of unusual geo-genetic patterns
 
-The unusual geo-genetic patterns detected by `GGoutlieR` can be presented on a geographical map with the function `plot_ggoutlier`.
+The unusual geo-genetic patterns detected by `GGoutlieR` can be presented on a geographical map with the function `plot_ggoutlier` (\autoref{fig:example}).
+
 
 ```R
 plot_ggoutlier(ggoutlier_res = ggoutlier_result,
@@ -123,11 +124,11 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_result,
                adjust_p_value_projection = F)
 ```
 
-![Visualization example of GGoutlieR with IPK barley landrace data. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers identified by GGoutlieR.](../fig/IPK_ggoutlier_for_paper.jpg)
+![Visualization example of GGoutlieR with IPK barley landrace data. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers identified by GGoutlieR. \label{fig:example}](../fig/IPK_ggoutlier_for_paper.jpg)
 
 # Acknowledgement
 
-We appreciate Martin Mascher and Max Haupt of Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) for providing the raw VCF data of barley landraces that was used in the example.
+We appreciate Dr. Martin Mascher and Max Haupt of Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) for providing the raw VCF data of barley landraces that was used in the example.
 The project at Schmid lab was supported by the funds from the Federal Ministry of Food and Agriculture (BMEL) according to a decision of the parliament of the Federal Republic of Germany via the Federal Office for Agriculture and Food (BLE) under the Federal Programme for Ecological Farming and Other Forms of Sustainable Agriculture (Project number 2818202615). 
 C.W.C was supported by the Study Abroad Fellowship from the Education Ministry of Taiwan (R.O.C.) (Project number 1100123625).
 
