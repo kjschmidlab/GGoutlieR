@@ -20,7 +20,8 @@ Imports:
     mapplots, 
     RColorBrewer,
     rworldxtra,
-    dichromat
+    dichromat,
+    sp
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
