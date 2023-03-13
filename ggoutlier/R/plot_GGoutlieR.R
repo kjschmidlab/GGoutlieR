@@ -10,6 +10,7 @@
 #' @param  anc_coef matrix. A matrix of ancestry coefficients with samples ordered by rows. Ancestry coefficients are used to make pie charts on a geographical map. This argument is optional.
 #' @param  gen_coord matrix. A matrix of "coordinates in a genetic space". It should be identical to the `gen_coord` used for running `ggoutlier`
 #' @param  pie_color string. Colors of pie charts. colors are automatically assigned if `pie_color = NULL` (which is the default). This argument is optional.
+#' @param  map_color string. Colors of map contours. The default is `map_color = "black"`
 #' @param  p_thres numeric. A value of significant level. Only outliers (p values less than `p_thres`) are mapped on a geographical map if `p_thres` is provided (the default is `NULL`). This argument is optional.
 #' @param  color_res integer. The resolution of color scale.
 #' @param  dot_cex numeric. The size of dots denoting the positions of samples on a geographical map.
@@ -39,6 +40,7 @@ plot_ggoutlier <- function(ggoutlier_res,
                            anc_coef = NULL,
                            gen_coord = NULL,
                            pie_color = NULL,
+                           map_color = "black",
                            p_thres = NULL,
                            color_res = 10,
                            dot_cex = 0.4,
@@ -243,7 +245,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     }else{
       par(mfrow = c(1,2), mar = c(1,1,1,1))
     }
-    sp::plot(geomap, xlim = plot_xlim, ylim = plot_ylim)
+    sp::plot(geomap, xlim = plot_xlim, ylim = plot_ylim, border = map_color)
     pie.r = abs(diff(par("usr")[1:2]) )*0.005
     for(i in 1:nrow(anc_coef)){
       add.pie(z = round(anc_coef[i,]*10^5),
@@ -314,7 +316,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     }
   }
 
-  sp::plot(geomap, xlim = plot_xlim, ylim = plot_ylim, add=T)
+  sp::plot(geomap, xlim = plot_xlim, ylim = plot_ylim, add=T, border = map_color)
   if(is.null(anc_coef)){points(x = geo_coord[,1], y = geo_coord[,2], pch = 16, cex = dot_cex)}
   if(!is.null(anc_coef)){
     points(x = geo_coord[,1], y = geo_coord[,2], pch = 16, cex = dot_cex)
