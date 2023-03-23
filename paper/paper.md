@@ -5,22 +5,19 @@ tags:
   - landscape genomics
   - K nearest neighbors
   - geo-genetic patterns
-
-authors:
-  - name: Che-Wei Chang
-    orcid: 0000-0001-6704-3732
+author:
+  - name: 'Che-Wei Chang'
+    corresponding: true
+    orcid: '0000-0001-6704-3732'
     affiliation: 1
-  - name: Karl Schmid
-    orcid: 0000-0001-5129-895X
+  - name: 'Karl Schmid'
+    orcid: '0000-0001-5129-895X'
     affiliation: 1
-
-affiliations:
- - name: University of Hohenheim, Stuttgart, Germany
-   index: 1
- 
-
-date: 07 Feb 2023
-bibliography: paper.bib
+affiliation:
+  - name: 'University of Hohenheim, Stuttgart, Germany'
+    index: 1
+date: 23 March 2023
+bibliography: ./paper.bib
 ---
 
 # Summary
@@ -62,7 +59,7 @@ The *D* statistic is assumed to follow a gamma distribution with unknown paramet
 An empirical gamma distribution is obtained as the null distribution by finding optimal parameters using maximum likelihood estimation.
 With the null gamma distribution, `GGoutlieR` tests the null hypothesis that the geogenetic pattern of a given sample is consistent with the isolation-by-distance assumption.
 Finally, p-values are calculated for each sample using the empirical null distribution and prediction error statistics.
-The details of the `GGoutlieR` framework are described step by step in the supplementary material (GITHUB_LINK).
+The details of the `GGoutlieR` framework are described step by step in the supplementary material (https://gitlab.com/kjschmid/ggoutlier/paper/suppinfo.pdf).
 
 
 # Example
@@ -70,7 +67,7 @@ The details of the `GGoutlieR` framework are described step by step in the suppl
 ### Outlier identification
 
 For demonstration, we used the genotypic and passport data of the global barley landrace collection of 1,661 accessions from the IPK genebank [@milner2019genebank; @konig2020bridge].
-The full analysis of the barley dataset with `GGoutlieR` is available in the vignette (GITLAB_LINK).
+The full analysis of the barley dataset with `GGoutlieR` is available in the vignette (https://gitlab.com/kjschmid/ggoutlier/vignettes/outlier_detection.pdf).
 Outliers were identified using the `ggoutlier` function.
 The function `summary_ggoutlier` was then used to obtain a summary table of outliers by taking the output of `ggoutlier`.
 
@@ -105,11 +102,11 @@ head(summary_ggoutlier(ggoutlier_result))
 ```
 
 ### Visualization of unusual geo-genetic patterns
+![Visualization example of GGoutlieR with IPK barley landrace data. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers identified by GGoutlieR. \label{fig:example}](../fig/IPK_ggoutlier_for_paper.jpg)
 
 The unusual geo-genetic patterns detected by `GGoutlieR` can be presented on a geographical map with the function `plot_ggoutlier` (\autoref{fig:example}).
-
-
 ```R
+## visualize GGoutlieR results
 plot_ggoutlier(ggoutlier_res = ggoutlier_result,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -124,7 +121,7 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_result,
                adjust_p_value_projection = F)
 ```
 
-![Visualization example of GGoutlieR with IPK barley landrace data. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers identified by GGoutlieR. \label{fig:example}](../fig/IPK_ggoutlier_for_paper.jpg)
+
 
 # Acknowledgement
 
