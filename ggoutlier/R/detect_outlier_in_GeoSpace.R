@@ -110,7 +110,7 @@ ggoutlier_geoKNN <- function(geo_coord,
   # Search the optimal K for KNN
   if(is.null(k)){
     # automatically select k if k=NULL
-    if(verbose) cat(paste("\n\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take a lot of time...\n"))
+    cat(paste("\n\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
     all.D <- find_optimalK_geoKNN(geo_coord = geo_coord,
                                      gen_coord = gen_coord,
                                      geo.dM = geo.dM,
@@ -136,7 +136,7 @@ ggoutlier_geoKNN <- function(geo_coord,
 
   }
   if(is.null(k)){stop("k is NULL!")}
-  if(verbose) cat("\nSearching K nearest neighbors...\n")
+  cat("\nSearching K nearest neighbors...\n")
 
   #-----------------------------------
   # KNN prediction with the optimal K (or K given by users)
@@ -218,6 +218,7 @@ ggoutlier_geoKNN <- function(geo_coord,
   }else{
     #---------------------
     # multi-stage test
+    cat("\n\nDoing multi-stage test...\n\n")
     if(verbose) cat(paste0("\n\nStart multi-stage KNN test process with k=",k,
                    " and using the null Gamma distribution with shape=", round(current.a, digits = 3),
                    " and rate=",round(current.b, digits = 3),

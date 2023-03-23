@@ -2,7 +2,7 @@
 {
   if(interactive())
   {
-    packageStartupMessage("# GGoutlieR v0.2.0")
+    packageStartupMessage("# GGoutlieR v0.2.2")
   }
 
 }

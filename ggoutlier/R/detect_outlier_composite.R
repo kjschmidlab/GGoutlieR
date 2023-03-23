@@ -48,7 +48,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   required_pkgs <- c("geosphere", # for calculating geographical distances
                      "stats4", # package to perform maximum likelihood estimation
                      "FastKNN", # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
-                     "foreach", "doParallel",
+                     "foreach", "doSNOW", # doParallel in previous version -> use doSNOW to make progress bars
                      "iterators","parallel")
   invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
 
@@ -178,7 +178,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   ##---------------------------------------------------
   ## NOTE: this step would be skipped if `geneticKNN_output` is available
   if(is.null(k_geneticKNN)){
-    if(verbose) cat(paste("\n `k_geneticKNN` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
+    cat(paste("\n `k_geneticKNN` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
     if(do_par){cl <- makeCluster(cpu)}else{cl <- NULL}
     all.D = find_optimalK_geneticKNN(geo_coord = geo_coord,
                                      pgdM = pgdM,
@@ -208,7 +208,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   ## KNN in genetic space: prediction with the optimal K (or K given by users)
   ##---------------------------------------------------
   ##---------------------------------------------------
-  if(verbose) cat("\nSearching K nearest neighbors (in a genetic space)...\n")
+  cat("\nSearching K nearest neighbors (in a genetic space)...\n")
   knn.indx_geneticKNN <- find_gen_knn(pgdM, k=k_geneticKNN)
   pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,
                                        pgdM = pgdM,
@@ -258,7 +258,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
 
   if(is.null(k_geoKNN)){
     # automatically select k if k=NULL
-    if(verbose) cat(paste("\n\n `k_geoKNN` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take a lot of time...\n"))
+    cat(paste("\n\n `k_geoKNN` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
     if(do_par){cl <- makeCluster(cpu)}else{cl <- NULL}
     all.D <- find_optimalK_geoKNN(geo_coord = geo_coord,
                                   gen_coord = gen_coord,
@@ -290,7 +290,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   ## KNN in geographical space: prediction with the optimal K (or K given by users)
   ##---------------------------------------------------
   ##---------------------------------------------------
-  if(verbose) cat("\nSearching K nearest neighbors...\n")
+  cat("\nSearching K nearest neighbors (in geographical space)...\n")
   knn.indx_geoKNN <- find_geo_knn(geo.dM = geo.dM, k=k_geoKNN, min_nn_dist=min_nn_dist)
   pred.q <- pred_q_knn(geo_coord = geo_coord, gen_coord = gen_coord, geo.dM =  geo.dM, knn.indx_geoKNN, w_power = w_geo)
   # calculate Dg statistic
@@ -461,11 +461,12 @@ ggoutlier_compositeKNN <- function(geo_coord,
   }else{
     #-------------------------------------------------------------
     # multi-stage test
-    if(verbose) cat(paste0("\n\nStart the multi-stage `geneticKNN` test process with k=",k_geneticKNN,
+    cat("\n\nDoing multi-stage test...\n\n")
+    if(verbose) cat(paste0("\n\nInitiate the multi-stage `geneticKNN` test process with k=",k_geneticKNN,
                    " using a null Gamma distribution with shape=", round(current.a_geneticKNN, digits = 3),
                    " and rate=",round(current.b_geneticKNN, digits = 3),
                    " (the parameters of Gamma distribution were determined by MLE)\n"))
-    if(verbose) cat(paste0("Start the multi-stage `geoKNN` test process with k=",k_geoKNN,
+    if(verbose) cat(paste0("Initiate the multi-stage `geoKNN` test process with k=",k_geoKNN,
                " using a null Gamma distribution with shape=", round(current.a_geoKNN, digits = 3),
                " and rate=",round(current.b_geoKNN, digits = 3),
                " (the parameters of Gamma distribution were determined by MLE)\n\n"))

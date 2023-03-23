@@ -11,14 +11,20 @@ find_optimalK_geoKNN <- function(geo_coord,
   all.D <- c()
   ## parallel computation (if `cpu` > 1)
   if(do_par){
-    doParallel::registerDoParallel(cl)
+    doSNOW::registerDoSNOW(cl)
     kindx <- seq(from = min(klim), to = max(klim), by = 1)
     parallel::clusterExport(cl = cl,
                             unclass(lsf.str(envir = asNamespace("GGoutlieR"),
                                             all = T)),
                             envir = as.environment(asNamespace("GGoutlieR"))
     )
-    all.D <- foreach(k = kindx, .packages='FNN', .combine="c") %dopar% {
+    ## setup a progress bar for foreach
+    pb <- txtProgressBar(max = max(klim), min = min(klim), style = 3)
+    progress <- function(n){setTxtProgressBar(pb, n)}
+    opts <- list(progress = progress)
+    clusterExport(cl, "opts", envir = environment())
+
+    all.D <- foreach(k = kindx, .packages='FNN', .combine="c", .options.snow = opts) %dopar% {
       # find KNN
       knn.indx <- find_geo_knn(geo.dM = geo.dM,
                                k=k,
@@ -35,8 +41,11 @@ find_optimalK_geoKNN <- function(geo_coord,
     stopCluster(cl)
   } else {
     ## computation with a single cpu
+
+    ## setup a progress bar
+    pb <- txtProgressBar(max = max(klim), min = min(klim), style = 3)
+
     while(k <= max(klim)){
-      cat(paste0("Calculating Dg with k = ",k,"\r"), append = F)
       # find KNN
       knn.indx <- find_geo_knn(geo.dM = geo.dM, k=k, min_nn_dist=min_nn_dist)
       # KNN prediction
@@ -45,6 +54,8 @@ find_optimalK_geoKNN <- function(geo_coord,
       # calculate Dg statistic
       Dg <- cal_Dg(pred.q, gen_coord)
       all.D <- c(all.D, sum(Dg))
+
+      setTxtProgressBar(pb, k)
       k=k+1
     }
   }

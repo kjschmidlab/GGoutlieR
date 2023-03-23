@@ -113,7 +113,7 @@ ggoutlier_geneticKNN <- function(geo_coord,
   ## search for the optimal K
 
   if(is.null(k)){
-    if(verbose) cat(paste("\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
+    cat(paste("\n `k` is NULL; searching for optimal k between", klim[1], "and", klim[2],"\nthis process can take time...\n"))
 
     all.D = find_optimalK_geneticKNN(geo_coord = geo_coord,
                                              pgdM = pgdM,
@@ -138,7 +138,7 @@ ggoutlier_geneticKNN <- function(geo_coord,
 
   }
   if(is.null(k)){stop("k is NULL!")}
-  if(verbose) cat("\nSearching K nearest neighbors...\n")
+  cat("\nSearching K nearest neighbors...\n")
   #---------------------------------
   # KNN prediction with the optimal K (or K given by users)
   knn.indx <- find_gen_knn(pgdM, k=k)
@@ -238,7 +238,8 @@ ggoutlier_geneticKNN <- function(geo_coord,
   }else{
     #-------------------------------------------------------------
     # multi-stage test
-    if(verbose) cat(paste0("\n\nStart the multi-stage KNN test process with k=",k,
+    cat("\n\nDoing multi-stage test...\n\n")
+    if(verbose) cat(paste0("\n\nInitiate the multi-stage KNN test process with k=",k,
                    " using a null Gamma distribution with shape=", round(current.a, digits = 3),
                    " and rate=",round(current.b, digits = 3),
                    " (the parameters of Gamma distribution were determined by MLE)\n\n"))
