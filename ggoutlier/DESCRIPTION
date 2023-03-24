@@ -6,6 +6,8 @@ Author: Che-Wei Chang, Karl Schmid
 Maintainer: Che-Wei Chang <chewei.chang@uni-hohenheim>
 Description: An R package used to identify individuals with unusual geo-genetic patterns
 License: MIT License 
+Depends:
+    R (>= 3.5.0)
 Imports:
     geosphere,
     stats4, 
