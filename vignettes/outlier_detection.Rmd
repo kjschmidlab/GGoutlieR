@@ -79,7 +79,7 @@ Next, we pruned redundant SNPs based on linkage disequilibrium with `PLINK`.
 * 1,661 geo-referenced landraces (no duplicates)
       * 29,219 SNPs; LD pruned with SNP $r^2$ < 0.1; MAF > 0.01; no missing   
       
-The `vcf.gz` file is available at: ADD_GITLABorGITHUB_LINK_HERE/`IPKbarley_GBS1661landraces_LDpruned.vcf.gz`
+The `vcf.gz` file is available at: https://gitlab.com/kjschmid/ggoutlier/-/blob/master/data/IPKbarley_GBS1661landraces_LDpruned.vcf.gz
 
 ## Pretreatment: calculate ancestry coefficients
 
@@ -187,7 +187,7 @@ head(ipk_geo_coord)
 ### Run `GGoutlieR` analysis
 
 `ggoutlier` is the main function for carrying out the `GGoutlieR` framework analysis.
-(Please find the details of `GGoutlieR` framework in the supplementary material: ADD_GITLAB_LINK_HERE)
+(Please find the details of `GGoutlieR` framework in the supplementary material: https://gitlab.com/kjschmid/ggoutlier/-/blob/master/paper/suppinfo.pdf)
 
 In short, `GGoutlieR` framework includes following major steps:
 
@@ -279,7 +279,7 @@ length(unique(summary_ggoutlier(compositeknn_res)$ID))
 To visualize outliers on a geographical map, `plot_ggoutlier` draws colored lines connecting outliers to corresponding nearest neighbors on a geographical map.
 The color depth and thickness of lines are proportional to the -log(p) values.
 
-As described in the supplementary material (ADD_GITLAB_LINK), `GGoutlieR` framework identifies outliers based on two types of KNN approaches:
+As described in the supplementary material (https://gitlab.com/kjschmid/ggoutlier/-/blob/master/paper/suppinfo.pdf), `GGoutlieR` framework identifies outliers based on two types of KNN approaches:
 
 * **geographical KNN**: K nearest neighbors defined based on geographical distances, used to predict genetic components.  
 * **genetic KNN**: K nearest neighbors defined based on genetic distances, used to predict geographical locations.
