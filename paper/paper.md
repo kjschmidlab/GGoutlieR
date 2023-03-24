@@ -10,6 +10,7 @@ author:
     corresponding: true
     orcid: '0000-0001-6704-3732'
     affiliation: 1
+    email: 'chewei.chang@uni-hohenheim.de'
   - name: 'Karl Schmid'
     orcid: '0000-0001-5129-895X'
     affiliation: 1
@@ -121,6 +122,9 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_result,
                adjust_p_value_projection = F)
 ```
 
+# Availability
+
+The `GGoutlierR` package and vignette are available in our GitLab repository (https://gitlab.com/kjschmid/ggoutlier).
 
 
 # Acknowledgement
