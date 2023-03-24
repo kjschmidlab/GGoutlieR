@@ -107,7 +107,7 @@ To develop the \textit{GGoutlieR} framework, we assume that IBD patterns are per
 Let geographical distribution and genetic variation of samples be described with two coordinate systems, $S_{geo}$ and $S_{genetic}$.
 We assume that the coordinates of an individual in $S_{genetic}$ are predictable from its neighbors in $S_{geo}$ and vice versa if the IBD assumption holds.
 
-We further assume that the prediction errors, defined as geographical distances between true and predicted coordinates in $S_{geo}$, follow a Gamma distribution with unknown parameters, written as $\Gamma_{geo}(\alpha,\beta)$. 
+We further assume that the prediction errors, defined as geographical distances between true and predicted coordinates in $S_{geo}$, follow a Gamma distribution with unknown parameters, written as $\Gamma_{geo}(\alpha,\beta)$.
 This assumption is made with the expectation of prediction errors approximating zero under IBD.
 Similarly, the mean of squared prediction errors of coordinates in $S_{genetic}$ is assumed to follow $\Gamma_{genetic}(\alpha,\beta)$.
 
@@ -123,14 +123,14 @@ We regard a matrix of ancestry coefficients ($Q_{N\times F}$) estimated based on
 
 The first approach in the \textit{GGoutlieR} framework aims at identifying outliers that are genetically differentiated from their geographical KNNs.
 
-\textbf{Step 1.} Compute pairwise geographical distance matrix. 
+\textbf{Step 1.} Compute pairwise geographical distance matrix.
 
-\textbf{Step 2.} Find KNNs for each individual according to pairwise geographical distances with a given.
+\textbf{Step 2.} Find KNNs for each individual according to pairwise geographical distances with a given $K$.
 To avoid a divisor of zero in the equation \ref{w_eq1} of \textbf{Step 3}, \textit{GGoutlieR} will ignore neighbors within 100 meters by the default (controlled by the \textit{min\_nn\_dist} argument).
 Otherwise, one unit of distance is added to the off-diagonal values of geographical distance matrix before searching KNNs if any pairwise distance is zero and \textit{min\_nn\_dist} is set to zero.
 
 \textbf{Step 3.} Predict $\hat{x}_{genetic,i,j}$ using a weighted KNN approach.
-$\hat{x}_{genetic,i,j}$ is the predicted coordinate of an individual $i$ in the dimension $j$ of $S_{genetic}$, where $i = \{1,2,...,N\}$ and $j = \{1,2,...,F\}$. $N$ is the number of individuals and $F$ is the number of dimensions in $S_{genetic}$, i.e. the number of ancestral populations. 
+$\hat{x}_{genetic,i,j}$ is the predicted coordinate of an individual $i$ in the dimension $j$ of $S_{genetic}$, where $i = \{1,2,...,N\}$ and $j = \{1,2,...,F\}$. $N$ is the number of individuals and $F$ is the number of dimensions in $S_{genetic}$, i.e. the number of ancestral populations.
 The weight of the $k$ th nearest neighbor of an individual $i$ is computed as
 
 \begin{equation} \label{w_eq1}
@@ -143,7 +143,7 @@ $\hat{x}_{genetic,i,j}$ is calculated as
 \begin{equation} \label{wknn_eq1}
 \hat{x}_{genetic,i,j}=\frac{1}{K}\sum_{k=1}^{K}w_{i,k}\ x_{genetic,i,j,k}
 \end{equation}
-where $K$ is a given number of nearest neighbors. 
+where $K$ is a given number of nearest neighbors.
 The default of \textit{GGoutlieR} searches the optimal $K$ with a range of values (see \textbf{Step 5.1}).
 $x_{genetic,i,j,k}$ is the coordinate of $k$ th neighbor of individual $i$ in the dimension $j$ of $S_{genetic}$.
 
@@ -155,7 +155,7 @@ D_{genetic, i}=\frac{1}{F}\sum_{j=1}^{f} \hat{\varepsilon}_{i,j}^2 =\frac{1}{F}\
 
 where $x_{genetic,i,j}$ and $\hat{x}_{genetic,i,j}$ are the true and predicted coordinates of the individual $i$ in the dimension $j$ of $S_{genetic}$, respectively.
 
-\textbf{Step 5.1.} Search optimal number of nearest neighbors ($K$) by minimizing $\sum_{i=1}^{n}D_{genetic,i}$. 
+\textbf{Step 5.1.} Search optimal number of nearest neighbors ($K$) by minimizing $\sum_{i=1}^{n}D_{genetic,i}$.
 The \textbf{Step 1-4} are repeated with a range of $K$ values (the default is from 3 to 50).
 As $D_{genetic}$ represents the size of prediction errors, we define optimal $K$ as the $K$ value resulting in the lowest $\sum_{i=1}^{n}D_{genetic,i}$.
 
@@ -173,17 +173,17 @@ To use the genetic KNN approach, users have to set the argument \textit{method =
 
 \subsubsection*{\textit{Approach 2}: outlier identification with genetic KNNs}
 
-The second approach of the \textit{GGoutlieR} framework aims at identifying outliers that are geographically remote from genetically similar individuals, i.e. their corresponding KNNs in $S_{genetic}$. 
+The second approach of the \textit{GGoutlieR} framework aims at identifying outliers that are geographically remote from genetically similar individuals, i.e. their corresponding KNNs in $S_{genetic}$.
 The rationale is similar to the first approach as described in the previous section.
 
-\textbf{Step 1.} Compute pairwise Euclidean distances according to a given matrix of genetic components, i.e. ancestry coefficients. 
+\textbf{Step 1.} Compute pairwise Euclidean distances according to a given matrix of genetic components, i.e. ancestry coefficients.
 If any pairwise distance is zero, $10^{-6}$ is added to the off-diagonal values of the genetic distance matrix to avoid a divisor of zero in the equation \ref{w_eq2} of \textbf{Step 3}. As an alternative option, \textit{GGoutlieR} accepts a distance matrix given by users in this step if users prefer a customized calculation of individual-based genetic distances.
 
 \textbf{Step 2.} Find KNNs for each individual according to pairwise genetic distances with a given $K$.
 
 \textbf{Step 3.} Predict $\hat{x}_{geo,i,j}$ using a weighted KNN approach.
-$\hat{x}_{geo,i,j}$ is the predicted coordinate of an individual $i$ in the dimension $j$ of $S_{geo}$, where $i = \{1,2,...,N\}$ and $j = \{1,2\}$. 
-$N$ is the number of individuals and $j$ corresponds to longitude and latitude. 
+$\hat{x}_{geo,i,j}$ is the predicted coordinate of an individual $i$ in the dimension $j$ of $S_{geo}$, where $i = \{1,2,...,N\}$ and $j = \{1,2\}$.
+$N$ is the number of individuals and $j$ corresponds to longitude and latitude.
 The weight of the $k$ th nearest neighbor of an individual $i$ is computed as
 
 \begin{equation} \label{w_eq2}
@@ -200,7 +200,7 @@ where $K$ is a given number of nearest neighbors.
 The default of \textit{GGoutlieR} searches the optimal $K$ with a range of values (see \textbf{Step 5.1}).
 $x_{geo,i,j,k}$ is the coordinate of $k$ th neighbor of individual $i$ in the dimension $j$ of $S_{geo}$.
 
-\textbf{Step 4.} Compute prediction errors as 
+\textbf{Step 4.} Compute prediction errors as
 
 \begin{equation} \label{Dgeo_eq}
 D_{geo, i}=GeoDist(x_{geo,i}, \hat{x}_{geo,i})
@@ -208,16 +208,16 @@ D_{geo, i}=GeoDist(x_{geo,i}, \hat{x}_{geo,i})
 
 where $GeoDist(x_{geo,i}, \hat{x}_{geo,i})$ is the geographical distance between the true and predicted locations of the individual $i$, which is calculated with the \textit{geosphere} package \citep{hijmansgeosphere}.
 
-\textbf{Step 5.1} Search optimal number of nearest neighbors ($K$) by minimizing $\sum_{i=1}^{n}D_{geo,i}$. 
+\textbf{Step 5.1} Search optimal number of nearest neighbors ($K$) by minimizing $\sum_{i=1}^{n}D_{geo,i}$.
 The \textbf{Step 1 - 4} are repeated with a range of $K$ values.
 The $K$ value resulting in the lowest $\sum_{i=1}^{n}D_{geo,i}$ is considered as the optimal $K$ for the given data set.
-The default of \textit{GGoutlieR} tests a range $K$ from 3 to 100.
+The default of \textit{GGoutlieR} tests a range $K$ from 3 to 50.
 
 \textbf{Step 5.2} Repeat \textbf{Step 1-4} with the optimal $K$.
 
 \textbf{Step 6} Obtain an empirical null distribution $\Gamma_{geo}(\alpha,\beta)$. $\alpha$ and $\beta$ are identified by maximum likelihood estimation.
 
-\textbf{Step 7} Test individuals with the empirical null distribution $\Gamma_{geo}(\alpha,\beta)$. 
+\textbf{Step 7} Test individuals with the empirical null distribution $\Gamma_{geo}(\alpha,\beta)$.
 The null hypothesis is that a focal individual follows the IBD expectation. The alternative hypothesis is that a focal individual is geographically remote from $K$ individuals that are genetically most similar to a focal individual.
 The test is carried out in a multi-stage manner as described in the \textbf{Step 7} of \textbf{Approach 1}.
 
