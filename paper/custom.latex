@@ -259,7 +259,7 @@ $endif$
 
 $for(author)$
 $if(author.name)$
-$author.name$$if(author.affiliation)$\textsuperscript{$author.affiliation$}$endif$
+$author.name$$if(author.affiliation)$\textsuperscript{$author.affiliation$}$if(author.corresponding)$\textsuperscript{*}$endif$$endif$
 $else$
 $author$
 $endif$
@@ -274,6 +274,13 @@ $if(affiliation.index)$
 $else$
 $affiliation$
 $endif$
+$endif$
+$endfor$
+
+\vspace{2ex}
+$for(author)$
+$if(author.corresponding)$
+*Corresponding author: $if(author.email)$$author.email$$endif$
 $endif$
 $endfor$
 
