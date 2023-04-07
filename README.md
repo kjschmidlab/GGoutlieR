@@ -1,6 +1,8 @@
 # GGoutlieR
 
-`GGoutlieR` is an R package for identifying and visualizing abnormal geo-genetic patterns for landscape genomic studies.
+`GGoutlieR` is an R package for identifying and visualizing unusual geo-genetic patterns for landscape genomic studies.
+It provides a summary table with heuristic p-values allowing users to easily identify outliers from thousands of biological samples.
+Moreover, its visualization tool enables users to present unusual geo-genetic association patterns on a geographical map.
 
 ## Installation
 
