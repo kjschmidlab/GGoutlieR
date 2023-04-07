@@ -25,9 +25,9 @@ bibliography: ./paper.bib
 
 Landscape genomics is an emerging field of research that integrates genomic and environmental information to explore the drivers of evolution.
 Reliable data on the geographical origin of biological samples is a prerequisite for accurate landscape genomics studies.
-Traditionally, researchers discover potentially questionable samples using visualisation-based tools.
+Traditionally, researchers discover potentially questionable samples using visualization-based tools.
 However, such approaches cannot handle large sample sizes due to overlapping data points on a graph and can hinder reproducible research.
-To address this shortcoming, we developed **G**eo-**G**enetic **outlier** (`GGoutlieR`), an R package of a heuristic framework for detecting and visualising samples with unusual geo-genetic patterns.
+To address this shortcoming, we developed **G**eo-**G**enetic **outlier** (`GGoutlieR`), an R package of a heuristic framework for detecting and visualizing samples with unusual geo-genetic patterns.
 Outliers are identified by calculating empirical p-values for each sample, allowing users to  identify them in data sets with thousands of samples.
 The package also provides a plotting function to display the geo-genetic patterns of outliers on a geographical map.
 GGoutlieR could significantly reduce the amount of data cleaning that researchers need to do before carrying out landscape genomics analyses.
@@ -40,18 +40,18 @@ To determine whether data are reliable, researchers can examine associations bet
 Under the assumption of isolation-by-distance, pairwise genetic similarities of samples are expected to decrease with increasing geographical distance between the sample origins.
 This assumption may be violated by long-distance migration or artificial factors such as human activity or data/sample management errors.
 
-Visualisation-based tools such as `SPA` [@yang2012model], `SpaceMix` [@bradburd2016spatial], `unPC` [@house2018evaluating] allow to identify samples with geo-genetic patterns that violate the isolation-by-distance assumption, but these tools do not provide statistics to robustly label outliers.
+Visualization-based tools such as `SPA` [@yang2012model], `SpaceMix` [@bradburd2016spatial], `unPC` [@house2018evaluating] allow to identify samples with geo-genetic patterns that violate the isolation-by-distance assumption, but these tools do not provide statistics to robustly label outliers.
 Advances in genome sequencing technologies lead to much larger sample sizes, such as in geo-genetic analyses of genebank collections of rice [@gutaker2020genomic; @wang2018genomic], barley [@milner2019genebank], wheat [@schulthess2022genomics], soybean [@liu2020pan] and maize [@li2019identifying].
-Visualisation-based approaches may not be suitable to display unusual geo-genetic patterns in big datasets due to the large number of overlapping data points on a graph.
+Visualization-based approaches may not be suitable to display unusual geo-genetic patterns in big datasets due to the large number of overlapping data points on a graph.
 To overcome this problem, we developed a heuristic statistical framework for detecting **G**eo-**G**enetic **outliers**, named `GGoutlieR`.
 Our `GGoutlieR` package computes empirical p-values for violation of the isolation-by-distance assumption for individual samples according to prior information on their geographic origin and genotyping data.
 This feature allows researchers to easily select outliers from thousands of samples for further investigation.
-In addition, `GGoutlieR` visualises the geo-genetic patterns of outliers as a network on a geographical map, providing insights into the relationships between geography and genetic clusters.
+In addition, `GGoutlieR` visualizes the geo-genetic patterns of outliers as a network on a geographical map, providing insights into the relationships between geography and genetic clusters.
 
 # Algorithm of `GGoutlieR`
 
 Under the isolation-by-distance assumption, the geographical origins of samples are predictable from their patterns of genetic variation [@battey2020predicting;@guillot2016accurate], and vice versa.
-In this context, prediction models should produce large prediction errors for samples that violate the isolation-by-distance assumption.
+In this context, prediction models should result in large prediction errors for samples that violate the isolation-by-distance assumption.
 Based on this concept, we developed the GGoutlieR framework to model anomalous geo-genetic patterns.
 
 Briefly, `GGoutlierR` uses *K*-nearest neighbour (KNN) regression to predict genetic components with the *K* nearest geographical neighbours, and also predicts in the opposite direction.
@@ -106,8 +106,14 @@ head(summary_ggoutlier(ggoutlier_result))
 ![Visualization example of GGoutlieR with IPK barley landrace data. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers identified by GGoutlieR. \label{fig:example}](../fig/IPK_ggoutlier_for_paper.jpg)
 
 The unusual geo-genetic patterns detected by `GGoutlieR` can be presented on a geographical map with the function `plot_ggoutlier` (\autoref{fig:example}).
+
+Moreover, the function `plot_ggoutlier` allows users to gain insight into outliers from a selected geographical region (\autoref{fig:example_UK}).
+
+![Visualization example of IPK barley landrace data with a highlight of samples from UK. The red lines show that the outliers in UK are genetically similar to accessions from Southern Tibet. \label{fig:example_UK}](../fig/IPK_ggoutlier_highlighUK.jpg)
+
 ```R
-## visualize GGoutlieR results
+## Visualize GGoutlieR results
+## Figure 1: visualize all outliers
 plot_ggoutlier(ggoutlier_res = ggoutlier_result,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -118,8 +124,21 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_result,
                plot_xlim = c(-20,140),
                plot_ylim = c(10,62),
                pie_r_scale = 1.2,
+               map_resolution = "course")
+               
+## Figure 2: highlight outliers in UK with `select_xlim` and `select_ylim`
+plot_ggoutlier(ggoutlier_res = compositeknn_res,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
+               p_thres = pthres,
+               map_type = "both",
+               select_xlim = c(-12,4), 
+               select_ylim = c(47,61),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,62),
+               pie_r_scale = 1.2,
                map_resolution = "course",
-               adjust_p_value_projection = F)
+               add_benchmark_graph = F)
 ```
 
 # Availability
