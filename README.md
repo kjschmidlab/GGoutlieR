@@ -22,4 +22,5 @@ You can find an example of `GGoutlieR` analysis using a global barley landrace c
 
 To find the detailed algorithm of `GGoutlieR`, please check the supplementary material of our manuscript [HERE](https://gitlab.com/kjschmid/ggoutlier/-/blob/master/paper/suppinfo.pdf) (`./paper/suppinfo.pdf`).
 
-
+## Preprint
+Che-Wei Chang and Karl Schmid. 2023. GGoutlieR: an R package to identify and visualize unusual geo-genetic patterns of biological samples. bioRxiv. DOI: [https://doi.org/10.1101/2023.04.06.535838](https://doi.org/10.1101/2023.04.06.535838)
