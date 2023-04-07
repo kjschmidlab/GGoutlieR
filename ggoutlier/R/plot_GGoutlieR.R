@@ -19,7 +19,7 @@
 #' @param  select_ylim vector. Values controlling latitude boundaries of a window to select outliers to present on a geographical map. The default is `select_ylim = c(-90,90)`.
 #' @param  plot_xlim vector. Values controlling longitude boundaries of a map.
 #' @param  plot_ylim vector. Values controlling latitude boundaries of a map.
-#' @param  only_edges_in_xylim logic. only the edges with starting points within the given `select_xlim` and `select_ylim` will display on a geographical map. the default is `TRUE`.
+#' @param  only_edges_in_xylim logic. only the edges with starting points within the given `select_xlim` and `select_ylim` will display on a geographical map. If `FALSE`, the edges out of the given boundaries will be removed from your plot. The default is `TRUE`.
 #' @param  pie_r_scale numeric. A scale controlling the radius of pie charts
 #' @param  red_alpha numeric. A value controlling the transparency of red lines. the default is 0.8
 #' @param  map_resolution string. The resolution of the geographical map. See details in the manual of `rworldmap::getMap()`
