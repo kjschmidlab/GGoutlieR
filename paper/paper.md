@@ -5,17 +5,17 @@ tags:
   - landscape genomics
   - K nearest neighbors
   - geo-genetic patterns
-author:
-  - name: 'Che-Wei Chang'
+authors:
+  - name: Che-Wei Chang
     corresponding: true
-    orcid: '0000-0001-6704-3732'
+    orcid: 0000-0001-6704-3732
     affiliation: 1
-    email: 'chewei.chang@uni-hohenheim.de'
-  - name: 'Karl Schmid'
-    orcid: '0000-0001-5129-895X'
+    email: chewei.chang@uni-hohenheim.de
+  - name: Karl Schmid
+    orcid: 0000-0001-5129-895X
     affiliation: 1
-affiliation:
-  - name: 'University of Hohenheim, Stuttgart, Germany'
+affiliations:
+  - name: University of Hohenheim, Stuttgart, Germany
     index: 1
 date: 23 March 2023
 bibliography: ./paper.bib
