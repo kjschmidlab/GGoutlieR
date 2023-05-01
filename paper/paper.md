@@ -60,7 +60,7 @@ The *D* statistic is assumed to follow a gamma distribution with unknown paramet
 An empirical gamma distribution is obtained as the null distribution by finding optimal parameters using maximum likelihood estimation.
 With the null gamma distribution, `GGoutlieR` tests the null hypothesis that the geogenetic pattern of a given sample is consistent with the isolation-by-distance assumption.
 Finally, p-values are calculated for each sample using the empirical null distribution and prediction error statistics.
-The details of the `GGoutlieR` framework are described step by step in the supplementary material (https://gitlab.com/kjschmid/ggoutlier/-/blob/master/paper/suppinfo.pdf).
+The details of the `GGoutlieR` framework are described step by step in the supplementary material (https://github.com/kjschmidlab/GGoutlieR/blob/master/paper/suppinfo.pdf).
 
 
 # Example
@@ -68,7 +68,7 @@ The details of the `GGoutlieR` framework are described step by step in the suppl
 ### Outlier identification
 
 For demonstration, we used the genotypic and passport data of the global barley landrace collection of 1,661 accessions from the IPK genebank [@milner2019genebank; @konig2020bridge].
-The full analysis of the barley dataset with `GGoutlieR` is available in the vignette (https://gitlab.com/kjschmid/ggoutlier/-/blob/master/vignettes/outlier_detection.pdf).
+The full analysis of the barley dataset with `GGoutlieR` is available in the vignette (https://github.com/kjschmidlab/GGoutlieR/blob/master/vignettes/outlier_detection.pdf).
 Outliers were identified using the `ggoutlier` function.
 The function `summary_ggoutlier` was then used to obtain a summary table of outliers by taking the output of `ggoutlier`.
 
@@ -143,7 +143,7 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
 
 # Availability
 
-The `GGoutlierR` package and vignette are available in our GitLab repository (https://gitlab.com/kjschmid/ggoutlier).
+The `GGoutlierR` package and vignette are available in our GitHub repository (https://github.com/kjschmidlab/GGoutlieR).
 
 
 # Acknowledgement
