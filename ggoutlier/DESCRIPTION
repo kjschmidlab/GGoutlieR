@@ -1,7 +1,7 @@
 Package: GGoutlieR
 Type: Package
 Title: GGoutlieR
-Version: 0.2.2
+Version: 1.0.0
 Author: Che-Wei Chang, Karl Schmid 
 Maintainer: Che-Wei Chang <chewei.chang@uni-hohenheim>
 Description: An R package used to identify individuals with unusual geo-genetic patterns
