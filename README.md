@@ -6,7 +6,7 @@ Moreover, its visualization tool enables users to present unusual geo-genetic as
 
 ## Installation
 
-To install `GGoutlieR` v0.2.2, please use the R commands below:
+To install `GGoutlieR` v1.0.0, please use the R commands below:
 
 ```
 ## install dependencies
