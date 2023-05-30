@@ -13,7 +13,8 @@ To install `GGoutlieR` v1.0.0, please use the R commands below:
 install.packages(c("geosphere","stats4","FastKNN","foreach","doSNOW","iterators","parallel","rworldmap","scales","plotrix","mapplots", "RColorBrewer","rworldxtra","dichromat","sp"))
 
 ## install GGoutlieR
-install.packages("https://github.com/kjschmidlab/GGoutlieR/blob/master/GGoutlieR_1.0.0.tar.gz", repos = NULL, type="source")
+library(devtools)
+install_git("https://github.com/kjschmidlab/GGoutlieR.git")
 ```
 
 ## Tutorial
