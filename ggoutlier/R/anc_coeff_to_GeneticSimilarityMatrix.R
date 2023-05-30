@@ -1,7 +1,7 @@
 #' calculate genetic similarity from ancestry coefficients.
 #' @details
 #' Since ancestry coefficients can be interpreted as a propotion of genome derived from a specific ancestral population, this function calculate genetic similarity as the probability of a random genome segment of two individuals derived from the same ancestral population.
-#' @param anc_coef: a matrix of ancestry coefficients with samples by rows. Each column corresponds to an ancestral population.
+#' @param anc_coef a matrix of ancestry coefficients with samples by rows. Each column corresponds to an ancestral population.
 
 anc_coeff_to_GeneticSimilarityMatrix <- function(anc_coef){
 

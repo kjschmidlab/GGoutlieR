@@ -88,8 +88,8 @@ compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                               gen_coord = ipk_anc_coef,
                               plot_dir = "../fig",
                               p_thres = 0.01,
-                              cpu = 4,
+                              cpu = 2,
                               method = "composite",
-                              verbose = F,
+                              verbose = FALSE,
                               min_nn_dist = 1000)
 }

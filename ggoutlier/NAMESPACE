@@ -6,3 +6,19 @@ export(ggoutlier_geneticKNN)
 export(ggoutlier_geoKNN)
 export(plot_ggoutlier)
 export(summary_ggoutlier)
+
+importFrom("grDevices", "colorRampPalette", "dev.off", "pdf")
+importFrom("graphics", "abline", "axis", "curve", "legend", "par",
+             "plot", "points", "segments", "text")
+importFrom("stats", "cor", "dgamma", "dist", "pgamma", "qgamma",
+             "rgamma", "var", "weighted.mean")
+importFrom("utils", "lsf.str", "setTxtProgressBar", "txtProgressBar")
+importFrom("parallel", "detectCores","clusterExport", "makeCluster", "stopCluster")
+importFrom("foreach", "%dopar%", "foreach")
+importFrom("mapplots", "add.pie")
+importFrom("rworldmap", "getMap")
+importFrom("plotrix", "color.legend")
+importFrom("scales","alpha")
+importFrom("stats4","mle")
+importFrom("RColorBrewer", "brewer.pal", "brewer.pal.info")
+

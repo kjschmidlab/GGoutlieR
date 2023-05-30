@@ -7,7 +7,7 @@
 anc_coeff_to_GeneticSimilarityMatrix(anc_coef)
 }
 \arguments{
-\item{anc_coef:}{a matrix of ancestry coefficients with samples by rows. Each column corresponds to an ancestral population.}
+\item{anc_coef}{a matrix of ancestry coefficients with samples by rows. Each column corresponds to an ancestral population.}
 }
 \description{
 calculate genetic similarity from ancestry coefficients.

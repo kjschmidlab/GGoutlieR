@@ -28,6 +28,8 @@ ggoutlier_geoKNN(
 
 \item{gen_coord}{matrix. A matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.}
 
+\item{min_nn_dist}{numeric. A minimal geographical distance for searching KNNs. Neighbors of a focal sample within this distance will be excluded from the KNN searching procedure.}
+
 \item{k}{integer. Number of the nearest neighbors.}
 
 \item{klim}{vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`}
@@ -40,6 +42,8 @@ ggoutlier_geoKNN(
 
 \item{p_thres}{numeric. A significance level}
 
+\item{n}{numeric. A number of random samples to draw from the null distribution for making a graph.}
+
 \item{multi_stages}{logic. A multi-stage test will be performed if is `TRUE` (the default is `TRUE`).}
 
 \item{maxIter}{numeric. Maximal iteration number of multi-stage KNN test.}
@@ -51,10 +55,6 @@ ggoutlier_geoKNN(
 \item{cpu}{integer. Number of CPUs to use for searching the optimal K.}
 
 \item{verbose}{logic. If `verbose = FALSE`, `ggoutlier` will suppress printout messages.}
-
-\item{k_geneticKNN}{integer. Number of the nearest neighbors in a genetic space. The default is `NULL`. The `ggoutlier` will search the optimal K if `k_geneticKNN = NULL`.}
-
-\item{k_geoKNN}{integer. Number of the nearest neighbors in a geographical space. the default is `NULL`. The `ggoutlier` will search the optimal K if `k_geoKNN = NULL`.}
 }
 \value{
 a list including five items. `statistics` is a `data.frame` consisting of the D_g values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.

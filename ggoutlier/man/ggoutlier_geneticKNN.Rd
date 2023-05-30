@@ -36,9 +36,11 @@ ggoutlier_geneticKNN(
 
 \item{plot_dir}{string. The path to save plots}
 
-\item{w_power}{numeric. A value controlling the power of distance weight in genetic KNN prediction.}
+\item{w_power}{numanceric. A value controlling the power of distance weight in genetic KNN prediction.}
 
-\item{p_thres}{numeric. A significance level}
+\item{p_thres}{numeric. A significe level}
+
+\item{n}{numeric. A number of random samples to draw from the null distribution for making a graph.}
 
 \item{s}{integer. A scalar of geographical distance. The default `s=100` scales the distance to a unit of 0.1 kilometer.}
 
@@ -53,10 +55,6 @@ ggoutlier_geneticKNN(
 \item{cpu}{integer. Number of CPUs to use for searching the optimal K.}
 
 \item{verbose}{logic. If `verbose = FALSE`, `ggoutlier` will suppress printout messages.}
-
-\item{method}{string. The method to run `GGoutlieR`. It can be "composite", "geneticKNN", or "geoKNN".}
-
-\item{min_nn_dist}{numeric. A minimal geographical distance for searching KNNs. Neighbors of a focal sample within this distance will be excluded from the KNN searching procedure.}
 }
 \description{
 identify samples geographically remote from K genetically nearest neighbors (genetic KNN)

@@ -1,15 +1,13 @@
 #' obtain an adjacency matrix to make a network graph
 #' @description `get_GGNet_adjacency_matrix` calculates p-values based on the KNNs and heuristic Gamma distribution obtained in the outlier identification processes. The matrices of p-values are then multiplied with the given genetic similarity matrix to form adjacency matrices.
-#' @param GeoSP_knn_res an output from `detect_outlier_in_GeoSpace`
-#' @param GenSP_knn_res an output from `detect_outlier_in_GeneticSpace`
+#' @param ggoutlier_res an output from `ggoutlier`
 #' @param geo_coord a two-column matrix or data.frame. the first column is longitude and the second one is latitude.
 #' @param gen_coord a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have to provide `pgdM` if `gen_coord` is not given.
-#' @param pgsM a matrix of pairwise genetic similarity with n x n dimensions. Weights of edges are extracted from this matrix according to the KNN results. In our demonstration, we used the output of `anc_coeff_to_GeneticSimilarityMatrix`. Users can consider other approaches to characterize genetic similarity.
 #' @param mutual logic. If a multi-stage test is used in the outlier identification, some samples could not be a mutual neighbor with its K nearest neighbors. In this case, setting `mutual=TRUE` can force those samples to become mutual neighbors in the output adjacency matrix.
+#' @param adjust_p_value logic. If `adjust_p_value=TRUE`, p values are adjusted for each nearest neighbor of a given sample.
 #' @return a list consisting of four matrices that can be used in building network graphs. The default is `TRUE`
 #' `GeoSP_pvalue` is a matrix describing the strength of edges as p values from the empirical Gamma distribution identified by `detect_outlier_in_GeoSpace`
 #' `GenSP_pvalue` is a matrix describing the strength of edges as p values from the empirical Gamma distribution identified by `detect_outlier_in_GeneticSpace`
-#' @examples
 get_GGNet_adjacency_matrix <- function(ggoutlier_res,
                                        geo_coord,
                                        gen_coord,
@@ -142,7 +140,7 @@ get_GGNet_adjacency_matrix <- function(ggoutlier_res,
 # gen_coord: a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have provide `pgdM` if `gen_coord` is not given.
 # test_type: type of test. It can be `NULL`, `GeoSP` or `GenSP`
 get_knn_pvalue <- function(knn_res, geo_coord = NULL, gen_coord = NULL, test_type = NULL){
-  library(geosphere)
+
   # check inputs
   if(any(names(knn_res) == "combined_result")){
     knn_res <- knn_res$combined_result # extract the combined results (if setting `keep_all_stg_res=T` in previous analyses)
@@ -195,7 +193,7 @@ get_knn_pvalue <- function(knn_res, geo_coord = NULL, gen_coord = NULL, test_typ
       tmp.geo_coord <- unname(geo_coord[i,])
       knn.geo_coord <- geo_coord[knn_res$knn_index[i,],]
       knn.Dgeo <- apply(knn.geo_coord, 1, function(a){
-        return(distm(x = tmp.geo_coord, y = a)/s)
+        return(geosphere::distm(x = tmp.geo_coord, y = a)/s)
       })
       knn.p[i,] <- 1 - pgamma(unname(knn.Dgeo), shape = a, rate = b)
     }
@@ -215,7 +213,7 @@ get_knn_pvalue <- function(knn_res, geo_coord = NULL, gen_coord = NULL, test_typ
 # gen_coord: a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have provide `pgdM` if `gen_coord` is not given.
 # test_type: type of test. It can be `NULL`, `GeoSP` or `GenSP`
 get_knn_pvalue_v2 <- function(knn_res, geo_coord = NULL, gen_coord = NULL, test_type = NULL){
-  library(geosphere)
+
   # check inputs
   if(any(names(knn_res) == "combined_result")){
     knn_res <- knn_res$combined_result # extract the combined results (if setting `keep_all_stg_res=T` in previous analyses)

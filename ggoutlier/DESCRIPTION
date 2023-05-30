@@ -1,11 +1,11 @@
 Package: GGoutlieR
 Type: Package
-Title: GGoutlieR
+Title: An R Package Used to Identify Individuals with Unusual Geo-Genetic Patterns
 Version: 1.0.0
 Author: Che-Wei Chang, Karl Schmid 
-Maintainer: Che-Wei Chang <chewei.chang@uni-hohenheim>
-Description: An R package used to identify individuals with unusual geo-genetic patterns
-License: MIT License 
+Maintainer: Che-Wei Chang <chewei.chang@uni-hohenheim.de>
+Description: Identifies individuals with unusual geo-genetic patterns. It produces a table of outliers with statistics and visualizes unusual geo-genetic patterns on a geographical map. This is useful for landscape genomics studies to discover samples that violate the isolation-by-distance assumption.
+License: MIT License + file LICENSE
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -26,7 +26,5 @@ Imports:
     sp
 Encoding: UTF-8
 LazyData: true
-LinkingTo: Rcpp
 RoxygenNote: 7.1.1
-Depends: 
-    R (>= 2.10)
+

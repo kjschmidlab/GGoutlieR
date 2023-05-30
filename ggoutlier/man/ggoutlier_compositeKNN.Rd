@@ -33,7 +33,7 @@ ggoutlier_compositeKNN(
 
 \item{gen_coord}{matrix. A matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.}
 
-\item{pgdM}{matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.}
+\item{pgdM}{matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`. NOTE: the genetic distance matrix is used in the search of KNN and as weights of KNN regression.}
 
 \item{k_geneticKNN}{integer. Number of the nearest neighbors in a genetic space. The default is `NULL`. The `ggoutlier` will search the optimal K if `k_geneticKNN = NULL`.}
 
@@ -48,6 +48,8 @@ ggoutlier_compositeKNN(
 \item{w_genetic}{numeric. A value controlling the power of distance weight in genetic KNN prediction.}
 
 \item{p_thres}{numeric. A significance level}
+
+\item{n}{numeric. A number of random samples to draw from the null distribution for making a graph.}
 
 \item{s}{integer. A scalar of geographical distance. The default `s=100` scales the distance to a unit of 0.1 kilometer.}
 

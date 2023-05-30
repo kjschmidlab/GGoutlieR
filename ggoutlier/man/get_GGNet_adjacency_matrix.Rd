@@ -13,17 +13,15 @@ get_GGNet_adjacency_matrix(
 )
 }
 \arguments{
+\item{ggoutlier_res}{an output from `ggoutlier`}
+
 \item{geo_coord}{a two-column matrix or data.frame. the first column is longitude and the second one is latitude.}
 
 \item{gen_coord}{a matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`. Users have to provide `pgdM` if `gen_coord` is not given.}
 
 \item{mutual}{logic. If a multi-stage test is used in the outlier identification, some samples could not be a mutual neighbor with its K nearest neighbors. In this case, setting `mutual=TRUE` can force those samples to become mutual neighbors in the output adjacency matrix.}
 
-\item{GeoSP_knn_res}{an output from `detect_outlier_in_GeoSpace`}
-
-\item{GenSP_knn_res}{an output from `detect_outlier_in_GeneticSpace`}
-
-\item{pgsM}{a matrix of pairwise genetic similarity with n x n dimensions. Weights of edges are extracted from this matrix according to the KNN results. In our demonstration, we used the output of `anc_coeff_to_GeneticSimilarityMatrix`. Users can consider other approaches to characterize genetic similarity.}
+\item{adjust_p_value}{logic. If `adjust_p_value=TRUE`, p values are adjusted for each nearest neighbor of a given sample.}
 }
 \value{
 a list consisting of four matrices that can be used in building network graphs. The default is `TRUE`
@@ -32,20 +30,4 @@ a list consisting of four matrices that can be used in building network graphs. 
 }
 \description{
 `get_GGNet_adjacency_matrix` calculates p-values based on the KNNs and heuristic Gamma distribution obtained in the outlier identification processes. The matrices of p-values are then multiplied with the given genetic similarity matrix to form adjacency matrices.
-}
-\examples{
-## load data
-GeoSP_knn_res <- readRDS("data/sus_MLE_GeoSP_Gamma_samples.RDS")
-GenSP_knn_res <- readRDS("data/sus_MLE_GenSP_Gamma_samples.RDS")
-geo_coord <- read.table("./data/georef_1661ind_geo_coord_for_locator.txt", header = T, stringsAsFactors = F)
-rownames(geo_coord) <- geo_coord[,1]
-geo_coord <- geo_coord[,-1]
-gen_coord <- t(as.matrix(read.csv("./data/alstructure_Q_hat_1661inds.csv", header = F, stringsAsFactors = F)))
-## get pairwise genetic similarity matrix
-pgsM <- anc_coeff_to_GeneticSimilarityMatrix(anc_coef = gen_coord)
-adjm <- get_GGNet_adjacency_matrix(GeoSP_knn_res = GeoSP_knn_res,
-                                  GenSP_knn_res = GenSP_knn_res,
-                                  gen_coord = gen_coord,
-                                  geo_coord = geo_coord,
-                                  pgsM = pgsM)
 }

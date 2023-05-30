@@ -10,6 +10,7 @@ plot_ggoutlier(
   anc_coef = NULL,
   gen_coord = NULL,
   pie_color = NULL,
+  map_color = "black",
   p_thres = NULL,
   color_res = 10,
   dot_cex = 0.4,
@@ -41,6 +42,8 @@ plot_ggoutlier(
 
 \item{pie_color}{string. Colors of pie charts. colors are automatically assigned if `pie_color = NULL` (which is the default). This argument is optional.}
 
+\item{map_color}{string. Colors of map contours. The default is `map_color = "black"`}
+
 \item{p_thres}{numeric. A value of significant level. Only outliers (p values less than `p_thres`) are mapped on a geographical map if `p_thres` is provided (the default is `NULL`). This argument is optional.}
 
 \item{color_res}{integer. The resolution of color scale.}
@@ -57,7 +60,7 @@ plot_ggoutlier(
 
 \item{plot_ylim}{vector. Values controlling latitude boundaries of a map.}
 
-\item{only_edges_in_xylim}{logic. only the edges with starting points within the given `select_xlim` and `select_ylim` will display on a geographical map. the default is `TRUE`.}
+\item{only_edges_in_xylim}{logic. only the edges with starting points within the given `select_xlim` and `select_ylim` will display on a geographical map. If `FALSE`, the edges out of the given boundaries will be removed from your plot. The default is `TRUE`.}
 
 \item{pie_r_scale}{numeric. A scale controlling the radius of pie charts}
 

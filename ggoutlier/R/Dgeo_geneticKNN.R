@@ -27,6 +27,6 @@ pred_geo_coord_knn <- function(geo_coord, pgdM, knn.indx, w_power){
 
 ## a function to calculate Dg
 cal_Dgeo <- function(pred.geo_coord, geo_coord, scalar){
-  geodist <- (sapply(1:nrow(geo_coord),function(a){distm(x = geo_coord[a,], y = pred.geo_coord[a,])/scalar}))
+  geodist <- (sapply(1:nrow(geo_coord),function(a){geosphere::distm(x = geo_coord[a,], y = pred.geo_coord[a,])/scalar}))
   return(geodist)
 } # cal_Dgeo end

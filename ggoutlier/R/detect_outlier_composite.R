@@ -2,7 +2,7 @@
 #' @description  perform outlier identification with genetic space KNN and geographical space KNN.
 #' @param geo_coord matrix or data.frame with two columns. The first column is longitude and the second one is latitude.
 #' @param gen_coord matrix. A matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.
-#' @param pgdM matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.
+#' @param pgdM matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`. NOTE: the genetic distance matrix is used in the search of KNN and as weights of KNN regression.
 #' @param k_geneticKNN integer. Number of the nearest neighbors in a genetic space. The default is `NULL`. The `ggoutlier` will search the optimal K if `k_geneticKNN = NULL`.
 #' @param k_geoKNN integer. Number of the nearest neighbors in a geographical space. the default is `NULL`. The `ggoutlier` will search the optimal K if `k_geoKNN = NULL`.
 #' @param klim vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`
@@ -20,6 +20,7 @@
 #' @param maxIter numeric. Maximal iteration number of multi-stage KNN test.
 #' @param keep_all_stg_res logic. Results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)
 #' @param warning_minR2 numeric. The prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. If any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.
+#' @param n numeric. A number of random samples to draw from the null distribution for making a graph.
 #' @return a list with two list. Each list includes five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
 #'
 #' @export
@@ -45,7 +46,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                    geoKNN_output = NULL,
                                    verbose = TRUE
                                     ){
-  required_pkgs <- c("geosphere", # for calculating geographical distances
+  required_pkgs <- c(#"geosphere", # for calculating geographical distances
                      "stats4", # package to perform maximum likelihood estimation
                      "FastKNN", # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
                      "foreach", "doSNOW", # doParallel in previous version -> use doSNOW to make progress bars
@@ -113,7 +114,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   #--------------------------------
   #--------------------------------
   ## calculate geographical distance
-  geo.dM <- distm(x = geo_coord)/s
+  geo.dM <- geosphere::distm(x = geo_coord)/s
   ## handle samples with identical geographical coordinates
   if(any(geo.dM[lower.tri(geo.dM)] == 0)){
     if(verbose) cat("Find samples with identical geographical coordinates.\n")
