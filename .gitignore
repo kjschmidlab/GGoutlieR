@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+GGoutlieR.Rcheck/
+Makefile
+fig/KNN_Dg_null_distribution.pdf
+fig/KNN_Dg_optimal_k_selection.pdf
+fig/KNN_Dgeo_null_distribution.pdf
+fig/KNN_Dgeo_optimal_k_selection.pdf
+fig/geneticKNN_test_multi_stage_Log10P_comparison.pdf
+fig/geoKNN_test_multi_stage_Log10P_comparison.pdf
