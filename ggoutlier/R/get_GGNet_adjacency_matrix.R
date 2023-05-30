@@ -10,22 +10,6 @@
 #' `GeoSP_pvalue` is a matrix describing the strength of edges as p values from the empirical Gamma distribution identified by `detect_outlier_in_GeoSpace`
 #' `GenSP_pvalue` is a matrix describing the strength of edges as p values from the empirical Gamma distribution identified by `detect_outlier_in_GeneticSpace`
 #' @examples
-#' ## load data
-#' GeoSP_knn_res <- readRDS("data/sus_MLE_GeoSP_Gamma_samples.RDS")
-#' GenSP_knn_res <- readRDS("data/sus_MLE_GenSP_Gamma_samples.RDS")
-#' geo_coord <- read.table("./data/georef_1661ind_geo_coord_for_locator.txt", header = T, stringsAsFactors = F)
-#' rownames(geo_coord) <- geo_coord[,1]
-#' geo_coord <- geo_coord[,-1]
-#' gen_coord <- t(as.matrix(read.csv("./data/alstructure_Q_hat_1661inds.csv", header = F, stringsAsFactors = F)))
-#' ## get pairwise genetic similarity matrix
-#' pgsM <- anc_coeff_to_GeneticSimilarityMatrix(anc_coef = gen_coord)
-#' adjm <- get_GGNet_adjacency_matrix(GeoSP_knn_res = GeoSP_knn_res,
-#'                                   GenSP_knn_res = GenSP_knn_res,
-#'                                   gen_coord = gen_coord,
-#'                                   geo_coord = geo_coord,
-#'                                   pgsM = pgsM)
-
-# TO DO: make this function to take any ggoulier output
 get_GGNet_adjacency_matrix <- function(ggoutlier_res,
                                        geo_coord,
                                        gen_coord,
