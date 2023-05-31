@@ -267,6 +267,24 @@ geoknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
 compositeknn_res <- readRDS("../data/IPK_landrace_ggoutlier_composite_output_p0.025.RDS") # load ggoutlier results saved in advance
 ```
 
+
+```{r make_packageData_for_runningExample, echo = FALSE, eval=FALSE}
+library(GGoutlieR)
+data("ipk_anc_coef") # get ancestry coefficients
+data("ipk_geo_coord") # get geographical coordinates
+ggoutlier_example <- ggoutlier(geo_coord = ipk_geo_coord,
+                               gen_coord = ipk_anc_coef,
+                               plot_dir = "./fig",
+                               p_thres = 0.01,
+                               cpu = 2,
+                               method = "composite",
+                               verbose = FALSE,
+                               min_nn_dist = 1000)
+ggoutlier_example <- compositeknn_res
+usethis::use_data(ggoutlier_example)
+```
+
+
 After running `ggoutlier`, we use `summary_ggoutlier` to extract the IDs and p-values of outliers. 
 Users can select outliers according to the summary table from `summary_ggoutlier` for further investigation.
 

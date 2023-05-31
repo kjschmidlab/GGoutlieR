@@ -21,4 +21,3 @@ importFrom("plotrix", "color.legend")
 importFrom("scales","alpha")
 importFrom("stats4","mle")
 importFrom("RColorBrewer", "brewer.pal", "brewer.pal.info")
-

@@ -12,3 +12,11 @@ NULL
 #' @format data.frame
 
 NULL
+
+#' Example of `ggoutlier` output
+#'
+#' @name ggoutlier_example
+#' @docType data
+#' @format list
+
+NULL

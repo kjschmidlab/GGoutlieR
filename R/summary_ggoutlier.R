@@ -3,6 +3,10 @@
 #' Get a summary table from the `ggoutlier` output
 #' @param  ggoutlier_res output from the function `ggoutlier`
 #' @return a table contains IDs of outliers and p-values.
+#' @examples
+#' library(GGoutlieR)
+#' data(ggoutlier_example) # get an example output of ggoutlier
+#' head(summary_ggoutlier(ggoutlier_example))
 #' @export
 
 summary_ggoutlier <- function(ggoutlier_res){

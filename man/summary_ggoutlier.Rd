@@ -15,3 +15,8 @@ a table contains IDs of outliers and p-values.
 \description{
 Get a summary table from the `ggoutlier` output
 }
+\examples{
+library(GGoutlieR)
+data(ggoutlier_example) # get an example output of ggoutlier
+head(summary_ggoutlier(ggoutlier_example))
+}

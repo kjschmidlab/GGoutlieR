@@ -1,2 +1,11 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^vignettes/*
+^supp_data/*
+^paper/*
+^fig/*
+^README.md
+^GGoutlieR.Rproj
+^\.git
+^\.github
+^\.gitignore

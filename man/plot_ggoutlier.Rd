@@ -80,6 +80,9 @@ plot_ggoutlier(
 
 \item{adjust_p_value_projection}{logic. If `TRUE`, the function will perform KNN prediction by forcing K=1 and compute new p-values for visualization.}
 }
+\value{
+a geographical map with colored lines showing sample pairs with unusual geo-genetic associations.
+}
 \description{
 Visualize geo-genetic patterns of outliers with their K nearest neighbors
 }
@@ -88,4 +91,22 @@ Red links on the map denote individual pairs that are genetically similar but ge
 The color depth and thickness of red links are proportional to -log10(p) based on the empirical Gamma distribution obtained from `detect_outlier_in_GeneticSpace`.
 Blue links on the map denote individual pairs that are genetically different but geographically close.
 The color depth and thickness of blue links are proportional to -log10(p) based on the empirical Gamma distribution obtained from `detect_outlier_in_GeoSpace`
+}
+\examples{
+library(GGoutlieR)
+data("ipk_anc_coef") # get ancestry coefficients
+data("ipk_geo_coord") # get geographical coordinates
+data(ggoutlier_example) # get an example output of ggoutlier
+plot_ggoutlier(ggoutlier_res = ggoutlier_example,
+               gen_coord = ipk_anc_coef,
+               geo_coord = ipk_geo_coord,
+               p_thres = 0.025,
+               map_type = "both",
+               select_xlim = c(-20,140),
+               select_ylim = c(10,62),
+               plot_xlim = c(-20,140),
+               plot_ylim = c(10,62),
+               pie_r_scale = 1.2,
+               map_resolution = "coarse")
+
 }

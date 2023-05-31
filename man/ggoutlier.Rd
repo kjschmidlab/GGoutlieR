@@ -86,7 +86,7 @@ data("ipk_anc_coef") # get ancestry coefficients
 data("ipk_geo_coord") # get geographical coordinates
 compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                               gen_coord = ipk_anc_coef,
-                              plot_dir = "../fig",
+                              plot_dir = ".",
                               p_thres = 0.01,
                               cpu = 2,
                               method = "composite",
