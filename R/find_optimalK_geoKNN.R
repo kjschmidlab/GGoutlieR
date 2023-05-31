@@ -24,7 +24,7 @@ find_optimalK_geoKNN <- function(geo_coord,
     opts <- list(progress = progress)
     clusterExport(cl, "opts", envir = environment())
 
-    all.D <- foreach(k = kindx, .packages='FNN', .combine="c", .options.snow = opts) %dopar% {
+    all.D <- foreach(k = kindx, .packages='FastKNN', .combine="c", .options.snow = opts) %dopar% {
       # find KNN
       knn.indx <- find_geo_knn(geo.dM = geo.dM,
                                k=k,

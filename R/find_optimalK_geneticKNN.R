@@ -26,7 +26,7 @@ find_optimalK_geneticKNN <- function(geo_coord,
     opts <- list(progress = progress)
     clusterExport(cl, "opts", envir = environment())
 
-    all.D <- foreach(k = kindx, .packages=c('geosphere','FNN'), .combine="c", .options.snow = opts) %dopar% {
+    all.D <- foreach(k = kindx, .packages=c('geosphere','FastKNN'), .combine="c", .options.snow = opts) %dopar% {
       knn.indx <- find_gen_knn(pgdM, k=k)
       # KNN prediction
       pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,
