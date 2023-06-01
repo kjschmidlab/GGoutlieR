@@ -5,6 +5,7 @@
 #' @param pgdM matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.
 #' @param k integer. Number of the nearest neighbors.
 #' @param klim vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`
+#' @param make_fig logic. If `make_fig = TRUE`, plots for diagnosing GGoutlieR analysis will be generated and saved to `plot_dir`. The default is `FALSE`
 #' @param plot_dir string. The path to save plots
 #' @param w_power numanceric. A value controlling the power of distance weight in genetic KNN prediction.
 #' @param p_thres numeric. A significe level
@@ -22,6 +23,7 @@ ggoutlier_geneticKNN <- function(geo_coord,
                                  pgdM = NULL,
                                  k = NULL,
                                  klim = c(3,50),
+                                 make_fig = FALSE,
                                  plot_dir = ".",
                                  w_power = 2,
                                  p_thres = 0.05,
@@ -123,13 +125,15 @@ ggoutlier_geneticKNN <- function(geo_coord,
 
     # make a figure of optimal k selection
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
-    k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")
-    pdf(k.sel.plot, width = 5, height = 4)
-    par(mar=c(4,6,1,1))
-    plot(x = klim[1]:klim[2], y = all.D, xlab="K", ylab=expression(sum(D["geo,i"], i==1, n)))
-    abline(v = opt.k)
-    legend("top",legend = paste("optimal k =", opt.k), pch="", bty = "n",cex = 1.2)
-    dev.off()
+    if(make_fig){
+      k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")
+      pdf(k.sel.plot, width = 5, height = 4)
+      par(mar=c(4,6,1,1))
+      plot(x = klim[1]:klim[2], y = all.D, xlab="K", ylab=expression(sum(D["geo,i"], i==1, n)))
+      abline(v = opt.k)
+      legend("top",legend = paste("optimal k =", opt.k), pch="", bty = "n",cex = 1.2)
+      dev.off()
+    }
 
     k = opt.k
     if(verbose) cat(paste("\n The optimal k is ",opt.k,". Its figure is saved at ", k.sel.plot," \n", sep = ""))
@@ -197,18 +201,21 @@ ggoutlier_geneticKNN <- function(geo_coord,
   null.fun <- function(x){dgamma(x , shape = current.a, rate = current.b)}
   gamma.thres <- qgamma(1-p_thres, shape = current.a, rate = current.b)
   null.distr <- rgamma(n , shape = current.a, rate = current.b)
-  null.plot <- paste(plot_dir, "/KNN_Dgeo_null_distribution.pdf", sep = "")
-  if(verbose) cat(paste("\nThe plot of null distribution is saved at ", null.plot," \n", sep = ""))
-  pdf(null.plot, width = 5, height = 4)
-  curve(null.fun, from = 0, to = max(null.distr), add = F, col = "blue",
-        ylab = "Density",
-        xlab = bquote(Gamma ~ '(' ~ alpha ~'='~.(round(current.a, digits = 3))~','~beta~'='~.(round(current.b, digits = 3))~')' )
-        ,bty = "n", main = expression("Null distribution of D"[geo]))
-  abline(v = gamma.thres, col = "red", lty = 2)
-  text(x = gamma.thres, y = par("usr")[4], labels = paste("p =", p_thres), xpd=NA)
-  par(mgp = c(3,0,0))
-  axis(side = 1 ,at = round(gamma.thres, digits = 3), line = 0.3, tck = 0.02, font = 2)
-  dev.off()
+
+  if(make_fig){
+    null.plot <- paste(plot_dir, "/KNN_Dgeo_null_distribution.pdf", sep = "")
+    if(verbose) cat(paste("\nThe plot of null distribution is saved at ", null.plot," \n", sep = ""))
+    pdf(null.plot, width = 5, height = 4)
+    curve(null.fun, from = 0, to = max(null.distr), add = F, col = "blue",
+          ylab = "Density",
+          xlab = bquote(Gamma ~ '(' ~ alpha ~'='~.(round(current.a, digits = 3))~','~beta~'='~.(round(current.b, digits = 3))~')' )
+          ,bty = "n", main = expression("Null distribution of D"[geo]))
+    abline(v = gamma.thres, col = "red", lty = 2)
+    text(x = gamma.thres, y = par("usr")[4], labels = paste("p =", p_thres), xpd=NA)
+    par(mgp = c(3,0,0))
+    axis(side = 1 ,at = round(gamma.thres, digits = 3), line = 0.3, tck = 0.02, font = 2)
+    dev.off()
+  }
 
 
   #----------------------------
@@ -314,15 +321,17 @@ ggoutlier_geneticKNN <- function(geo_coord,
       }
     }
     # make a figure comparing the results of single stage and multi-stage tests
-    logp.plot <- paste0(plot_dir, "/geneticKNN_test_multi_stage_Log10P_comparison.pdf")
-    if(verbose) cat(paste("\n\n\nThe plot for comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
-    pdf(logp.plot, width = 4, height = 4.2)
-    plot(-log10(res.out$statistics$p.value),
-         -log10(collapse_res$statistics$p.value),
-         xlab = expression("-log"[10]~"(p) of single-stage KNN test"),
-         ylab = expression("-log"[10]~"(p) of multi-stage KNN test"),
-         main = "KNN in Genetic space")
-    dev.off()
+    if(make_fig){
+      logp.plot <- paste0(plot_dir, "/geneticKNN_test_multi_stage_Log10P_comparison.pdf")
+      if(verbose) cat(paste("\n\n\nThe plot for comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
+      pdf(logp.plot, width = 4, height = 4.2)
+      plot(-log10(res.out$statistics$p.value),
+           -log10(collapse_res$statistics$p.value),
+           xlab = expression("-log"[10]~"(p) of single-stage KNN test"),
+           ylab = expression("-log"[10]~"(p) of multi-stage KNN test"),
+           main = "KNN in Genetic space")
+      dev.off()
+    }
 
     if(keep_all_stg_res){
       names(res.Iters) <- paste0("Iter_", 1:length(res.Iters))

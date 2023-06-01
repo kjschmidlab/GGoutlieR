@@ -11,6 +11,7 @@ ggoutlier_compositeKNN(
   k_geneticKNN = NULL,
   k_geoKNN = NULL,
   klim = c(3, 50),
+  make_fig = FALSE,
   plot_dir = ".",
   w_geo = 1,
   w_genetic = 2,
@@ -40,6 +41,8 @@ ggoutlier_compositeKNN(
 \item{k_geoKNN}{integer. Number of the nearest neighbors in a geographical space. the default is `NULL`. The `ggoutlier` will search the optimal K if `k_geoKNN = NULL`.}
 
 \item{klim}{vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`}
+
+\item{make_fig}{logic. If `make_fig = TRUE`, plots for diagnosing GGoutlieR analysis will be generated and saved to `plot_dir`. The default is `FALSE`}
 
 \item{plot_dir}{string. The path to save plots}
 

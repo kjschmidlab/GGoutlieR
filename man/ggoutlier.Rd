@@ -13,6 +13,7 @@ ggoutlier(
   k_geneticKNN = NULL,
   k_geoKNN = NULL,
   klim = c(3, 50),
+  make_fig = FALSE,
   plot_dir = ".",
   w_geo = 1,
   w_genetic = 2,
@@ -45,6 +46,8 @@ ggoutlier(
 \item{k_geoKNN}{integer. Number of the nearest neighbors in a geographical space. the default is `NULL`. The `ggoutlier` will search the optimal K if `k_geoKNN = NULL`.}
 
 \item{klim}{vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`}
+
+\item{make_fig}{logic. If `make_fig = TRUE`, plots for diagnosing GGoutlieR analysis will be generated and saved to `plot_dir`. The default is `FALSE`}
 
 \item{plot_dir}{string. The path to save plots}
 
@@ -84,12 +87,23 @@ This function is used to identify outliers with unusual geo-genetic patterns usi
 library(GGoutlieR)
 data("ipk_anc_coef") # get ancestry coefficients
 data("ipk_geo_coord") # get geographical coordinates
-compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
-                              gen_coord = ipk_anc_coef,
-                              plot_dir = ".",
-                              p_thres = 0.01,
-                              cpu = 2,
-                              method = "composite",
-                              verbose = FALSE,
-                              min_nn_dist = 1000)
+
+## To reduce computational time, a random subset
+## of the IPK barley landrace collection is used
+## in this minimal example.
+## The argument setting `multi_stages = TRUE`
+## and a larger range of `klim` are recommended
+## in your analysis.
+
+indx <- sample(1:nrow(ipk_geo_coord), size = 100)
+mini_example <- ggoutlier(geo_coord = ipk_geo_coord[indx,],
+                             gen_coord = ipk_anc_coef[indx,],
+                             klim = c(3,6),
+                             p_thres = 0.01,
+                             cpu = 2,
+                             method = "composite",
+                             verbose = FALSE,
+                             min_nn_dist = 1000,
+                             multi_stages = FALSE)
+summary_ggoutlier(mini_example)
 }

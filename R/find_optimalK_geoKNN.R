@@ -11,20 +11,22 @@ find_optimalK_geoKNN <- function(geo_coord,
   all.D <- c()
   ## parallel computation (if `cpu` > 1)
   if(do_par){
-    doSNOW::registerDoSNOW(cl)
+    doParallel::registerDoParallel(cl)
     kindx <- seq(from = min(klim), to = max(klim), by = 1)
     parallel::clusterExport(cl = cl,
                             unclass(lsf.str(envir = asNamespace("GGoutlieR"),
                                             all = T)),
                             envir = as.environment(asNamespace("GGoutlieR"))
     )
-    ## setup a progress bar for foreach
-    pb <- txtProgressBar(max = max(klim), min = min(klim), style = 3)
-    progress <- function(n){setTxtProgressBar(pb, n)}
-    opts <- list(progress = progress)
-    clusterExport(cl, "opts", envir = environment())
+    # NOTE: abolish progress bar to meet the requirement of CRAN submission
+    # setup a progress bar for foreach
+    #pb <- txtProgressBar(max = max(klim), min = min(klim), style = 3)
+    #progress <- function(n){setTxtProgressBar(pb, n)}
+    #opts <- list(progress = progress)
+    #clusterExport(cl, "opts", envir = environment())
 
-    all.D <- foreach(k = kindx, .packages='FastKNN', .combine="c", .options.snow = opts) %dopar% {
+    #all.D <- foreach(k = kindx, .packages='FastKNN', .combine="c", .options.snow = opts) %dopar% {
+    all.D <- foreach(k = kindx, .packages='FastKNN', .combine="c") %dopar% {
       # find KNN
       knn.indx <- find_geo_knn(geo.dM = geo.dM,
                                k=k,

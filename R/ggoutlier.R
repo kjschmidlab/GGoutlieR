@@ -8,6 +8,7 @@
 #' @param k_geneticKNN integer. Number of the nearest neighbors in a genetic space. The default is `NULL`. The `ggoutlier` will search the optimal K if `k_geneticKNN = NULL`.
 #' @param k_geoKNN integer. Number of the nearest neighbors in a geographical space. the default is `NULL`. The `ggoutlier` will search the optimal K if `k_geoKNN = NULL`.
 #' @param klim vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`
+#' @param make_fig logic. If `make_fig = TRUE`, plots for diagnosing GGoutlieR analysis will be generated and saved to `plot_dir`. The default is `FALSE`
 #' @param plot_dir string. The path to save plots
 #' @param w_geo numeric. A value controlling the power of distance weight in geographical KNN prediction.
 #' @param w_genetic numeric. A value controlling the power of distance weight in genetic KNN prediction.
@@ -27,14 +28,25 @@
 #' library(GGoutlieR)
 #' data("ipk_anc_coef") # get ancestry coefficients
 #' data("ipk_geo_coord") # get geographical coordinates
-#' compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
-#'                               gen_coord = ipk_anc_coef,
-#'                               plot_dir = ".",
-#'                               p_thres = 0.01,
-#'                               cpu = 2,
-#'                               method = "composite",
-#'                               verbose = FALSE,
-#'                               min_nn_dist = 1000)
+#'
+#' ## To reduce computational time, a random subset
+#' ## of the IPK barley landrace collection is used
+#' ## in this minimal example.
+#' ## The argument setting `multi_stages = TRUE`
+#' ## and a larger range of `klim` are recommended
+#' ## in your analysis.
+#'
+#' indx <- sample(1:nrow(ipk_geo_coord), size = 100)
+#' mini_example <- ggoutlier(geo_coord = ipk_geo_coord[indx,],
+#'                              gen_coord = ipk_anc_coef[indx,],
+#'                              klim = c(3,6),
+#'                              p_thres = 0.01,
+#'                              cpu = 2,
+#'                              method = "composite",
+#'                              verbose = FALSE,
+#'                              min_nn_dist = 1000,
+#'                              multi_stages = FALSE)
+#' summary_ggoutlier(mini_example)
 #' @export
 
 ggoutlier <- function(geo_coord,
@@ -45,6 +57,7 @@ ggoutlier <- function(geo_coord,
                       k_geneticKNN = NULL,
                       k_geoKNN = NULL,
                       klim = c(3,50),
+                      make_fig = FALSE,
                       plot_dir = ".",
                       w_geo = 1,
                       w_genetic = 2,
@@ -59,6 +72,7 @@ ggoutlier <- function(geo_coord,
                       maxIter=NULL,
                       keep_all_stg_res = FALSE,
                       warning_minR2 = 0.9
+
 
     ){
   method <- match.arg(method)
@@ -84,7 +98,8 @@ ggoutlier <- function(geo_coord,
                            keep_all_stg_res = F,
                            warning_minR2 = warning_minR2,
                            cpu = cpu,
-                           verbose = verbose
+                           verbose = verbose,
+                           make_fig = make_fig
       )
   }
   if(method == "geoKNN"){
@@ -104,11 +119,12 @@ ggoutlier <- function(geo_coord,
                        keep_all_stg_res = keep_all_stg_res,
                        warning_minR2 = warning_minR2,
                        cpu = cpu,
-                       verbose = verbose
+                       verbose = verbose,
+                       make_fig = make_fig
       )
   }
   if(method == "composite"){
-    if(!multi_stages){warning("`composite` method is recommended to be done with the multi-stage test (`multi_stages = TRUE`)")}
+    if(!multi_stages){message("`composite` method is recommended to be done with the multi-stage test (`multi_stages = TRUE`)")}
     out <-
       ggoutlier_compositeKNN(geo_coord = geo_coord,
                              gen_coord = gen_coord,
@@ -130,7 +146,8 @@ ggoutlier <- function(geo_coord,
                              cpu = cpu,
                              geneticKNN_output = geneticKNN_output,
                              geoKNN_output = geoKNN_output,
-                             verbose = verbose
+                             verbose = verbose,
+                             make_fig = make_fig
       )
   }
   return(out)

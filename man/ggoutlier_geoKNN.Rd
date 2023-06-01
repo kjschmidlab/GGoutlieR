@@ -11,6 +11,7 @@ ggoutlier_geoKNN(
   k = NULL,
   klim = c(3, 50),
   s = 100,
+  make_fig = FALSE,
   plot_dir = ".",
   w_power = 1,
   p_thres = 0.05,
@@ -35,6 +36,8 @@ ggoutlier_geoKNN(
 \item{klim}{vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`}
 
 \item{s}{integer. A scalar of geographical distance. The default `s=100` scales the distance to a unit of 0.1 kilometer.}
+
+\item{make_fig}{logic. If `make_fig = TRUE`, plots for diagnosing GGoutlieR analysis will be generated and saved to `plot_dir`. The default is `FALSE`}
 
 \item{plot_dir}{string. The path to save plots}
 

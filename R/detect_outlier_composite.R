@@ -6,6 +6,7 @@
 #' @param k_geneticKNN integer. Number of the nearest neighbors in a genetic space. The default is `NULL`. The `ggoutlier` will search the optimal K if `k_geneticKNN = NULL`.
 #' @param k_geoKNN integer. Number of the nearest neighbors in a geographical space. the default is `NULL`. The `ggoutlier` will search the optimal K if `k_geoKNN = NULL`.
 #' @param klim vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`
+#' @param make_fig logic. If `make_fig = TRUE`, plots for diagnosing GGoutlieR analysis will be generated and saved to `plot_dir`. The default is `FALSE`
 #' @param plot_dir string. The path to save plots
 #' @param w_geo numeric. A value controlling the power of distance weight in geographical KNN prediction.
 #' @param w_genetic numeric. A value controlling the power of distance weight in genetic KNN prediction.
@@ -30,6 +31,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                    k_geneticKNN = NULL,
                                    k_geoKNN = NULL,
                                    klim = c(3,50),
+                                   make_fig = FALSE,
                                    plot_dir = ".",
                                    w_geo = 1,
                                    w_genetic = 2,
@@ -45,11 +47,12 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                    geneticKNN_output = NULL,
                                    geoKNN_output = NULL,
                                    verbose = TRUE
-                                    ){
-  required_pkgs <- c(#"geosphere", # for calculating geographical distances
+                                  ){
+  # NOTE doSNOW is superseded -> cannot pass CRAN pre-test -> remove progress bar for parallel computation (doParallel does not support progress bars, see https://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r/10982524#10982524)
+  required_pkgs <- c("geosphere", # for calculating geographical distances
                      "stats4", # package to perform maximum likelihood estimation
                      "FastKNN", # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
-                     "foreach", "doSNOW", # doParallel in previous version -> use doSNOW to make progress bars
+                     "foreach", "doParallel",
                      "iterators","parallel")
   invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
 
@@ -146,7 +149,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
 
   ## parse `ggoutlier_geneticKNN` output
   if(!is.null(geneticKNN_output)){
-    if(attributes(geneticKNN_output, "model") != "ggoutlier_geneticKNN"){
+    if(attributes(geneticKNN_output)$model != "ggoutlier_geneticKNN"){
       stop("The input for `geneticKNN_output` is incorrect. Please check if you give an output of `geneticKNN_output` or not.")
     }
     if(nrow(geneticKNN_output$knn_index) != nrow(geo_coord)){
@@ -160,7 +163,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
 
   ## parse `ggoutlier_geoKNN` output
   if(!is.null(geoKNN_output)){
-    if(attributes(geoKNN_output, "model") != "ggoutlier_geoKNN"){
+    if(attributes(geoKNN_output)$model != "ggoutlier_geoKNN"){
       stop("The input for `geoKNN_output` is incorrect. Please check if you give an output of `ggoutlier_geoKNN` or not.")
     }
     if(nrow(geneticKNN_output$knn_index) != nrow(geo_coord)){
@@ -190,13 +193,15 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                      cl = cl)
 
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
-    k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")
-    pdf(k.sel.plot, width = 5, height = 4)
-    par(mar=c(4,6,1,1))
-    plot(x = klim[1]:klim[2], y = all.D, xlab="K", ylab=expression(sum(D["geo,i"], i==1, n)))
-    abline(v = opt.k)
-    legend("top",legend = paste("optimal k =", opt.k), pch="", bty = "n",cex = 1.2)
-    invisible(dev.off())
+    if(make_fig){
+      k.sel.plot <- paste(plot_dir, "/KNN_Dgeo_optimal_k_selection.pdf", sep = "")
+      pdf(k.sel.plot, width = 5, height = 4)
+      par(mar=c(4,6,1,1))
+      plot(x = klim[1]:klim[2], y = all.D, xlab="K", ylab=expression(sum(D["geo,i"], i==1, n)))
+      abline(v = opt.k)
+      legend("top",legend = paste("optimal k =", opt.k), pch="", bty = "n",cex = 1.2)
+      invisible(dev.off())
+    }
 
     k_geneticKNN = opt.k
     if(verbose) cat(paste("\n The optimal k_geneticKNN is ",opt.k,". Its figure is saved at ", k.sel.plot," \n", sep = ""))
@@ -273,13 +278,16 @@ ggoutlier_compositeKNN <- function(geo_coord,
     # make a figure for K searching procedure
     opt.k = c(klim[1]:klim[2])[which.min(all.D)]
     k_geoKNN = opt.k # replace k with the optimal k
-    k.sel.plot <- paste(plot_dir, "/KNN_Dg_optimal_k_selection.pdf", sep = "")
-    pdf(k.sel.plot, width = 5, height = 4)
-    par(mar=c(4,6,1,1))
-    plot(x = klim[1]:klim[2], y = all.D, xlab="K", ylab=expression(sum(D["genetic,i"], i==1, n)))
-    abline(v = opt.k)
-    legend("top",legend = paste("optimal k =", opt.k), pch="", bty = "n",cex = 1.2)
-    invisible(dev.off())
+    if(make_fig){
+      k.sel.plot <- paste(plot_dir, "/KNN_Dg_optimal_k_selection.pdf", sep = "")
+      pdf(k.sel.plot, width = 5, height = 4)
+      par(mar=c(4,6,1,1))
+      plot(x = klim[1]:klim[2], y = all.D, xlab="K", ylab=expression(sum(D["genetic,i"], i==1, n)))
+      abline(v = opt.k)
+      legend("top",legend = paste("optimal k =", opt.k), pch="", bty = "n",cex = 1.2)
+      invisible(dev.off())
+    }
+
 
     if(verbose) cat(paste("\n The optimal k_geoKNN is ",opt.k,". Its figure is saved at ", k.sel.plot," \n", sep = ""))
   }
@@ -371,18 +379,21 @@ ggoutlier_compositeKNN <- function(geo_coord,
     null.fun <- function(x){dgamma(x , shape = current.a, rate = current.b)}
     gamma.thres <- qgamma(1-p_thres, shape = current.a, rate = current.b)
     null.distr <- rgamma(n , shape = current.a, rate = current.b)
-    null.plot <- paste0(plot_dir, "/",prefix,"_null_distribution.pdf")
-    if(verbose) cat(paste("\nThe plot of null distribution is saved at ", null.plot," \n", sep = ""))
-    pdf(null.plot, width = 5, height = 4)
-    curve(null.fun, from = 0, to = max(null.distr), add = F, col = "blue",
-          ylab = "Density",
-          xlab = bquote(Gamma ~ '(' ~ alpha ~'='~.(round(current.a, digits = 3))~','~beta~'='~.(round(current.b, digits = 3))~')' )
-          ,bty = "n", main = plot_main)
-    abline(v = gamma.thres, col = "red", lty = 2)
-    text(x = gamma.thres, y = par("usr")[4], labels = paste("p =", p_thres), xpd=NA)
-    par(mgp = c(3,0,0))
-    axis(side = 1 ,at = round(gamma.thres, digits = 3), line = 0.3, tck = 0.02, font = 2)
-    invisible(dev.off())
+
+    if(make_fig){
+      null.plot <- paste0(plot_dir, "/",prefix,"_null_distribution.pdf")
+      if(verbose) cat(paste("\nThe plot of null distribution is saved at ", null.plot," \n", sep = ""))
+      pdf(null.plot, width = 5, height = 4)
+      curve(null.fun, from = 0, to = max(null.distr), add = F, col = "blue",
+            ylab = "Density",
+            xlab = bquote(Gamma ~ '(' ~ alpha ~'='~.(round(current.a, digits = 3))~','~beta~'='~.(round(current.b, digits = 3))~')' )
+            ,bty = "n", main = plot_main)
+      abline(v = gamma.thres, col = "red", lty = 2)
+      text(x = gamma.thres, y = par("usr")[4], labels = paste("p =", p_thres), xpd=NA)
+      par(mgp = c(3,0,0))
+      axis(side = 1 ,at = round(gamma.thres, digits = 3), line = 0.3, tck = 0.02, font = 2)
+      invisible(dev.off())
+    }
   }
   plot_nullDistr(current.a = current.a_geneticKNN,
                  current.b = current.b_geneticKNN,
@@ -457,8 +468,10 @@ ggoutlier_compositeKNN <- function(geo_coord,
     ## save arguments used in GGoutlieR
     attr(res.out_geneticKNN, "arguments") <- arguments_geneticKNN
     attr(res.out_geoKNN, "arguments") <- arguments_geoKNN
-    return(list("geneticKNN_result" = res.out_geneticKNN,
-                "geoKNN_result" = res.out_geoKNN))
+    final_out <- list("geneticKNN_result" = res.out_geneticKNN,
+                      "geoKNN_result" = res.out_geoKNN)
+    attr(final_out, "model") <- "composite"
+    return(final_out)
   }else{
     #-------------------------------------------------------------
     # multi-stage test
@@ -617,26 +630,28 @@ ggoutlier_compositeKNN <- function(geo_coord,
 
     # make a figure comparing the results of single stage and multi-stage tests
     ## plot of geneticKNN
-    logp.plot <- paste0(plot_dir, "/geneticKNN_test_multi_stage_Log10P_comparison.pdf")
-    if(verbose) cat(paste("\n\n\nThe plot for comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
-    pdf(logp.plot, width = 4, height = 4.2)
-    plot(-log10(res.out_geneticKNN$statistics$p.value),
-         -log10(collapse_res_geneticKNN$statistics$p.value),
-         xlab = expression("-log"[10]~"(p) of single-stage KNN test"),
-         ylab = expression("-log"[10]~"(p) of multi-stage KNN test"),
-         main = "KNN in Genetic space")
-    invisible(dev.off())
+    if(make_fig){
+      logp.plot <- paste0(plot_dir, "/geneticKNN_test_multi_stage_Log10P_comparison.pdf")
+      if(verbose) cat(paste("\n\n\nThe plot for comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
+      pdf(logp.plot, width = 4, height = 4.2)
+      plot(-log10(res.out_geneticKNN$statistics$p.value),
+           -log10(collapse_res_geneticKNN$statistics$p.value),
+           xlab = expression("-log"[10]~"(p) of single-stage KNN test"),
+           ylab = expression("-log"[10]~"(p) of multi-stage KNN test"),
+           main = "KNN in Genetic space")
+      invisible(dev.off())
 
-    ## plot of geoKNN
-    logp.plot <- paste0(plot_dir, "/geoKNN_test_multi_stage_Log10P_comparison.pdf")
-    if(verbose) cat(paste("\n\n\nThe plot of comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
-    pdf(logp.plot, width = 4, height = 4.2)
-    plot(-log10(res.out_geoKNN$statistics$p.value),
-         -log10(collapse_res_geoKNN$statistics$p.value),
-         xlab = expression("-log"[10]~"(p) of single-stage KNN test"),
-         ylab = expression("-log"[10]~"(p) of multi-stage KNN test"),
-         main = "KNN in Geographical space")
-    invisible(dev.off())
+      ## plot of geoKNN
+      logp.plot <- paste0(plot_dir, "/geoKNN_test_multi_stage_Log10P_comparison.pdf")
+      if(verbose) cat(paste("\n\n\nThe plot of comparing -logP between single-stage and multi-stage KNN tests is saved at ", logp.plot," \n", sep = ""))
+      pdf(logp.plot, width = 4, height = 4.2)
+      plot(-log10(res.out_geoKNN$statistics$p.value),
+           -log10(collapse_res_geoKNN$statistics$p.value),
+           xlab = expression("-log"[10]~"(p) of single-stage KNN test"),
+           ylab = expression("-log"[10]~"(p) of multi-stage KNN test"),
+           main = "KNN in Geographical space")
+      invisible(dev.off())
+    }
 
     # return multi-stage test outputs
     if(keep_all_stg_res){

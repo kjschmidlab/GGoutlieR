@@ -10,6 +10,7 @@ ggoutlier_geneticKNN(
   pgdM = NULL,
   k = NULL,
   klim = c(3, 50),
+  make_fig = FALSE,
   plot_dir = ".",
   w_power = 2,
   p_thres = 0.05,
@@ -33,6 +34,8 @@ ggoutlier_geneticKNN(
 \item{k}{integer. Number of the nearest neighbors.}
 
 \item{klim}{vector. A range of K to search for the optimal number of nearest neighbors. The default is `klim = c(3, 50)`}
+
+\item{make_fig}{logic. If `make_fig = TRUE`, plots for diagnosing GGoutlieR analysis will be generated and saved to `plot_dir`. The default is `FALSE`}
 
 \item{plot_dir}{string. The path to save plots}
 
