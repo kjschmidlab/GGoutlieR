@@ -3,9 +3,9 @@ Type: Package
 Title: An R Package Used to Identify Individuals with Unusual Geo-Genetic Patterns
 Version: 1.0.0
 Author: Che-Wei Chang, Karl Schmid 
-Maintainer: Che-Wei Chang <chewei.chang@uni-hohenheim.de>
-Description: Identifies individuals with unusual geo-genetic patterns. It produces a table of outliers with statistics and visualizes unusual geo-genetic patterns on a geographical map. This is useful for landscape genomics studies to discover samples that violate the isolation-by-distance assumption.
-License: MIT License + file LICENSE
+Maintainer: Che-Wei Chang <cheweichang92@gmail.com>
+Description: Identifies individuals with unusual association patterns of genetics and geography. It produces a table of outliers with statistics and visualizes unusual geo-genetic patterns on a geographical map. This is useful for landscape genomics studies to discover samples that violate the isolation-by-distance assumption.
+License: MIT + file LICENSE
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -13,7 +13,7 @@ Imports:
     stats4, 
     FastKNN,
     foreach,
-    doSNOW,
+    doParallel,
     iterators,
     parallel,
     rworldmap,
