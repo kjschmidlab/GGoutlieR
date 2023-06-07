@@ -208,6 +208,8 @@ Three different methods are available by setting the argument `method`:
 With `method = "composite"`, `ggoutlier` performs both `geneticKNN` and `geoKNN` methods, and it sequentially removes the most significant sample among `geneticKNN` and `geoKNN` methods in the multi-stage tests.
 We would use the results from the `composite` method for further demonstration.
 
+The argument `make_fig = TRUE` (the default is `FALSE`) is used to generate figures for diagnosis of KNN search and the heuristic null distribution in the directory of `plot_dir`.
+
 The argument `verbose = FALSE` is used to suppress the printout message.
 If you want to see the running progress of `ggoutlier`, set `verbose = TRUE`.
 
@@ -217,6 +219,7 @@ pthres = 0.025 # set a threshold
 ## run GGoutlieR with the composite approach
 compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                               gen_coord = ipk_anc_coef,
+                              make_fig = TRUE,
                               plot_dir = "../fig", 
                               p_thres = pthres, 
                               cpu = 4, 
@@ -224,13 +227,13 @@ compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                               method = "composite",
                               verbose = F,
                               min_nn_dist = 1000)
-
 ```
 
 ```{r run_ggoutlier_not_show, echo=FALSE, eval=FALSE}
 ## run GGoutlieR with the approach of genetic space KNN only
 geneticknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                             gen_coord = ipk_anc_coef,
+                            make_fig = TRUE,
                             plot_dir = "../fig", 
                             p_thres = pthres, 
                             cpu = 4, 
@@ -241,6 +244,7 @@ geneticknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
 ## run GGoutlieR with the approach of geographical space KNN only
 geoknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                         gen_coord = ipk_anc_coef,
+                        make_fig = TRUE,
                         plot_dir = "../fig", 
                         p_thres = pthres, 
                         cpu = 4,
@@ -264,7 +268,7 @@ geoknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
 
 #geneticknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geneticKNN_output_p0.025.RDS")
 #geoknn_res <- readRDS("../data/IPK_landrace_ggoutlier_geoKNN_output_p0.025.RDS")
-compositeknn_res <- readRDS("../data/IPK_landrace_ggoutlier_composite_output_p0.025.RDS") # load ggoutlier results saved in advance
+compositeknn_res <- readRDS("../supp_data/IPK_landrace_ggoutlier_composite_output_p0.025.RDS") # load ggoutlier results saved in advance
 ```
 
 
@@ -274,6 +278,7 @@ data("ipk_anc_coef") # get ancestry coefficients
 data("ipk_geo_coord") # get geographical coordinates
 ggoutlier_example <- ggoutlier(geo_coord = ipk_geo_coord,
                                gen_coord = ipk_anc_coef,
+                               make_fig = TRUE,
                                plot_dir = "./fig",
                                p_thres = 0.01,
                                cpu = 2,
