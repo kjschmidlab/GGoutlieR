@@ -1,7 +1,7 @@
 ---
 title: "Outlier detection with GGoutlieR"
 author: "Che-Wei Chang"
-output: rmarkdown::html_vignette
+output: pdf_document
 vignette: >
   %\VignetteIndexEntry{Outlier detection}
   %\VignetteEngine{knitr::rmarkdown}
