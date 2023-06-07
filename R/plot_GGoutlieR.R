@@ -84,6 +84,9 @@ plot_ggoutlier <- function(ggoutlier_res,
                      "rworldxtra","dichromat", "sp")
   invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
 
+  # use on.exit to prevent changes in users' pars
+  oldpar <- par(no.readonly = TRUE) # save original par of users
+  on.exit(oldpar)
 
   # extract data
   if(attributes(ggoutlier_res)$model == "composite"){

@@ -56,6 +56,12 @@ ggoutlier_compositeKNN <- function(geo_coord,
                      "iterators","parallel")
   invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
 
+  # use on.exit to prevent changes in users' pars
+  if(make_fig){
+    oldpar <- par(no.readonly = TRUE) # save original par of users
+    on.exit(oldpar)
+  }
+
   if(cpu > 1){
     max_cores=detectCores()
     if(cpu >= max_cores){
