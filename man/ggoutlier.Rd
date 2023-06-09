@@ -37,7 +37,7 @@ ggoutlier(
 
 \item{pgdM}{matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`.}
 
-\item{method}{string. The method to run `GGoutlieR`. It can be "composite", "geneticKNN", or "geoKNN".}
+\item{method}{string. The method to run `GGoutlieR`. It can be `"composite"`, `"geneticKNN"`, or `"geoKNN"`.}
 
 \item{K}{integer. Number of the nearest neighbors. If `K` is not `NULL`, the value will pass to `k_geneticKNN` and `k_geoKNN`.}
 
@@ -78,10 +78,10 @@ ggoutlier(
 \item{warning_minR2}{numeric. The prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. If any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.}
 }
 \value{
-a list including five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
+an object of `list`. If you set `method = "composite"`, `ggoutlier` will return a nested `list` with two subsidiary `list` which are `"geneticKNN_result"` and `"geoKNN_result"`. Each subsidiary list includes five items: `statistics` is a `data.frame` consisting of the D_geography ("Dgeo") or D_genetics ("Dg") values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample. The subsidiary list `geneticKNN_result` has an additional item called `"scalar"`, which records the value of geographical distance scalar used in the computation. If you use `method = "geneticKNN"` and `method = "geoKNN"`, `ggoutlier` will return a `list` respectively corresponding to `"geneticKNN_result"` and `"geoKNN_result"`.
 }
 \description{
-This function is used to identify outliers with unusual geo-genetic patterns using the KNN approach.
+This function is used to identify outliers with unusual geo-genetic patterns using the KNN approach. For the details of the outlier detection approach, please see Chang and Schmid 2023 (doi:https://doi.org/10.1101/2023.04.06.535838)
 }
 \examples{
 library(GGoutlieR)
@@ -106,4 +106,16 @@ mini_example <- ggoutlier(geo_coord = ipk_geo_coord[indx,],
                              min_nn_dist = 1000,
                              multi_stages = FALSE)
 summary_ggoutlier(mini_example)
+
+# DON'T RUN: this analysis will take a few minutes
+# full_example <- ggoutlier(geo_coord = ipk_geo_coord,
+#                           gen_coord = ipk_anc_coef,
+#                           klim = c(3,6),
+#                           p_thres = 0.01,
+#                           cpu = 2,
+#                           method = "composite",
+#                           verbose = FALSE,
+#                           min_nn_dist = 1000,
+#                           multi_stages = FALSE)
+
 }

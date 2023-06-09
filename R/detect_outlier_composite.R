@@ -1,5 +1,5 @@
 #' GGoutlieR with the composite approach
-#' @description  perform outlier identification with genetic space KNN and geographical space KNN.
+#' @description  perform outlier identification with genetic space KNN and geographical space KNN. For the details of the outlier detection approach, please see the supplementary material of Chang and Schmid 2023 (doi:https://doi.org/10.1101/2023.04.06.535838)
 #' @param geo_coord matrix or data.frame with two columns. The first column is longitude and the second one is latitude.
 #' @param gen_coord matrix. A matrix of "coordinates in a genetic space". Users can provide ancestry coefficients or eigenvectors for calculation. If, for example, ancestry coefficients are given, each column corresponds to an ancestral population. Samples are ordered in rows as in `geo_coord`.
 #' @param pgdM matrix. A pairwise genetic distance matrix. Users can provide a customized genetic distance matrix with this argument. Samples are ordered in rows and columns as in the rows of `geo_coord`. The default of `pgdM` is `NULL`. If `pgdM` is not provided, a genetic distance matrix will be calculated from `gen_coord`. NOTE: the genetic distance matrix is used in the search of KNN and as weights of KNN regression.
@@ -22,9 +22,7 @@
 #' @param keep_all_stg_res logic. Results from all iterations of the multi-stage test will be retained if it is`TRUE`. (the default is `FALSE`)
 #' @param warning_minR2 numeric. The prediction accuracy of KNN is evaluated as R^2 to assess the violation of isolation-by-distance expectation. If any R^2 is larger than `warning_minR2`, a warning message will be reported at the end of your analysis.
 #' @param n numeric. A number of random samples to draw from the null distribution for making a graph.
-#' @value an object of nested `list` with two subsidiary `list` which are `"geneticKNN_result"` and `"geoKNN_result"`. Each subsidiary list includes five items: `statistics` is a `data.frame` consisting of the D_geography ("Dgeo") or D_genetics ("Dg") values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample. The subsidiary list `geneticKNN_result` has an additional item called `"scalar"`, which records the value of geographical distance scalar used in the computation.
-#' @method For the details of the outlier detection approach, please see the supplementary material of Chang and Schmid 2023 (doi:https://doi.org/10.1101/2023.04.06.535838)
-
+#' @returns  an object of nested `list` with two subsidiary `list` which are `"geneticKNN_result"` and `"geoKNN_result"`. Each subsidiary list includes five items: `statistics` is a `data.frame` consisting of the D_geography ("Dgeo") or D_genetics ("Dg") values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample. The subsidiary list `geneticKNN_result` has an additional item called `"scalar"`, which records the value of geographical distance scalar used in the computation.
 #' @export
 ggoutlier_compositeKNN <- function(geo_coord,
                                    gen_coord,

@@ -29,7 +29,7 @@
 #' @param  add_benchmark_graph logic. If `TRUE`, a benchmark graph with only pie charts of ancestry coefficients for comparison with the outlier graph.
 #' @param  vertical_plots logic. If `TRUE`, a benchmark graph and outlier graph will be combined in a vertical direction.
 #' @param  adjust_p_value_projection logic. If `TRUE`, the function will perform KNN prediction by forcing K=1 and compute new p-values for visualization.
-#' @return a geographical map with colored lines showing sample pairs with unusual geo-genetic associations.
+#' @returns a geographical map with colored lines showing sample pairs with unusual geo-genetic associations.
 #' @examples
 #' library(GGoutlieR)
 #' data("ipk_anc_coef") # get ancestry coefficients

@@ -75,8 +75,8 @@ ggoutlier_compositeKNN(
 \item{verbose}{logic. If `verbose = FALSE`, `ggoutlier` will suppress printout messages.}
 }
 \value{
-a list with two list. Each list includes five items. `statistics` is a `data.frame` consisting of the D_geo values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample.
+an object of nested `list` with two subsidiary `list` which are `"geneticKNN_result"` and `"geoKNN_result"`. Each subsidiary list includes five items: `statistics` is a `data.frame` consisting of the D_geography ("Dgeo") or D_genetics ("Dg") values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample. The subsidiary list `geneticKNN_result` has an additional item called `"scalar"`, which records the value of geographical distance scalar used in the computation.
 }
 \description{
-perform outlier identification with genetic space KNN and geographical space KNN.
+perform outlier identification with genetic space KNN and geographical space KNN. For the details of the outlier detection approach, please see the supplementary material of Chang and Schmid 2023 (doi:https://doi.org/10.1101/2023.04.06.535838)
 }

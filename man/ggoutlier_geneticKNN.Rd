@@ -59,6 +59,9 @@ ggoutlier_geneticKNN(
 
 \item{verbose}{logic. If `verbose = FALSE`, `ggoutlier` will suppress printout messages.}
 }
+\value{
+an object of `list` including six items. `statistics` is a `data.frame` consisting of the `D geography` "Dgeo" values, p values and a column of logic values showing if a sample is an outlier or not. `threshold` is a `data.frame` recording the significance threshold. `gamma_parameter` is a vector recording the parameter of the heuristic Gamma distribution. `knn_index` and `knn_name` are a `data.frame` recording the K nearest neighbors of each sample. `scalar` is the value of geographical distance scalar used in the computation.
+}
 \description{
-identify samples geographically remote from K genetically nearest neighbors (genetic KNN)
+identify samples geographically remote from K genetically nearest neighbors (genetic KNN). For the details of the outlier detection approach, please see the supplementary material of Chang and Schmid 2023 (doi:https://doi.org/10.1101/2023.04.06.535838)
 }
