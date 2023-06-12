@@ -1,6 +1,6 @@
 # GGoutlieR
 
-`GGoutlieR` is an R package for identifying and visualizing unusual geo-genetic patterns for landscape genomic studies.
+`GGoutlieR` (**G**eo-**G**enetic **outlieR**) is an R package for identifying and visualizing unusual geo-genetic patterns for landscape genomic studies.
 It provides a summary table with heuristic p-values allowing users to easily identify outliers from thousands of biological samples.
 Moreover, its visualization tool enables users to present unusual geo-genetic association patterns on a geographical map.
 
@@ -9,8 +9,17 @@ Moreover, its visualization tool enables users to present unusual geo-genetic as
 To install `GGoutlieR` v1.0.0, please use the R commands below:
 
 ```
+##-----------------------
+## install from CRAN
+##-----------------------
+install.packages("GGoutlieR")
+
+##-----------------------
+## install from GitHub
+##-----------------------
+
 ## install dependencies
-install.packages(c("geosphere","stats4","FastKNN","foreach","doSNOW","iterators","parallel","rworldmap","scales","plotrix","mapplots", "RColorBrewer","rworldxtra","dichromat","sp"))
+install.packages(c("geosphere","stats4","FastKNN","foreach","doParallel","iterators","parallel","rworldmap","scales","plotrix","mapplots", "RColorBrewer","rworldxtra","dichromat","sp"))
 
 ## install GGoutlieR
 library(devtools)
@@ -20,6 +29,7 @@ install_git("https://github.com/kjschmidlab/GGoutlieR.git")
 ## Tutorial
 
 You can find an example of `GGoutlieR` analysis using a global barley landrace collection [HERE](https://github.com/kjschmidlab/GGoutlieR/blob/master/vignettes/outlier_detection.pdf) (`./vignettes/outlier_detection.pdf`). 
+The VCF file of the barley landrace collection is available [HERE](https://github.com/kjschmidlab/GGoutlieR/blob/master/supp_data/IPKbarley_GBS1661landraces_LDpruned.vcf.gz) (`./supp_data/IPKbarley_GBS1661landraces_LDpruned.vcf.gz`).
 
 ## Details about GGoutlieR framework
 
