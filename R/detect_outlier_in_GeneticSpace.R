@@ -143,7 +143,12 @@ ggoutlier_geneticKNN <- function(geo_coord,
     }
 
     k = opt.k
-    if(verbose) cat(paste("\n The optimal k is ",opt.k,". Its figure is saved at ", k.sel.plot," \n", sep = ""))
+    if(make_fig){
+      if(verbose) cat(paste0("\n The optimal k is ",opt.k,". Its figure is saved at ", k.sel.plot," \n"))
+    }else{
+      if(verbose) cat(paste0("\n The optimal k is ",opt.k," \n"))
+    }
+
 
   }
   if(is.null(k)){stop("k is NULL!")}
