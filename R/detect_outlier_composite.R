@@ -132,7 +132,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
   geo.dM <- sf::st_distance(geo_data_sf)/s
 
   ## handle samples with identical geographical coordinates
-  if(any(geo.dM[lower.tri(geo.dM)] == 0)){
+  if(any(as.vector(geo.dM[lower.tri(geo.dM)]) == 0)){
     if(verbose) cat("Find samples with identical geographical coordinates.\n")
     if(any(min_nn_dist == 0 , is.null(min_nn_dist))){
       if(verbose) cat("Add one unit of distance to individual pairs\n")
