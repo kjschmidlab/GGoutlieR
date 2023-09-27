@@ -121,8 +121,16 @@ ggoutlier_compositeKNN <- function(geo_coord,
   # Data pre-treatment
   #--------------------------------
   #--------------------------------
+  ## geographical data: data.frame to sf format
+  geo_data_df <- data.frame(ID = rownames(geo_coord),
+                            x = geo_coord$x,
+                            y = geo_coord$y)
+  geo_data_sf <- sf::st_as_sf(geo_data_df,
+                              coords = c("x", "y"), crs = 4326)
+
   ## calculate geographical distance
-  geo.dM <- geosphere::distm(x = geo_coord)/s
+  geo.dM <- sf::st_distance(geo_data_sf)/s
+
   ## handle samples with identical geographical coordinates
   if(any(geo.dM[lower.tri(geo.dM)] == 0)){
     if(verbose) cat("Find samples with identical geographical coordinates.\n")
