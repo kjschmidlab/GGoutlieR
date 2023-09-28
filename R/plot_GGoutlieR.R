@@ -392,11 +392,11 @@ plot_ggoutlier <- function(ggoutlier_res,
   } # if map_type == "both" or "geographic_knn" end
   if(map_type == "both" | map_type == "genetic_knn"){
     # adjust transparency according to the type of figures
-    if(map_type == "both"){
-      tmp.alpha = red_alpha * 0.75
-    }else{
-      tmp.alpha = red_alpha
-    }
+    #if(map_type == "both"){
+    #  tmp.alpha = red_alpha * 0.75
+    #}else{
+    #  tmp.alpha = red_alpha
+    #}
     if(is.null(p_thres)){
       ## create a data.frame for drawing segments on ggplot
       ## x0 and y0 correspond to the rows (the samples under testing)
