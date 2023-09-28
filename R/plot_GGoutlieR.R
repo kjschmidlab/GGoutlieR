@@ -30,7 +30,7 @@
 #' @param  vertical_plots logic. If `TRUE`, a benchmark graph and outlier graph will be combined in a vertical direction.
 #' @param  adjust_p_value_projection logic. If `TRUE`, the function will perform KNN prediction by forcing K=1 and compute new p-values for visualization.
 #' @param  linewidth_range numeric. A vector of two values. It is used to control the minimal and maximal width of KNN network on the geographical map.
-#' @returns a list of ggplot object(s). The plot is geographical map with colored lines showing sample pairs with unusual geo-genetic associations.
+#' @returns ggplot object. The plot is geographical map with colored lines showing sample pairs with unusual geo-genetic associations.
 #' @examples
 #' library(GGoutlieR)
 #' data("ipk_anc_coef") # get ancestry coefficients
@@ -85,7 +85,7 @@ plot_ggoutlier <- function(ggoutlier_res,
   required_pkgs <- c(#"rworldmap",
                      #"mapplots",
                      #"rworldxtra","dichromat", "sp",
-                     "RColorBrewer","scales", "plotrix",
+                     "RColorBrewer","scales",
                      "scatterpie", "rnaturalearth",
                      "rnaturalearthdata", "sf",
                      "ggplot2", "cowplot",
