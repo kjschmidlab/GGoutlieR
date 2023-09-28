@@ -109,7 +109,7 @@ ggoutlier_geoKNN <- function(geo_coord,
 
   ## calculate geographical distance
   geo.dM <- sf::st_distance(geo_data_sf)/s
-
+  geo.dM <- matrix(as.vector(geo.dM), ncol = ncol(geo.dM), nrow = nrow(geo.dM)) # convert geo.dM from `units` to matrix
   ## handle samples with identical geographical coordinates
   if(any(as.vector(geo.dM[lower.tri(geo.dM)]) == 0)){
     if(verbose) cat("Find samples with identical geographical coordinates.\n")
