@@ -112,6 +112,13 @@ plot_ggoutlier <- function(ggoutlier_res,
   }
 
   # check input
+  if(is.null(anc_coef) & is.null(gen_coord)){
+    stop("please provide at least either `anc_coef` or `gen_coord`")
+  }else{
+    if(is.null(gen_coord)){gen_coord <- anc_coef}
+    if(is.null(anc_coef)){anc_coef <- gen_coord}
+  }
+
   map_type = match.arg(map_type)
   if(!is.null(anc_coef) & !is.null(p_thres)){
     if(map_type == "both" | map_type == "geographic_knn"){
@@ -134,12 +141,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     if(is.null(dot_cex)){
       dot_cex <- min(linewidth_range)
     }
-    if(is.null(anc_coef) & is.null(gen_coord)){
-      stop("please provide at least either `anc_coef` or `gen_coord`")
-    }else{
-      if(is.null(gen_coord)){gen_coord <- anc_coef}
-      if(is.null(anc_coef)){anc_coef <- gen_coord}
-    }
+
     # assign colors if pie_color is NULL
     if(!is.null(anc_coef) & is.null(pie_color)){
       # check if sample sizes match
@@ -176,7 +178,7 @@ plot_ggoutlier <- function(ggoutlier_res,
 
   # get an adjancency matrix 'GGNet_adjm'
   if(all(dim(gen_coord) == dim(anc_coef))){
-    if(all(round(anc_coef, digits = 5) == round(anc_coef, digits = 5))){
+    if(all(round(gen_coord, digits = 5) == round(anc_coef, digits = 5))){
       gen_coord_eq_AncCoeff = TRUE
     }else{gen_coord_eq_AncCoeff = FALSE}
   }
