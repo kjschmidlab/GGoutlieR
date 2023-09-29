@@ -309,7 +309,10 @@ plot_ggoutlier <- function(ggoutlier_res,
       coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = FALSE) +
       theme(axis.title.x=element_blank(),
             axis.title.y = element_blank(),
-            legend.position = "none") +
+            # hide legend but keep blank space
+            legend.text = element_text(color = "white"),
+            legend.title = element_text(color = "white"),
+            legend.key = element_rect(fill = "white")) +
       scale_fill_manual(values=pie_color) +
       geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
                        fill = type, r=pie_r_scale,
