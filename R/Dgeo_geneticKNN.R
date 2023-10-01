@@ -22,6 +22,7 @@ pred_geo_coord_knn <- function(geo_coord, pgdM, knn.indx, w_power){
     w <- (1/tmp.d)/(sum(1/tmp.d))
     res[j,] <- apply(tmp.geo_coord, 2, function(x){weighted.mean(x, w)})
   }
+  colnames(res) <- colnames(geo_coord) # should be "x" and "y"
   return(res)
 } # pred_geo_coord_knn end
 
