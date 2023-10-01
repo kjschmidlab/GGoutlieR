@@ -29,7 +29,7 @@ find_optimalK_geneticKNN <- function(geo_coord,
     #clusterExport(cl, "opts", envir = environment())
     #all.D <- foreach(k = kindx, .packages=c('geosphere','FastKNN'), .combine="c", .options.snow = opts) %dopar% {
 
-    all.D <- foreach(k = kindx, .packages=c('geosphere','FastKNN'), .combine="c") %dopar% {
+    all.D <- foreach(k = kindx, .packages=c('sf','FastKNN'), .combine="c") %dopar% {
       knn.indx <- find_gen_knn(pgdM, k=k)
       # KNN prediction
       pred.geo_coord <- pred_geo_coord_knn(geo_coord = geo_coord,

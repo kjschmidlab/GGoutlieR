@@ -191,10 +191,17 @@ get_knn_pvalue <- function(knn_res, geo_coord = NULL, gen_coord = NULL, test_typ
     s <- attributes(knn_res)$arguments["scalar"]
     for(i in 1:n){
       tmp.geo_coord <- unname(geo_coord[i,])
+      tmp.geo_coord_sf <- st_as_sf(tmp.geo_coord, coords = c("x", "y"), crs = 4326)
       knn.geo_coord <- geo_coord[knn_res$knn_index[i,],]
+
       knn.Dgeo <- apply(knn.geo_coord, 1, function(a){
-        return(geosphere::distm(x = tmp.geo_coord, y = a)/s)
+        a_sf <- st_as_sf(x, coords = c("x", "y"), crs = 4326) # convert data.frame object to sf
+        return(as.vector(sf::st_distance(x = tmp.geo_coord_sf, y = a_sf))/s) # compute geographic distance
       })
+
+      #knn.Dgeo <- apply(knn.geo_coord, 1, function(a){
+      #  return(geosphere::distm(x = tmp.geo_coord, y = a)/s)
+      #})
       knn.p[i,] <- 1 - pgamma(unname(knn.Dgeo), shape = a, rate = b)
     }
   }

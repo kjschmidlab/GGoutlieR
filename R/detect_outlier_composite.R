@@ -48,7 +48,7 @@ ggoutlier_compositeKNN <- function(geo_coord,
                                    verbose = TRUE
                                   ){
   # NOTE doSNOW is superseded -> cannot pass CRAN pre-test -> remove progress bar for parallel computation (doParallel does not support progress bars, see https://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r/10982524#10982524)
-  required_pkgs <- c("geosphere", # for calculating geographical distances
+  required_pkgs <- c("sf", # for calculating geographical distances
                      "stats4", # package to perform maximum likelihood estimation
                      "FastKNN", # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
                      "foreach", "doParallel",

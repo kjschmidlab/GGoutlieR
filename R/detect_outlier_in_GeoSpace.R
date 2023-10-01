@@ -38,7 +38,7 @@ ggoutlier_geoKNN <- function(geo_coord,
                              cpu = 1,
                              verbose = TRUE
 ){
-  required_pkgs <- c("geosphere", # for calculating geographical distances
+  required_pkgs <- c("sf", # for calculating geographical distances
                      "stats4", # package to perform maximum likelihood estimation
                      "FastKNN", # KNN algorithm using a given distance matrix (other packages do not take arbitrary distance matrices)
                      "foreach", "doParallel",
