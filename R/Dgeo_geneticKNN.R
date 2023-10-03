@@ -31,6 +31,6 @@ pred_geo_coord_knn <- function(geo_coord, pgdM, knn.indx, w_power){
 cal_Dgeo <- function(pred.geo_coord, geo_coord, scalar){
   geo_coord_sf <- sf::st_as_sf(geo_coord, coords = c("x", "y"), crs = 4326)
   pred.geo_coord_sf <- sf::st_as_sf(pred.geo_coord, coords = c("x", "y"), crs = 4326)
-  geodist <- (sapply(1:nrow(geo_coord),function(a){as.vector(sf::st_distance(x = geo_coord_sf[a,], y = pred.geo_coord_sf[a,]))/scalar}))
+  geodist <- as.vector(diag(sf::st_distance(x = geo_coord_sf, y = pred.geo_coord_sf)))/scalar
   return(geodist)
 } # cal_Dgeo end
