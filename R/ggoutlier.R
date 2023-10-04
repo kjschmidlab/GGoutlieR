@@ -90,6 +90,9 @@ ggoutlier <- function(geo_coord,
     ){
   method <- match.arg(method)
 
+  if(make_fig){
+    if(!dir.exists(plot_dir)){stop(paste0("The directory `", plot_dir,"` does not exist. Please check if the `plot_dir` is correct."))}
+  }
   if(!is.null(K)){
       k_geneticKNN <- K
       k_geoKNN <- K
