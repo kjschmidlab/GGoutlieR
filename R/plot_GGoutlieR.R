@@ -116,7 +116,14 @@ plot_ggoutlier <- function(ggoutlier_res,
     stop("please provide at least either `anc_coef` or `gen_coord`")
   }else{
     if(is.null(gen_coord)){gen_coord <- anc_coef}
-    if(is.null(anc_coef)){anc_coef <- gen_coord}
+    if(is.null(anc_coef)){
+      if(all(abs(apply(anc_coef,1 , sum) - 1) < 10^-5)){
+        message("assign `gen_coord` as ancestry coefficients (`anc_coef`)")
+        anc_coef <- gen_coord
+      }else{
+        message("\n ancestry coefficients are missing.\n")
+      }
+    } # if is.null(anc_coef) end
   }
 
   map_type = match.arg(map_type)
@@ -238,7 +245,7 @@ plot_ggoutlier <- function(ggoutlier_res,
   ## set plot_xlim and plot_ylim if NULL
   if(is.null(plot_xlim)){plot_xlim <- select_xlim}
   if(is.null(plot_ylim)){plot_ylim <- select_ylim}
-  par(mar = c(1,1,1,1))
+  #par(mar = c(1,1,1,1))
   #******************************
   # edges of genetic space (GenSP) KNN outlier likelihood
   if(map_type %in% c("both", "genetic_knn")){
@@ -307,18 +314,20 @@ plot_ggoutlier <- function(ggoutlier_res,
       ggplot2::ggplot(data = geomap) +
       ggplot2::geom_sf(color = map_color) +
       coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = FALSE) +
-      theme(axis.title.x=element_blank(),
-            axis.title.y = element_blank(),
-            # hide legend but keep blank space
-            legend.text = element_text(color = "white"),
-            legend.title = element_text(color = "white"),
-            legend.key = element_rect(fill = "white")) +
+
       scale_fill_manual(values=pie_color) +
       geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
                        fill = type, r=pie_r_scale,
                        amount=value),
                    data=anc_ggplot_df, stat='pie',
-                   col = "black")
+                   col = "black",
+                   show.legend = FALSE) +
+      theme(axis.title.x=element_blank(),
+            axis.title.y = element_blank(),
+            # hide legend but keep blank space
+            legend.text = element_text(color = "white"),
+            legend.title = element_text(color = "white"),
+            legend.key = element_rect(fill = "white"))
       #print(geomap_plot_benchmark)
 
 
@@ -490,28 +499,25 @@ plot_ggoutlier <- function(ggoutlier_res,
       if(length(sig.row) == 0){
         warning("there is no outlier in the region selected according to `select_xlim` and `select_ylim`")
       }else{
+
+        if(show_knn_pie){# add pie charts of KNNs if show_knn_pie is TRUE
+          sig_knn_index <- unique(unlist(lapply(sig.row, function(i){GeoSP_knn_res$knn_index[i,]})))
+          sig.row <- c(sig.row, sig_knn_index)
+        } # show_knn_pie end
+
+        sig_anc_ggplot_df <- gather(anc_coef_for_pie[sig.row,], "type", "value", !!cols2)
+        sig_anc_ggplot_df$type <- factor(sig_anc_ggplot_df$type, levels = cols) # set legend order based on order of "cols"
         geomap_plot_GeoSpKNN <-
           geomap_plot_GeoSpKNN +
           scale_fill_manual(values=pie_color) +
           geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
                            fill = type, r=pie_r_scale,
                            amount=value),
-                       data=anc_ggplot_df[sig.row,], stat='pie',
-                       col = "black")
+                       data=sig_anc_ggplot_df, stat='pie',
+                       col = "black", show.legend = FALSE)
 
 
-        # add pie charts of KNNs if show_knn_pie is TRUE
-        if(show_knn_pie){
-          sig_knn_index <- unique(unlist(lapply(sig.row, function(i){GeoSP_knn_res$knn_index[i,]})))
-          geomap_plot_GeoSpKNN <-
-            geomap_plot_GeoSpKNN +
-            scale_fill_manual(values=pie_color) +
-            geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
-                             fill = type, r=pie_r_scale,
-                             amount=value),
-                         data=anc_ggplot_df[sig_knn_index,], stat='pie',
-                         col = "black")
-        } # show_knn_pie end
+
       } # if no significant end
     } # add pie Geographic KNN end
   } # make geomap_plot_GeoSpKNN end
@@ -540,6 +546,13 @@ plot_ggoutlier <- function(ggoutlier_res,
       if(length(sig.row) == 0){
         warning("there is no outlier in the region selected according to `select_xlim` and `select_ylim`")
       }else{
+        if(show_knn_pie){# add pie charts of KNNs if show_knn_pie is TRUE
+          sig_knn_index <- unique(unlist(lapply(sig.row, function(i){GenSP_knn_res$knn_index[i,]})))
+          sig.row <- c(sig.row, sig_knn_index)
+        } # show_knn_pie end
+
+        sig_anc_ggplot_df <- gather(anc_coef_for_pie[sig.row,], "type", "value", !!cols2)
+        sig_anc_ggplot_df$type <- factor(sig_anc_ggplot_df$type, levels = cols) # set legend order based on order of "cols"
         geomap_plot_GeneticKNN <-
           geomap_plot_GeneticKNN +
           scale_fill_manual(values=pie_color) +
@@ -548,20 +561,6 @@ plot_ggoutlier <- function(ggoutlier_res,
                            amount=value),
                        data=anc_ggplot_df[sig.row,], stat='pie',
                        col = "black")
-
-
-        # add pie charts of KNNs if show_knn_pie is TRUE
-        if(show_knn_pie){
-          sig_knn_index <- unique(unlist(lapply(sig.row, function(i){GenSP_knn_res$knn_index[i,]})))
-          geomap_plot_GeneticKNN <-
-            geomap_plot_GeneticKNN +
-            scale_fill_manual(values=pie_color) +
-            geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
-                             fill = type, r=pie_r_scale,
-                             amount=value),
-                         data=anc_ggplot_df[sig_knn_index,], stat='pie',
-                         col = "black")
-        } # show_knn_pie end
       } # if no significant end
     } # add pie Genetic KNN end
   } # make geomap_plot_GeneticKNN end
