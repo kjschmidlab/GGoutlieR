@@ -21,18 +21,16 @@
 #' @param  plot_ylim vector. Values controlling latitude boundaries of a map.
 #' @param  only_edges_in_xylim logic. only the edges with starting points within the given `select_xlim` and `select_ylim` will display on a geographical map. If `FALSE`, the edges out of the given boundaries will be removed from your plot. The default is `TRUE`.
 #' @param  pie_r_scale numeric. A scale controlling the radius of pie charts
-#' @param  red_alpha numeric. A value controlling the transparency of red lines. the default is 0.8
-#' @param  map_resolution a character string. The resolution of the geographical map. See details of the `scale` argument in the manual of `rnaturalearth::ne_countries()`. The default is `map_resolution = "small"`
+#' @param  map_resolution a character string. The resolution of the geographical map. See details of the `scale` argument in the manual of `rnaturalearth::ne_countries()`. The default is `map_resolution = "medium"`
 #' @param  show_knn_pie logic. If `TRUE`, the ancestry coefficients of K nearest neighbors of significant samples will display on the map. The default is `FALSE`.
 #' @param  show_col_legend logic. If `TRUE`, a color key will be added to the output graph.
 #' @param  which_sample a string vector of sample ID(s). If users want to only show specific sample(s)
 #' @param  add_benchmark_graph logic. If `TRUE`, a benchmark graph with only pie charts of ancestry coefficients for comparison with the outlier graph.
-#' @param  vertical_plots logic. If `TRUE`, a benchmark graph and outlier graph will be combined in a vertical direction.
 #' @param  adjust_p_value_projection logic. If `TRUE`, the function will perform KNN prediction by forcing K=1 and compute new p-values for visualization.
 #' @param  linewidth_range numeric. A vector of two values. It is used to control the minimal and maximal width of KNN network on the geographical map.
 #' @param  plot_labels character. A string of labels for plots. The default is `plot_labels = "auto"`. This parameter is for `cowplot::plot_grid`.
 #'
-#' @returns ggplot object. The plot is geographical map with colored lines showing sample pairs with unusual geo-genetic associations.
+#' @returns ggplot object. The plot is geographical map(s) with colored lines showing sample pairs with unusual geo-genetic associations.
 #' @examples
 #' library(GGoutlieR)
 #' data("ipk_anc_coef") # get ancestry coefficients
@@ -47,7 +45,7 @@
 #'                select_ylim = c(10,62),
 #'                plot_xlim = c(-20,140),
 #'                plot_ylim = c(10,62),
-#'                pie_r_scale = 1.2,
+#'                pie_r_scale = 1.8,
 #'                map_resolution = "medium")
 #'
 #' @export
@@ -72,13 +70,11 @@ plot_ggoutlier <- function(ggoutlier_res,
                            plot_ylim = NULL,
                            only_edges_in_xylim = TRUE,
                            pie_r_scale = 1,
-                           #red_alpha = 0.8,
-                           map_resolution = "small",
+                           map_resolution = "medium",
                            show_knn_pie = FALSE,
                            show_col_bar = TRUE,
                            which_sample = NULL,
                            add_benchmark_graph = TRUE,
-                           #vertical_plots = TRUE,
                            adjust_p_value_projection = FALSE,
                            linewidth_range = c(0.5,3),
                            plot_labels = "auto"
@@ -316,7 +312,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     geomap_plot_benchmark <-
       ggplot2::ggplot(data = geomap) +
       ggplot2::geom_sf(color = map_color, show.legend = NA) +
-      coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = FALSE) +
+      coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = TRUE) +
 
       scale_fill_manual(values=pie_color) +
       geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
@@ -325,8 +321,8 @@ plot_ggoutlier <- function(ggoutlier_res,
                    data=anc_ggplot_df, stat='pie',
                    col = "black",
                    show.legend = FALSE) +
-      theme(axis.title.x=element_blank(),
-            axis.title.y = element_blank(),
+      theme(axis.title.x = element_text(color = "white"),
+            axis.title.y = element_text(color = "white"),
             # hide legend but keep blank space
             legend.text = element_text(color = "white"),
             legend.title = element_text(color = "white"),
@@ -371,18 +367,9 @@ plot_ggoutlier <- function(ggoutlier_res,
           y0 = geo_coord[geosp.df$row,2],
           x1 = geo_coord[geosp.df$col,1],
           y1 = geo_coord[geosp.df$col,2],
-          #col = alpha(geosp.df$geosp.col, alpha = 0.9),
-          logp = -log10(geosp.df$geosp.pvalue)
+          logp = round(-log10(geosp.df$geosp.pvalue), digits = 2)
         )
 
-
-      #segments(x0 = geo_coord[geosp.df$row,1],
-      #         y0 = geo_coord[geosp.df$row,2],
-      #         x1 = geo_coord[geosp.df$col,1],
-      #         y1 = geo_coord[geosp.df$col,2],
-      #         col = alpha(geosp.df$geosp.col, alpha = 0.9),
-      #         lwd = -log10(geosp.df$geosp.pvalue)
-      #)
     }else{
 
       ## create a data.frame for drawing segments on ggplot
@@ -394,32 +381,13 @@ plot_ggoutlier <- function(ggoutlier_res,
           y0 = geo_coord[geosp.df$row[geosp.df$sig.tag],2],
           x1 = geo_coord[geosp.df$col[geosp.df$sig.tag],1],
           y1 = geo_coord[geosp.df$col[geosp.df$sig.tag],2],
-          #col = alpha(geosp.df$geosp.col[geosp.df$sig.tag], alpha = 0.9),
-          logp = -log10(geosp.df$geosp.pvalue[geosp.df$sig.tag])
+          logp = round(-log10(geosp.df$geosp.pvalue[geosp.df$sig.tag]), digits = 2)
         )
-      # sig.row corresponds to the rows (the samples under testing)
-      # sig.col corresponds to the columns (the K nearest neighbors of the samples under testing)
-      #sig.row <- geosp.df$row[geosp.df$sig.tag]
-      #sig.col <- geosp.df$col[geosp.df$sig.tag]
-      #sig.color <- geosp.df$geosp.col[geosp.df$sig.tag]
-      #sig.likelihood <- geosp.df$geosp.pvalue[geosp.df$sig.tag]
-      #segments(x0 = geo_coord[sig.row,1],
-      #         y0 = geo_coord[sig.row,2],
-      #         x1 = geo_coord[sig.col,1],
-      #         y1 = geo_coord[sig.col,2],
-      #         col = alpha(sig.color, alpha = 0.9),
-      #         lwd = -log10(sig.likelihood)
-      #)
     }
 
   } # if map_type == "both" or "geographic_knn" end
   if(map_type == "both" | map_type == "genetic_knn"){
     # adjust transparency according to the type of figures
-    #if(map_type == "both"){
-    #  tmp.alpha = red_alpha * 0.75
-    #}else{
-    #  tmp.alpha = red_alpha
-    #}
     if(is.null(p_thres)){
       ## create a data.frame for drawing segments on ggplot
       ## x0 and y0 correspond to the rows (the samples under testing)
@@ -431,15 +399,9 @@ plot_ggoutlier <- function(ggoutlier_res,
           x1 = geo_coord[gensp.df$col,1],
           y1 = geo_coord[gensp.df$col,2],
           #col = alpha(gensp.df$gensp.col, alpha = tmp.alpha),
-          logp = -log10(gensp.df$gensp.pvalue)
+          logp = round(-log10(gensp.df$gensp.pvalue), digits = 2)
         )
-      #segments(x0 = geo_coord[gensp.df$row,1],
-      #         y0 = geo_coord[gensp.df$row,2],
-      #         x1 = geo_coord[gensp.df$col,1],
-      #         y1 = geo_coord[gensp.df$col,2],
-      #         col = alpha(gensp.df$gensp.col, alpha = tmp.alpha),
-      #         lwd = -log10(gensp.df$gensp.pvalue)
-      #)
+
     }else{
       ## create a data.frame for drawing segments on ggplot
       ## x0 and y0 correspond to the rows (the samples under testing)
@@ -451,22 +413,11 @@ plot_ggoutlier <- function(ggoutlier_res,
           x1 = geo_coord[gensp.df$col[gensp.df$sig.tag],1],
           y1 = geo_coord[gensp.df$col[gensp.df$sig.tag],2],
           #col = alpha(gensp.df$gensp.col[gensp.df$sig.tag], alpha = tmp.alpha),
-          logp = -log10(gensp.df$gensp.pvalue[gensp.df$sig.tag])
+          logp = round(-log10(gensp.df$gensp.pvalue[gensp.df$sig.tag]), digits = 2)
         )
 
       # sig.row corresponds to the rows (the samples under testing)
       # sig.col corresponds to the columns (the K nearest neighbors of the samples under testing)
-      #sig.row <- gensp.df$row[gensp.df$sig.tag]
-      #sig.col <- gensp.df$col[gensp.df$sig.tag]
-      #sig.color <- gensp.df$gensp.col[gensp.df$sig.tag]
-      #sig.likelihood <- gensp.df$gensp.pvalue[gensp.df$sig.tag]
-      #segments(x0 = geo_coord[sig.row,1],
-      #         y0 = geo_coord[sig.row,2],
-      #         x1 = geo_coord[sig.col,1],
-      #         y1 = geo_coord[sig.col,2],
-      #         col = alpha(sig.color, alpha = tmp.alpha),
-      #         lwd = -log10(sig.likelihood)
-      #)
     }
   }
 
@@ -476,10 +427,9 @@ plot_ggoutlier <- function(ggoutlier_res,
   geomap_plot <-
     ggplot2::ggplot(data = geomap) +
     ggplot2::geom_sf(color = map_color) +
-    coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = FALSE) +
-    theme(axis.title.x=element_blank(),
-          axis.title.y = element_blank()
-          #,legend.position = "none"
+    coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = TRUE) +
+    theme(axis.title.x = element_text(color = "white"),
+          axis.title.y = element_text(color = "white")
     )
   ## add links of geographic KNN to geographical map
   if(map_type == "both" | map_type == "geographic_knn"){
@@ -523,9 +473,6 @@ plot_ggoutlier <- function(ggoutlier_res,
                            amount=value),
                        data=sig_anc_ggplot_df, stat='pie',
                        col = "black", show.legend = FALSE)
-
-
-
       } # if no significant end
     } # add pie Geographic KNN end
   } # make geomap_plot_GeoSpKNN end
@@ -621,122 +568,6 @@ plot_ggoutlier <- function(ggoutlier_res,
       return(geomap_plot_GeoSpKNN)
     }
   }
-
-  #sp::plot(geomap, xlim = plot_xlim, ylim = plot_ylim, add=T, border = map_color)
-  #if(is.null(anc_coef)){points(x = geo_coord[,1], y = geo_coord[,2], pch = 16, cex = dot_cex)}
-  #if(!is.null(anc_coef)){
-  #  points(x = geo_coord[,1], y = geo_coord[,2], pch = 16, cex = dot_cex)
-  #  #}else{
-  #  if(!is.null(p_thres) & map_type %in% c("both","geographic_knn")){
-  #    sig.row <- unique(geosp.df$row[geosp.df$sig.tag])
-  #    if(length(sig.row) == 0){
-  #        warning("there is no outlier in the region selected according to `select_xlim` and `select_ylim`")
-  #    }else{
-  #      pie.r = abs(diff(par("usr")[1:2]) )*0.005
-  #      for(i in 1:length(sig.row)){
-  #        add.pie(z = round(anc_coef[sig.row[i],]*10^5),
-  #                x = geo_coord[sig.row[i],1],
-  #                y = geo_coord[sig.row[i],2],
-  #                col = pie_color,
-  #                labels = NA,
-  #                radius = pie.r*pie_r_scale)
-  #      }
-  #      # add pie charts of KNNs if show_knn_pie is TRUE
-  #      if(show_knn_pie){
-  #        for(i in 1:length(sig.row)){
-  #          for(j in GeoSP_knn_res$knn_index[sig.row[i],]){
-  #            add.pie(z = round(anc_coef[j,]*10^5),
-  #                    x = geo_coord[j,1],
-  #                    y = geo_coord[j,2],
-  #                    col = pie_color,
-  #                    labels = NA,
-  #                    radius = pie.r*pie_r_scale)
-  #          }
-  #        }
-  #      }
-  #    }
-  #  }
-  #  if(!is.null(p_thres)  & map_type %in% c("both","genetic_knn")){
-  #    sig.row <- unique(gensp.df$row[gensp.df$sig.tag])
-  #    if(length(sig.row) == 0){
-  #      warning("there is no outlier in the region selected according to `select_xlim` and `select_ylim`")
-  #    }else{
-  #      pie.r = abs(diff(par("usr")[1:2]) )*0.005
-  #      for(i in 1:length(sig.row)){
-  #        add.pie(z = round(anc_coef[sig.row[i],]*10^5),
-  #                x = geo_coord[sig.row[i],1],
-  #                y = geo_coord[sig.row[i],2],
-  #                col = pie_color,
-  #                labels = NA,
-  #                radius = pie.r*pie_r_scale)
-  #      }
-  #      # add pie charts of KNNs if show_knn_pie is TRUE
-  #      if(show_knn_pie){
-  #        for(i in 1:length(sig.row)){
-  #          for(j in GenSP_knn_res$knn_index[sig.row[i],]){
-  #            add.pie(z = round(anc_coef[j,]*10^5),
-  #                    x = geo_coord[j,1],
-  #                    y = geo_coord[j,2],
-  #                    col = pie_color,
-  #                    labels = NA,
-  #                    radius = pie.r*pie_r_scale)
-  #          }
-  #        }
-  #      }
-  #    }
-  #  }
-  #}
-  #if(map_type == "genetic_knn" & show_col_bar){
-  #  color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
-  #                xr = plot_xlim[2],
-  #                yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.07,
-  #                yt = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.05 , # the coordinates
-  #                legend = c(0, round(max(-log10(gensp.pvalue)))) ,
-  #                gradient="x",
-  #                rect.col=edge.col$GenSP_colkey, align="rb")
-  #  text(x = plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.075,
-  #       y = plot_ylim[2],
-  #       labels = expression(-log[10](p)), font = 2, cex = 1.1
-  #  )
-  #}
-
-  #if(map_type == "geographic_knn" & show_col_bar){
-  #  color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
-  #                xr = plot_xlim[2],
-  #                yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.07,
-  #                yt = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.05 , # the coordinates
-  #                legend = c(0, round(max(-log10(geosp.pvalue)))) ,
-  #                gradient="x",
-  #                rect.col=edge.col$GeoSP_colkey, align="rb")
-  #  text(x = plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.075,
-  #       y = plot_ylim[2],
-  #       labels = expression(-log[10](p)), font = 2, cex = 1.1
-  #  )
-  #}
-  #if(map_type == "both" & show_col_bar){
-  #  par(xpd = NA)
-  #  color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
-  #                xr = plot_xlim[2],
-  #                yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.06,
-  #                yt = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.03 , # the coordinates
-  #                legend = c(0, round(max(-log10(geosp.pvalue)))) ,
-  #                gradient="x",
-  #                rect.col=edge.col$GeoSP_colkey, align="rb")
-  #  color.legend( xl =plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.15,
-  #                xr = plot_xlim[2],
-  #                yb = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.15,
-  #                yt = plot_ylim[2] - abs(plot_ylim[2] - plot_ylim[1])*0.12, # the coordinates
-  #                legend = c(0, round(max(-log10(gensp.pvalue)))) ,
-  #                gradient="x",
-  #                rect.col=edge.col$GenSP_colkey, align="rb")
-
-  #  text(x = plot_xlim[2] - abs(plot_xlim[2] - plot_xlim[1])*0.075,
-  #       y = plot_ylim[2] + abs(plot_ylim[2] - plot_ylim[1])*0.02,
-  #       labels = expression(-log[10](p)), font = 2, cex = 1.1
-  #  )
-  #  par(xpd = FALSE)
-  #}
-  #par(mfrow = c(1,1), mar = c(4,4,4,4)) # recover plot setting
 } # plot_ggoutlier end
 
 
