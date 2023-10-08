@@ -30,6 +30,7 @@
 #' @param  vertical_plots logic. If `TRUE`, a benchmark graph and outlier graph will be combined in a vertical direction.
 #' @param  adjust_p_value_projection logic. If `TRUE`, the function will perform KNN prediction by forcing K=1 and compute new p-values for visualization.
 #' @param  linewidth_range numeric. A vector of two values. It is used to control the minimal and maximal width of KNN network on the geographical map.
+#' @param  plot_labels character. A string of labels for plots. The default is `plot_labels = "auto"`. This parameter is for `cowplot::plot_grid`.
 #'
 #' @returns ggplot object. The plot is geographical map with colored lines showing sample pairs with unusual geo-genetic associations.
 #' @examples
@@ -79,7 +80,8 @@ plot_ggoutlier <- function(ggoutlier_res,
                            add_benchmark_graph = TRUE,
                            #vertical_plots = TRUE,
                            adjust_p_value_projection = FALSE,
-                           linewidth_range = c(0.5,3)
+                           linewidth_range = c(0.5,3),
+                           plot_labels = "auto"
 
 
 ){
@@ -313,7 +315,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     ## make benchmark plot
     geomap_plot_benchmark <-
       ggplot2::ggplot(data = geomap) +
-      ggplot2::geom_sf(color = map_color) +
+      ggplot2::geom_sf(color = map_color, show.legend = TRUE) +
       coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = FALSE) +
 
       scale_fill_manual(values=pie_color) +
@@ -328,7 +330,12 @@ plot_ggoutlier <- function(ggoutlier_res,
             # hide legend but keep blank space
             legend.text = element_text(color = "white"),
             legend.title = element_text(color = "white"),
-            legend.key = element_rect(fill = "white"))
+            legend.key = element_blank()
+            ) +
+      guides(color = guide_legend(override.aes =
+                                    list(fill = NA,
+                                         color = c("white"),
+                                         alpha = 0)))
       #print(geomap_plot_benchmark)
 
 
@@ -560,7 +567,7 @@ plot_ggoutlier <- function(ggoutlier_res,
           geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
                            fill = type, r=pie_r_scale,
                            amount=value),
-                       data=anc_ggplot_df[sig.row,], stat='pie',
+                       data=sig_anc_ggplot_df, stat='pie',
                        col = "black")
       } # if no significant end
     } # add pie Genetic KNN end
@@ -576,14 +583,14 @@ plot_ggoutlier <- function(ggoutlier_res,
           geomap_plot_benchmark,
           geomap_plot_GeneticKNN,
           geomap_plot_GeoSpKNN,
-          labels = "AUTO", ncol = 1
+          labels = plot_labels, ncol = 1
        )
     }else{
       plot_out <-
         cowplot::plot_grid(
           geomap_plot_GeneticKNN,
           geomap_plot_GeoSpKNN,
-          labels = "AUTO", ncol = 1
+          labels = plot_labels, ncol = 1
         )
     }
     return(plot_out)
@@ -594,7 +601,7 @@ plot_ggoutlier <- function(ggoutlier_res,
         cowplot::plot_grid(
           geomap_plot_benchmark,
           geomap_plot_GeneticKNN,
-          labels = "AUTO", ncol = 1
+          labels = plot_labels, ncol = 1
         )
       return(plot_out)
     }else{
@@ -607,7 +614,7 @@ plot_ggoutlier <- function(ggoutlier_res,
         cowplot::plot_grid(
           geomap_plot_benchmark,
           geomap_plot_GeoSpKNN,
-          labels = "AUTO", ncol = 1
+          labels = plot_labels, ncol = 1
         )
       return(plot_out)
     }else{
