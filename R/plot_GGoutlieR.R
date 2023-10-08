@@ -30,6 +30,7 @@
 #' @param  vertical_plots logic. If `TRUE`, a benchmark graph and outlier graph will be combined in a vertical direction.
 #' @param  adjust_p_value_projection logic. If `TRUE`, the function will perform KNN prediction by forcing K=1 and compute new p-values for visualization.
 #' @param  linewidth_range numeric. A vector of two values. It is used to control the minimal and maximal width of KNN network on the geographical map.
+#'
 #' @returns ggplot object. The plot is geographical map with colored lines showing sample pairs with unusual geo-genetic associations.
 #' @examples
 #' library(GGoutlieR)
@@ -91,7 +92,7 @@ plot_ggoutlier <- function(ggoutlier_res,
                      "ggplot2", "cowplot",
                      "ggforce", "rlang", "ggfun",
                      "stats", "tidyr", "dplyr", "utils")
-  invisible(lapply(required_pkgs, FUN=function(x){suppressPackageStartupMessages(library(x, verbose = FALSE, character.only = TRUE))}))
+  invisible(lapply(required_pkgs, FUN=function(x){suppressMessages(library(x, verbose = FALSE, character.only = TRUE))}))
 
   # use on.exit to prevent changes in users' pars
   oldpar <- par(no.readonly = TRUE) # save original par of users
@@ -116,8 +117,8 @@ plot_ggoutlier <- function(ggoutlier_res,
     stop("please provide at least either `anc_coef` or `gen_coord`")
   }else{
     if(is.null(gen_coord)){gen_coord <- anc_coef}
-    if(is.null(anc_coef)){
-      if(all(abs(apply(anc_coef,1 , sum) - 1) < 10^-5)){
+    if(is.null(anc_coef) & !is.null(gen_coord)){
+      if(all(abs(apply(gen_coord,1 , sum) - 1) < 10^-5)){ # double check if gen_coord is as expectation of ancestry coefficients
         message("assign `gen_coord` as ancestry coefficients (`anc_coef`)")
         anc_coef <- gen_coord
       }else{
