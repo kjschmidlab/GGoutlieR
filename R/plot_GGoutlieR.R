@@ -315,7 +315,7 @@ plot_ggoutlier <- function(ggoutlier_res,
     ## make benchmark plot
     geomap_plot_benchmark <-
       ggplot2::ggplot(data = geomap) +
-      ggplot2::geom_sf(color = map_color, show.legend = TRUE) +
+      ggplot2::geom_sf(color = map_color, show.legend = NA) +
       coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = FALSE) +
 
       scale_fill_manual(values=pie_color) +
@@ -330,7 +330,7 @@ plot_ggoutlier <- function(ggoutlier_res,
             # hide legend but keep blank space
             legend.text = element_text(color = "white"),
             legend.title = element_text(color = "white"),
-            legend.key = element_blank()
+            legend.key = element_rect(fill = NA)
             ) +
       guides(color = guide_legend(override.aes =
                                     list(fill = NA,
@@ -568,7 +568,7 @@ plot_ggoutlier <- function(ggoutlier_res,
                            fill = type, r=pie_r_scale,
                            amount=value),
                        data=sig_anc_ggplot_df, stat='pie',
-                       col = "black")
+                       col = "black", show.legend = FALSE)
       } # if no significant end
     } # add pie Genetic KNN end
   } # make geomap_plot_GeneticKNN end
