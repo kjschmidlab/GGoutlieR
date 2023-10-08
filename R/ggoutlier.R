@@ -37,29 +37,31 @@
 #' ## and a larger range of `klim` are recommended
 #' ## in your analysis.
 #'
-#' indx <- sample(1:nrow(ipk_geo_coord), size = 100)
-#' mini_example <- ggoutlier(geo_coord = ipk_geo_coord[indx,],
-#'                              gen_coord = ipk_anc_coef[indx,],
-#'                              klim = c(3,6),
-#'                              p_thres = 0.01,
-#'                              cpu = 2,
-#'                              method = "composite",
-#'                              verbose = FALSE,
-#'                              min_nn_dist = 1000,
-#'                              multi_stages = FALSE)
-#' summary_ggoutlier(mini_example)
+#'# indx <- sample(1:nrow(ipk_geo_coord), size = 100)
+#'# mini_example <- ggoutlier(geo_coord = ipk_geo_coord[indx,],
+#'#                              gen_coord = ipk_anc_coef[indx,],
+#'#                              klim = c(3,6),
+#'#                              p_thres = 0.01,
+#'#                              cpu = 2,
+#'#                              method = "composite",
+#'#                              verbose = FALSE,
+#'#                              min_nn_dist = 1000,
+#'#                              multi_stages = FALSE)
+#' #summary_ggoutlier(mini_example)
 #'
-#' # DON'T RUN: this analysis will take a few minutes
-#' # full_example <- ggoutlier(geo_coord = ipk_geo_coord,
-#' #                           gen_coord = ipk_anc_coef,
-#' #                           klim = c(3,6),
-#' #                           p_thres = 0.01,
-#' #                           cpu = 2,
-#' #                           method = "composite",
-#' #                           verbose = FALSE,
-#' #                           min_nn_dist = 1000,
-#' #                           multi_stages = FALSE)
-#'
+#' DON'T RUN: this analysis will take a few minutes
+#' \dontrun{
+#' full_example <- ggoutlier(geo_coord = ipk_geo_coord,
+#'                            gen_coord = ipk_anc_coef,
+#'                            klim = c(3,6),
+#'                            p_thres = 0.01,
+#'                            cpu = 2,
+#'                            method = "composite",
+#'                            verbose = FALSE,
+#'                            min_nn_dist = 1000,
+#'                            multi_stages = FALSE)
+#' }
+
 #' @export
 
 ggoutlier <- function(geo_coord,
