@@ -94,12 +94,12 @@ ggoutlier_result <- ggoutlier(geo_coord = ipk_geo_coord,
 head(summary_ggoutlier(ggoutlier_result))
 
 #>                 ID     method      p.value
-#> 1  BRIDGE_HOR_2827     geoKNN 0.0002533251
-#> 2 BRIDGE_HOR_12795     geoKNN 0.0002871882
-#> 3    BRIDGE_BCC_37     geoKNN 0.0003011807
-#> 4 BRIDGE_HOR_10557     geoKNN 0.0003500990
-#> 5 BRIDGE_HOR_10555     geoKNN 0.0003697789
-#> 6        BTR_FT519 geneticKNN 0.0003816026
+#> 1  BRIDGE_HOR_2827     geoKNN 0.0002534661
+#> 2 BRIDGE_HOR_12795     geoKNN 0.0002875591
+#> 3    BRIDGE_BCC_37     geoKNN 0.0003014085
+#> 4 BRIDGE_HOR_10557     geoKNN 0.0003502037
+#> 5 BRIDGE_HOR_10555     geoKNN 0.0003697646
+#> 6        BTR_FT519 geneticKNN 0.0003828147
 ```
 
 ### Visualization of unusual geo-genetic patterns
