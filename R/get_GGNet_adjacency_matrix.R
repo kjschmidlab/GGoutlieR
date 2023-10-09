@@ -195,7 +195,7 @@ get_knn_pvalue <- function(knn_res, geo_coord = NULL, gen_coord = NULL, test_typ
       knn.geo_coord <- geo_coord[knn_res$knn_index[i,],]
 
       knn.Dgeo <- apply(knn.geo_coord, 1, function(a){
-        a_sf <- st_as_sf(x, coords = c("x", "y"), crs = 4326) # convert data.frame object to sf
+        a_sf <- st_as_sf(a, coords = c("x", "y"), crs = 4326) # convert data.frame object to sf
         return(as.vector(sf::st_distance(x = tmp.geo_coord_sf, y = a_sf))/s) # compute geographic distance
       })
 

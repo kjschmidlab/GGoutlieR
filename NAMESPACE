@@ -12,10 +12,14 @@ importFrom("graphics", "abline", "axis", "curve", "legend", "par",
              "plot", "points", "segments", "text")
 importFrom("stats", "cor", "dgamma", "dist", "pgamma", "qgamma",
              "rgamma", "var", "weighted.mean")
-importFrom("utils", "lsf.str", "setTxtProgressBar", "txtProgressBar")
+importFrom("utils", "lsf.str", "setTxtProgressBar", "txtProgressBar", "flush.console")
 importFrom("parallel", "detectCores","clusterExport", "makeCluster", "stopCluster")
 importFrom("foreach", "%dopar%", "foreach")
 importFrom("scales","alpha")
 importFrom("stats4","mle")
 importFrom("RColorBrewer", "brewer.pal", "brewer.pal.info")
 importFrom("sf", "st_distance", "st_as_sf")
+importFrom("tidyr", "gather")
+importFrom("ggforce","geom_arc_bar")
+importFrom("rlang","enquo")
+

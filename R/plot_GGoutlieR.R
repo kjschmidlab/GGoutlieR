@@ -23,7 +23,6 @@
 #' @param  pie_r_scale numeric. A scale controlling the radius of pie charts
 #' @param  map_resolution a character string. The resolution of the geographical map. See details of the `scale` argument in the manual of `rnaturalearth::ne_countries()`. The default is `map_resolution = "medium"`
 #' @param  show_knn_pie logic. If `TRUE`, the ancestry coefficients of K nearest neighbors of significant samples will display on the map. The default is `FALSE`.
-#' @param  show_col_legend logic. If `TRUE`, a color key will be added to the output graph.
 #' @param  which_sample a string vector of sample ID(s). If users want to only show specific sample(s)
 #' @param  add_benchmark_graph logic. If `TRUE`, a benchmark graph with only pie charts of ancestry coefficients for comparison with the outlier graph.
 #' @param  adjust_p_value_projection logic. If `TRUE`, the function will perform KNN prediction by forcing K=1 and compute new p-values for visualization.
@@ -36,6 +35,7 @@
 #' data("ipk_anc_coef") # get ancestry coefficients
 #' data("ipk_geo_coord") # get geographical coordinates
 #' data(ggoutlier_example) # get an example output of ggoutlier
+#' \dontrun{
 #' plot_ggoutlier(ggoutlier_res = ggoutlier_example,
 #'                gen_coord = ipk_anc_coef,
 #'                geo_coord = ipk_geo_coord,
@@ -47,6 +47,7 @@
 #'                plot_ylim = c(10,62),
 #'                pie_r_scale = 1.8,
 #'                map_resolution = "medium")
+#'                }
 #'
 #' @export
 
@@ -72,7 +73,6 @@ plot_ggoutlier <- function(ggoutlier_res,
                            pie_r_scale = 1,
                            map_resolution = "medium",
                            show_knn_pie = FALSE,
-                           show_col_bar = TRUE,
                            which_sample = NULL,
                            add_benchmark_graph = TRUE,
                            adjust_p_value_projection = FALSE,
@@ -85,7 +85,7 @@ plot_ggoutlier <- function(ggoutlier_res,
                      #"mapplots",
                      #"rworldxtra","dichromat", "sp",
                      "RColorBrewer","scales",
-                     "scatterpie", "rnaturalearth",
+                     "rnaturalearth",
                      "rnaturalearthdata", "sf",
                      "ggplot2", "cowplot",
                      "ggforce", "rlang", "ggfun",

@@ -23,7 +23,6 @@ plot_ggoutlier(
   pie_r_scale = 1,
   map_resolution = "medium",
   show_knn_pie = FALSE,
-  show_col_bar = TRUE,
   which_sample = NULL,
   add_benchmark_graph = TRUE,
   adjust_p_value_projection = FALSE,
@@ -77,8 +76,6 @@ plot_ggoutlier(
 \item{linewidth_range}{numeric. A vector of two values. It is used to control the minimal and maximal width of KNN network on the geographical map.}
 
 \item{plot_labels}{character. A string of labels for plots. The default is `plot_labels = "auto"`. This parameter is for `cowplot::plot_grid`.}
-
-\item{show_col_legend}{logic. If `TRUE`, a color key will be added to the output graph.}
 }
 \value{
 ggplot object. The plot is geographical map(s) with colored lines showing sample pairs with unusual geo-genetic associations.
@@ -97,6 +94,7 @@ library(GGoutlieR)
 data("ipk_anc_coef") # get ancestry coefficients
 data("ipk_geo_coord") # get geographical coordinates
 data(ggoutlier_example) # get an example output of ggoutlier
+\dontrun{
 plot_ggoutlier(ggoutlier_res = ggoutlier_example,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -108,5 +106,6 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_example,
                plot_ylim = c(10,62),
                pie_r_scale = 1.8,
                map_resolution = "medium")
+               }
 
 }

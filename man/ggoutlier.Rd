@@ -88,27 +88,10 @@ library(GGoutlieR)
 data("ipk_anc_coef") # get ancestry coefficients
 data("ipk_geo_coord") # get geographical coordinates
 
-## To reduce computational time, a random subset
-## of the IPK barley landrace collection is used
-## in this minimal example.
-## The argument setting `multi_stages = TRUE`
-## and a larger range of `klim` are recommended
-## in your analysis.
-
-# indx <- sample(1:nrow(ipk_geo_coord), size = 100)
-# mini_example <- ggoutlier(geo_coord = ipk_geo_coord[indx,],
-#                              gen_coord = ipk_anc_coef[indx,],
-#                              klim = c(3,6),
-#                              p_thres = 0.01,
-#                              cpu = 2,
-#                              method = "composite",
-#                              verbose = FALSE,
-#                              min_nn_dist = 1000,
-#                              multi_stages = FALSE)
- #summary_ggoutlier(mini_example)
 
 #DON'T RUN: this analysis will take a few minutes
-\dontrun{full_example <- ggoutlier(geo_coord = ipk_geo_coord,
+\dontrun{ggoutlier_example <-
+                 ggoutlier(geo_coord = ipk_geo_coord,
                            gen_coord = ipk_anc_coef,
                            klim = c(3,6),
                            p_thres = 0.01,
