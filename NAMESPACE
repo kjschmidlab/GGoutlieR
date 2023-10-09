@@ -22,4 +22,3 @@ importFrom("sf", "st_distance", "st_as_sf")
 importFrom("tidyr", "gather")
 importFrom("ggforce","geom_arc_bar")
 importFrom("rlang","enquo")
-

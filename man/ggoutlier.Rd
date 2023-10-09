@@ -90,7 +90,8 @@ data("ipk_geo_coord") # get geographical coordinates
 
 
 #DON'T RUN: this analysis will take a few minutes
-\dontrun{ggoutlier_example <-
+\dontrun{
+ggoutlier_example <-
                  ggoutlier(geo_coord = ipk_geo_coord,
                            gen_coord = ipk_anc_coef,
                            klim = c(3,6),
@@ -100,5 +101,7 @@ data("ipk_geo_coord") # get geographical coordinates
                            verbose = FALSE,
                            min_nn_dist = 1000,
                            multi_stages = FALSE)
+
+head(summary_ggoutlier(ggoutlier_example)) # get a summary table
 }
 }
