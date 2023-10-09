@@ -14,7 +14,7 @@
 #' @param  p_thres numeric. A value of significant level. Only outliers (p values less than `p_thres`) are mapped on a geographical map if `p_thres` is provided (the default is `NULL`). This argument is optional.
 #' @param  color_res integer. The resolution of color scale.
 #' @param  dot_cex numeric. The size of dots denoting the positions of samples on a geographical map.
-#' @param  map_type string. The type of plot to draw. It can be `"geographic_knn"`, `"genetic_knn"` and `"add_both"`.
+#' @param  map_type string. The type of plot to draw. It can be `"geographic_knn"`, `"genetic_knn"` and `"both"`.
 #' @param  select_xlim vector. Values controlling longitude boundaries of a window to select outliers to present on a geographical map. The default is `select_xlim = c(-180,180)`.
 #' @param  select_ylim vector. Values controlling latitude boundaries of a window to select outliers to present on a geographical map. The default is `select_ylim = c(-90,90)`.
 #' @param  plot_xlim vector. Values controlling longitude boundaries of a map.

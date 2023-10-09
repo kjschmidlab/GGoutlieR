@@ -49,7 +49,7 @@ plot_ggoutlier(
 
 \item{dot_cex}{numeric. The size of dots denoting the positions of samples on a geographical map.}
 
-\item{map_type}{string. The type of plot to draw. It can be `"geographic_knn"`, `"genetic_knn"` and `"add_both"`.}
+\item{map_type}{string. The type of plot to draw. It can be `"geographic_knn"`, `"genetic_knn"` and `"both"`.}
 
 \item{select_xlim}{vector. Values controlling longitude boundaries of a window to select outliers to present on a geographical map. The default is `select_xlim = c(-180,180)`.}
 
