@@ -227,9 +227,36 @@ compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                               method = "composite",
                               verbose = F,
                               min_nn_dist = 1000)
+
+
 ```
 
 ```{r run_ggoutlier_not_show, echo=FALSE, eval=FALSE}
+## test computational time
+system.time(
+  compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
+                              gen_coord = ipk_anc_coef,
+                              make_fig = FALSE,
+                              plot_dir = "../fig", 
+                              p_thres = 0.005, 
+                              cpu = 4, 
+                              klim = c(3,30), 
+                              method = "composite",
+                              verbose = F,
+                              min_nn_dist = 1000,
+                              multi_stages = F)) # 54 sec
+system.time(
+  compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
+                              gen_coord = ipk_anc_coef,
+                              make_fig = FALSE,
+                              plot_dir = "../fig", 
+                              p_thres = 0.025, 
+                              cpu = 4, 
+                              klim = c(3,50), 
+                              method = "composite",
+                              verbose = F,
+                              min_nn_dist = 1000,
+                              multi_stages = T))# 728 sec
 ## run GGoutlieR with the approach of genetic space KNN only
 geneticknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                             gen_coord = ipk_anc_coef,
@@ -287,6 +314,9 @@ ggoutlier_example <- ggoutlier(geo_coord = ipk_geo_coord,
                                min_nn_dist = 1000)
 ggoutlier_example <- compositeknn_res
 usethis::use_data(ggoutlier_example)
+
+data("ggoutlier_example")
+compositeknn_res <- ggoutlier_example
 ```
 
 
@@ -325,6 +355,7 @@ The example here overlaid both red and blue lines on the same map (with the argu
 Users can keep only blue or red lines by setting `map_type = "geographic_knn"` or `map_type = "genetic_knn"`, respectively.
 
 ```{r ggoutlier_graph, eval=FALSE}
+p_example <- 
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -335,7 +366,7 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
                plot_xlim = c(-20,140),
                plot_ylim = c(10,62),
                pie_r_scale = 1.2,
-               map_resolution = "coarse",
+               map_resolution = "medium",
                adjust_p_value_projection = F)
 ```
 
@@ -368,8 +399,8 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
 *Figure 2. GGoutlieR results with highlights of outliers in the UK*
 
 ```{r make_fig_for_paper_and_vignette,eval=FALSE,echo=FALSE}
-jpeg(filename = "../fig/IPK_ggoutlier_for_paper.jpg", res = 400,
-     height = 3000, width = 3000)
+jpeg(filename = "./fig/IPK_ggoutlier_for_paper.jpg", res = 400,
+     height = 3200, width = 2400)
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -379,13 +410,13 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
                select_ylim = c(10,62),
                plot_xlim = c(-20,140),
                plot_ylim = c(10,62),
-               pie_r_scale = 1.2,
-               map_resolution = "course",
+               pie_r_scale = 1.5,
+               map_resolution = "medium",
                adjust_p_value_projection = F)
 dev.off()
 
-jpeg(filename = "../fig/IPK_ggoutlier_highlighUK.jpg", res = 400,
-     height = 1500, width = 3000)
+jpeg(filename = "./fig/IPK_ggoutlier_highlighUK.jpg", res = 400,
+     height = 2400, width = 2400)
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -395,8 +426,8 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
                select_ylim = c(47,61),
                plot_xlim = c(-20,140),
                plot_ylim = c(10,62),
-               pie_r_scale = 1.2,
-               map_resolution = "course",
+               pie_r_scale = 2,
+               map_resolution = "medium",
                adjust_p_value_projection = F,
                add_benchmark_graph = F)
 dev.off()
