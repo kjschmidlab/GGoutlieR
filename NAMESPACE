@@ -22,3 +22,7 @@ importFrom("sf", "st_distance", "st_as_sf")
 importFrom("tidyr", "gather")
 importFrom("ggforce","geom_arc_bar")
 importFrom("rlang","enquo")
+importFrom("ggplot2","aes", "coord_sf", "element_rect",
+           "element_text", "geom_point", "geom_segment", "guide_legend",
+           "guides", "labs", "scale_fill_manual", "scale_linewidth",
+           "theme", ".data")

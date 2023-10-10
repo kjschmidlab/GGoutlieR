@@ -88,7 +88,7 @@ plot_ggoutlier <- function(ggoutlier_res,
                      "rnaturalearth",
                      "rnaturalearthdata", "sf",
                      "ggplot2", "cowplot",
-                     "ggforce", "rlang", "ggfun",
+                     "ggforce", "rlang", #"ggfun",
                      "stats", "tidyr", "dplyr", "utils")
   invisible(lapply(required_pkgs, FUN=function(x){suppressMessages(library(x, verbose = FALSE, character.only = TRUE))}))
 
@@ -123,6 +123,11 @@ plot_ggoutlier <- function(ggoutlier_res,
         message("\n ancestry coefficients are missing.\n")
       }
     } # if is.null(anc_coef) end
+  }
+  if(!is.null(anc_coef)){
+    if(!all(abs(apply(anc_coef,1 , sum) - 1) < 10^-5)){
+      stop("sum of ancestry coefficients of each individual should be 1. please check your data")
+    }
   }
 
   map_type = match.arg(map_type)
@@ -315,9 +320,9 @@ plot_ggoutlier <- function(ggoutlier_res,
       coord_sf(xlim = plot_xlim, ylim = plot_ylim, expand = TRUE) +
 
       scale_fill_manual(values=pie_color) +
-      geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
-                       fill = type, r=pie_r_scale,
-                       amount=value),
+      geom_arc_bar(aes(x0 = .data$x, y0 = .data$y,r0=0,
+                       fill = .data$type, r=pie_r_scale,
+                       amount= .data$value),
                    data=anc_ggplot_df, stat='pie',
                    col = "black",
                    show.legend = FALSE) +
@@ -435,12 +440,12 @@ plot_ggoutlier <- function(ggoutlier_res,
   if(map_type == "both" | map_type == "geographic_knn"){
     geomap_plot_GeoSpKNN <-
       geomap_plot +
-      geom_segment(aes(x=x0,
-                       y=y0,
-                       xend=x1,
-                       yend=y1,
-                       alpha = logp,
-                       linewidth = logp
+      geom_segment(aes(x=.data$x0,
+                       y=.data$y0,
+                       xend=.data$x1,
+                       yend=.data$y1,
+                       alpha = .data$logp,
+                       linewidth = .data$logp
       ),
       data=link_geosp_df,
       lineend = "round",
@@ -449,10 +454,10 @@ plot_ggoutlier <- function(ggoutlier_res,
       labs(linewidth =bquote("-"~log[10]~"(p)"),
            alpha = bquote("-"~log[10]~"(p)"))+
       scale_linewidth(range = linewidth_range) +
-      geom_point(mapping = aes(x = x, y = y), data = geo_coord, size = dot_cex)
+      geom_point(mapping = aes(x = .data$x, y = .data$y), data = geo_coord, size = dot_cex)
 
     ## add pies
-    if(!is.null(p_thres)){
+    if(!is.null(p_thres) & !is.null(anc_coef)){
       sig.row <- unique(geosp.df$row[geosp.df$sig.tag])
       if(length(sig.row) == 0){
         warning("there is no outlier in the region selected according to `select_xlim` and `select_ylim`")
@@ -468,9 +473,9 @@ plot_ggoutlier <- function(ggoutlier_res,
         geomap_plot_GeoSpKNN <-
           geomap_plot_GeoSpKNN +
           scale_fill_manual(values=pie_color) +
-          geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
-                           fill = type, r=pie_r_scale,
-                           amount=value),
+          geom_arc_bar(aes(x0 = .data$x, y0 = .data$y,r0=0,
+                           fill = .data$type, r=pie_r_scale,
+                           amount=.data$value),
                        data=sig_anc_ggplot_df, stat='pie',
                        col = "black", show.legend = FALSE)
       } # if no significant end
@@ -479,12 +484,12 @@ plot_ggoutlier <- function(ggoutlier_res,
   if(map_type == "both" | map_type == "genetic_knn"){
     geomap_plot_GeneticKNN <-
       geomap_plot +
-      geom_segment(aes(x=x0,
-                       y=y0,
-                       xend=x1,
-                       yend=y1,
-                       alpha = logp,
-                       linewidth = logp
+      geom_segment(aes(x=.data$x0,
+                       y=.data$y0,
+                       xend=.data$x1,
+                       yend=.data$y1,
+                       alpha = .data$logp,
+                       linewidth = .data$logp
       ),
       data=link_gensp_df,
       lineend = "round",
@@ -493,10 +498,10 @@ plot_ggoutlier <- function(ggoutlier_res,
       labs(linewidth =bquote("-"~log[10]~"(p)"),
            alpha = bquote("-"~log[10]~"(p)"))+
       scale_linewidth(range = linewidth_range) +
-      geom_point(mapping = aes(x = x, y = y), data = geo_coord, size = dot_cex)
+      geom_point(mapping = aes(x = .data$x, y = .data$y), data = geo_coord, size = dot_cex)
 
     ## add pies
-    if(!is.null(p_thres)){
+    if(!is.null(p_thres) & !is.null(anc_coef)){
       sig.row <- unique(gensp.df$row[gensp.df$sig.tag])
       if(length(sig.row) == 0){
         warning("there is no outlier in the region selected according to `select_xlim` and `select_ylim`")
@@ -511,9 +516,9 @@ plot_ggoutlier <- function(ggoutlier_res,
         geomap_plot_GeneticKNN <-
           geomap_plot_GeneticKNN +
           scale_fill_manual(values=pie_color) +
-          geom_arc_bar(aes(x0 = x, y0 = y,r0=0,
-                           fill = type, r=pie_r_scale,
-                           amount=value),
+          geom_arc_bar(aes(x0 = .data$x, y0 = .data$y,r0=0,
+                           fill = .data$type, r=pie_r_scale,
+                           amount=.data$value),
                        data=sig_anc_ggplot_df, stat='pie',
                        col = "black", show.legend = FALSE)
       } # if no significant end
