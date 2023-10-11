@@ -355,7 +355,6 @@ The example here overlaid both red and blue lines on the same map (with the argu
 Users can keep only blue or red lines by setting `map_type = "geographic_knn"` or `map_type = "genetic_knn"`, respectively.
 
 ```{r ggoutlier_graph, eval=FALSE}
-p_example <- 
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -400,7 +399,7 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
 
 ```{r make_fig_for_paper_and_vignette,eval=FALSE,echo=FALSE}
 jpeg(filename = "./fig/IPK_ggoutlier_for_paper.jpg", res = 400,
-     height = 3200, width = 2400)
+     height = 3000, width = 2400)
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -416,7 +415,7 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
 dev.off()
 
 jpeg(filename = "./fig/IPK_ggoutlier_highlighUK.jpg", res = 400,
-     height = 2400, width = 2400)
+     height = 2000, width = 2400)
 plot_ggoutlier(ggoutlier_res = compositeknn_res,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
@@ -429,7 +428,8 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
                pie_r_scale = 2,
                map_resolution = "medium",
                adjust_p_value_projection = F,
-               add_benchmark_graph = F)
+               add_benchmark_graph = F,
+               plot_labels = NA)
 dev.off()
 ```
 
