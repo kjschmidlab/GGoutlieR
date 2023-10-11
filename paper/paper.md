@@ -123,11 +123,11 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_result,
                select_ylim = c(10,62),
                plot_xlim = c(-20,140),
                plot_ylim = c(10,62),
-               pie_r_scale = 1.2,
-               map_resolution = "course")
+               pie_r_scale = 2,
+               map_resolution = "medium")
                
 ## Figure 2: highlight outliers in UK with `select_xlim` and `select_ylim`
-plot_ggoutlier(ggoutlier_res = compositeknn_res,
+plot_ggoutlier(ggoutlier_res = ggoutlier_result,
                gen_coord = ipk_anc_coef,
                geo_coord = ipk_geo_coord,
                p_thres = pthres,
@@ -136,9 +136,10 @@ plot_ggoutlier(ggoutlier_res = compositeknn_res,
                select_ylim = c(47,61),
                plot_xlim = c(-20,140),
                plot_ylim = c(10,62),
-               pie_r_scale = 1.2,
-               map_resolution = "course",
-               add_benchmark_graph = F)
+               pie_r_scale = 2,
+               map_resolution = "medium",
+               add_benchmark_graph = F,
+               plot_labels = NA)
 ```
 
 # Availability
