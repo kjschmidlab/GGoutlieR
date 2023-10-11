@@ -103,7 +103,7 @@ head(summary_ggoutlier(ggoutlier_result))
 ```
 
 ### Visualization of unusual geo-genetic patterns
-![Visualization example of GGoutlieR with IPK barley landrace data. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers identified by GGoutlieR. \label{fig:example}](../fig/IPK_ggoutlier_for_paper.jpg)
+![Visualization example of GGoutlieR with IPK barley landrace data. (a) Geographical map with ancestry coefficients of landraces presented by pie charts. (b) and (c) Unusual geo-genetic associations identified by GGoutlieR. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers. \label{fig:example}](../fig/IPK_ggoutlier_for_paper.jpg)
 
 The unusual geo-genetic patterns detected by `GGoutlieR` can be presented on a geographical map with the function `plot_ggoutlier` (\autoref{fig:example}).
 
