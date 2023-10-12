@@ -216,7 +216,7 @@ If you want to see the running progress of `ggoutlier`, set `verbose = TRUE`.
 ```{r run_ggoutlier, eval=FALSE, echo = TRUE}
 pthres = 0.025 # set a threshold
 
-## run GGoutlieR with the composite approach
+## run GGoutlieR with the composite approach (this example takes about 12 minutes)
 compositeknn_res <- ggoutlier(geo_coord = ipk_geo_coord,
                               gen_coord = ipk_anc_coef,
                               make_fig = TRUE,
