@@ -305,9 +305,13 @@ ggoutlier_compositeKNN <- function(geo_coord,
       legend("top",legend = paste("optimal k =", opt.k), pch="", bty = "n",cex = 1.2)
       invisible(dev.off())
     }
+    if(make_fig){
+      if(verbose) cat(paste("\n The optimal k_geoKNN is ",opt.k,". Its figure is saved at ", k.sel.plot," \n", sep = ""))
+    }else{
+      if(verbose) cat(paste("\n The optimal k_geoKNN is ",opt.k," \n", sep = ""))
+    }
 
 
-    if(verbose) cat(paste("\n The optimal k_geoKNN is ",opt.k,". Its figure is saved at ", k.sel.plot," \n", sep = ""))
   }
   if(is.null(k_geoKNN)){stop("k_geoKNN is NULL!")}
 
