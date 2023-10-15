@@ -1,7 +1,7 @@
 Package: GGoutlieR
 Type: Package
 Title: Identify Individuals with Unusual Geo-Genetic Patterns
-Version: 1.0.1
+Version: 1.0.2
 Authors@R:
   c(person(given = "Che-Wei",
            family = "Chang",
