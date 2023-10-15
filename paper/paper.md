@@ -28,7 +28,8 @@ Reliable data on the geographical origin of biological samples is a prerequisite
 Traditionally, researchers discover potentially questionable samples using visualization-based tools.
 However, such approaches cannot handle large sample sizes due to overlapping data points on a graph and can hinder reproducible research.
 To address this shortcoming, we developed **G**eo-**G**enetic **outlier** (`GGoutlieR`), an R package of a heuristic framework for detecting and visualizing samples with unusual geo-genetic patterns.
-Outliers are identified by calculating empirical p-values for each sample, allowing users to  identify them in data sets with thousands of samples.
+Outliers are detected through either geography-based K nearest neighbors (KNNs) or genetics-based KNNs.
+The framework calculates empirical p-values for each sample, allowing users to easily identify outliers in data sets with thousands of samples.
 The package also provides a plotting function to display the geo-genetic patterns of outliers on a geographical map.
 GGoutlieR could significantly reduce the amount of data cleaning that researchers need to do before carrying out landscape genomics analyses.
 
