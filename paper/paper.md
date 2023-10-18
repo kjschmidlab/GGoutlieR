@@ -103,7 +103,7 @@ head(summary_ggoutlier(ggoutlier_result))
 ```
 
 ### Visualization of unusual geo-genetic patterns
-![Visualization example of GGoutlieR with IPK barley landrace data. (a) Geographical map with ancestry coefficients of landraces presented by pie charts. (b) and (c) Unusual geo-genetic associations identified by GGoutlieR. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers. \label{fig:example}](../fig/IPK_ggoutlier_for_paper.jpg)
+![Visualization example of GGoutlieR with IPK barley landrace data. (a) Geographical map with ancestry coefficients of landraces presented by pie charts. (b) and (c) Unusual geo-genetic associations identified by GGoutlieR. The red lines show the individual pairs with unusual genetic similarities across long geographical distances. The blue lines indicate the unusual genetic differences between geographical neighbors. Pie charts present the ancestry coefficients of outliers. \label{fig:example}](../fig/IPK_ggoutlier_for_paper.jpg){ width=90% }
 
 The unusual geo-genetic patterns detected by `GGoutlieR` can be presented on a geographical map with the function `plot_ggoutlier` (\autoref{fig:example}).
 
@@ -144,11 +144,11 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_result,
 
 # Availability
 
-The `GGoutlierR` package and vignette are available in our GitHub repository (https://github.com/kjschmidlab/GGoutlieR).
+The `GGoutlierR` package and vignette are available in our GitHub repository (https://github.com/kjschmidlab/GGoutlieR) and CRAN (https://cran.r-project.org/web/packages/GGoutlieR/index.html).
 
 # Acknowledgements
 
-We are grateful to Dr. Martin Mascher and Max Haupt of the Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) for providing raw VCF data of barley landraces that was used in the example.
+We are grateful to Dr. Martin Mascher and Max Haupt of the Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) for providing raw VCF data of barley landraces used in the example.
 This work was supported by the funds from the Federal Ministry of Food and Agriculture (BMEL) according to a decision of the parliament of the Federal Republic of Germany via the Federal Office for Agriculture and Food (BLE) under the Federal Programme for Ecological Farming and Other Forms of Sustainable Agriculture (Project number 2818202615). 
 C.W.C was supported by the Study Abroad Fellowship from the Education Ministry of Taiwan (R.O.C.) (Project number 1100123625).
 
