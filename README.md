@@ -10,7 +10,7 @@ To find the detailed algorithm of `GGoutlieR`, please check the supplementary ma
 
 ## Installation
 
-You can install `GGoutlieR` v1.0.1 either from CRAN or from this Github repository with the R commands below.
+You can install `GGoutlieR` either from CRAN or from this Github repository with the R commands below.
 
 ```
 ##-----------------------
@@ -73,12 +73,13 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_example,
 
 ## Reference manual
 
-Reference manual is at  
+The reference manual is at  
 [https://cran.r-project.org/web/packages/GGoutlieR/GGoutlieR.pdf](https://cran.r-project.org/web/packages/GGoutlieR/GGoutlieR.pdf)
 
 ## Contributing
 
-We appreciate your interest in using `GGoutlieR` in your study. You can contribute to the improvement of the package via following ways.
+We appreciate your interest in using `GGoutlieR` in your study. 
+You can contribute to the improvement of the package via following ways.
 
 ### Questions and bug reports
 
@@ -87,13 +88,13 @@ You can also contact [cheweichang92@gmail.com](cheweichang92@gmail.com) or [karl
 
 ### Pull request
 
-If you would like to contribute to codes:
+If you would like to contribute to the code:
 
 * Fork the `GGoutlieR` repository
 * Contribute to your forked repository.
 * Create a pull request.
 
-Your changes/additions will be merged in the master branch of `GGoutlieR` repository if they pass necessary checks.
+Your changes or additions will be merged in the master branch of `GGoutlieR` repository if they pass required checks.
 
 ## Preprint
 Che-Wei Chang and Karl Schmid. 2023. GGoutlieR: an R package to identify and visualize unusual geo-genetic patterns of biological samples. bioRxiv. DOI: [https://doi.org/10.1101/2023.04.06.535838](https://doi.org/10.1101/2023.04.06.535838)
