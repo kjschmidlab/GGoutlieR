@@ -53,7 +53,7 @@ ggoutlier_example <-
                           klim = c(3,15), 
                           method = "composite",
                           verbose = FALSE,
-                          multi_stages = FALSE)) # switch off multi-stage test to reduce computational time
+                          multi_stages = FALSE) # switch off multi-stage test to reduce computational time
                           
 # check the first few rows of the summary table
 head(summary_ggoutlier(ggoutlier_example))     
