@@ -28,10 +28,10 @@ Reliable data on the geographical origin of biological samples is a prerequisite
 Traditionally, researchers discover potentially questionable samples using visualization-based tools.
 However, such approaches cannot handle large sample sizes due to overlapping data points on a graph and can hinder reproducible research.
 To address this shortcoming, we developed **G**eo-**G**enetic **outlier** (`GGoutlieR`), an R package of a heuristic framework for detecting and visualizing samples with unusual geo-genetic patterns.
-Outliers are detected through either geography-based K nearest neighbors (KNNs) or genetics-based KNNs.
+Outliers can be identified using either geography-based K-nearest neighbors (KNNs) or genetics-based KNNs.
 The framework calculates empirical p-values for each sample, allowing users to easily identify outliers in data sets with thousands of samples.
 The package also provides a plotting function to display the geo-genetic patterns of outliers on a geographical map.
-GGoutlieR could significantly reduce the amount of data cleaning that researchers need to do before carrying out landscape genomics analyses.
+GGoutlieR has the potential to significantly minimize the data cleaning required by researchers prior to conducting landscape genomics analyses.
 
 # Statement of need
 
@@ -51,7 +51,7 @@ In addition, `GGoutlieR` visualizes the geo-genetic patterns of outliers as a ne
 
 # Algorithm of `GGoutlieR`
 
-Under the isolation-by-distance assumption, the geographical origins of samples are predictable from their patterns of genetic variation [@battey2020predicting;@guillot2016accurate], and vice versa.
+"Assuming isolation by distance, the geographical origins of samples can be predicted from their patterns of genetic variation, and vice versa [@battey2020predicting;@guillot2016accurate].
 In this context, prediction models should result in large prediction errors for samples that violate the isolation-by-distance assumption.
 Based on this concept, we developed the GGoutlieR framework to model anomalous geo-genetic patterns.
 
@@ -62,7 +62,6 @@ An empirical gamma distribution is obtained as the null distribution by finding 
 With the null gamma distribution, `GGoutlieR` tests the null hypothesis that the geogenetic pattern of a given sample is consistent with the isolation-by-distance assumption.
 Finally, p-values are calculated for each sample using the empirical null distribution and prediction error statistics.
 The details of the `GGoutlieR` framework are described step by step in the supplementary material (https://github.com/kjschmidlab/GGoutlieR/blob/master/paper/suppinfo.pdf).
-
 
 # Example
 
@@ -147,12 +146,10 @@ plot_ggoutlier(ggoutlier_res = ggoutlier_result,
 
 The `GGoutlierR` package and vignette are available in our GitHub repository (https://github.com/kjschmidlab/GGoutlieR).
 
+# Acknowledgements
 
-# Acknowledgement
-
-We appreciate Dr. Martin Mascher and Max Haupt of Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) for providing the raw VCF data of barley landraces that was used in the example.
-The project at Schmid lab was supported by the funds from the Federal Ministry of Food and Agriculture (BMEL) according to a decision of the parliament of the Federal Republic of Germany via the Federal Office for Agriculture and Food (BLE) under the Federal Programme for Ecological Farming and Other Forms of Sustainable Agriculture (Project number 2818202615). 
+We are grateful to Dr. Martin Mascher and Max Haupt of the Leibniz Institute of Plant Genetics and Crop Plant Research (IPK) for providing raw VCF data of barley landraces that was used in the example.
+This work was supported by the funds from the Federal Ministry of Food and Agriculture (BMEL) according to a decision of the parliament of the Federal Republic of Germany via the Federal Office for Agriculture and Food (BLE) under the Federal Programme for Ecological Farming and Other Forms of Sustainable Agriculture (Project number 2818202615). 
 C.W.C was supported by the Study Abroad Fellowship from the Education Ministry of Taiwan (R.O.C.) (Project number 1100123625).
-
 
 # References
