@@ -1,6 +1,9 @@
 # GGoutlieR
 
 `GGoutlieR` (**G**eo-**G**enetic **outlieR**) is an R package for identifying and visualizing unusual geo-genetic patterns for landscape genomic studies.
+
+Outliers with unusual geo-genetic association patterns can be identified through either genetics-based K-nearest neighbors (KNNs) or geography-based KNNs in the framework of `GGoutlieR`.
+
 It provides a summary table with heuristic p-values allowing users to easily identify outliers from thousands of biological samples.
 Moreover, its visualization tool enables users to present unusual geo-genetic association patterns on a geographical map.
 
@@ -53,7 +56,7 @@ ggoutlier_example <-
                           klim = c(3,15), 
                           method = "composite",
                           verbose = FALSE,
-                          multi_stages = FALSE)) # switch off multi-stage test to reduce computational time
+                          multi_stages = FALSE) # switch off multi-stage test to reduce computational time
                           
 # check the first few rows of the summary table
 head(summary_ggoutlier(ggoutlier_example))     
