@@ -55,11 +55,11 @@ In addition, `GGoutlieR` visualizes the geo-genetic patterns of outliers as a ne
 In this context, prediction models should result in large prediction errors for samples that violate the isolation-by-distance assumption.
 Based on this concept, we developed the GGoutlieR framework to model anomalous geo-genetic patterns.
 
-Briefly, `GGoutlierR` uses *K*-nearest neighbour (KNN) regression to predict genetic components with the *K* nearest geographical neighbours, and also predicts in the opposite direction.
-Next, the prediction errors are transformed into distance-based (*D*) statistics and the optimal *K* is identified by minimising the sum of the *D* statistics.
+Briefly, `GGoutlierR` uses *K*-nearest neighbor (KNN) regression to predict genetic components with the *K* nearest geographical neighbors, and also predicts in the opposite direction.
+Next, the prediction errors are transformed into distance-based (*D*) statistics and the optimal *K* is identified by minimizing the sum of the *D* statistics.
 The *D* statistic is assumed to follow a gamma distribution with unknown parameters.
 An empirical gamma distribution is obtained as the null distribution by finding optimal parameters using maximum likelihood estimation.
-With the null gamma distribution, `GGoutlieR` tests the null hypothesis that the geogenetic pattern of a given sample is consistent with the isolation-by-distance assumption.
+With the null gamma distribution, `GGoutlieR` tests the null hypothesis that the geo-genetic pattern of a given sample is consistent with the isolation-by-distance assumption.
 Finally, p-values are calculated for each sample using the empirical null distribution and prediction error statistics.
 The details of the `GGoutlieR` framework are described step by step in the supplementary material (https://github.com/kjschmidlab/GGoutlieR/blob/master/paper/suppinfo.pdf).
 
