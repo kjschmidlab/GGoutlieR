@@ -51,7 +51,7 @@ In addition, `GGoutlieR` visualizes the geo-genetic patterns of outliers as a ne
 
 # Algorithm of `GGoutlieR`
 
-"Assuming isolation by distance, the geographical origins of samples can be predicted from their patterns of genetic variation, and vice versa [@battey2020predicting;@guillot2016accurate].
+Assuming isolation by distance, the geographical origins of samples can be predicted from their patterns of genetic variation, and vice versa [@battey2020predicting;@guillot2016accurate].
 In this context, prediction models should result in large prediction errors for samples that violate the isolation-by-distance assumption.
 Based on this concept, we developed the GGoutlieR framework to model anomalous geo-genetic patterns.
 
